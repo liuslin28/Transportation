@@ -1,0 +1,1237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>地图展示</title>
+    <script type="text/javascript" src="JS/jquery-1.4.4.min.js"></script>
+    <link href="http://58.210.10.26:8011/arcgis_js_api/library/3.16/3.16compact/dijit/themes/claro/claro.css"
+          rel="stylesheet"/>
+    <link href="http://58.210.10.26:8011/arcgis_js_api/library/3.16/3.16compact/dijit/themes/tundra/tundra.css"
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
+    <script src="https://js.arcgis.com/3.28/"></script>
+    <style type="text/css">
+        html {
+            height: 99.6%;
+        }
+
+        body {
+            height: 100%;
+        }
+
+        #header {
+            height: 80px;
+            overflow: auto;
+            padding: 0.5em;
+        }
+
+        /*信息窗口头部样式*/
+        .esriPopup.titlePane {
+            background-color: #DDDDDD;
+            color: #000000;
+            line-height: 24px;
+            font-weight: 900;
+            border-radius: initial;
+        }
+
+        /*  -信息窗口最大化按钮样式*/
+        .esriPopup.titleButton.maximize {
+            display: none;
+            right: 35px;
+            top: 9px;
+        }
+
+        /*  信息窗口容器title关闭按钮样式 */
+        .esriPopup.titleButton.close {
+            right: 13px;
+            top: 5px;
+        }
+
+        /*信息窗口容器样式*/
+        .esriPopup.contentPane {
+            padding: 0;
+            margin: 0;
+        }
+
+        /*信息窗口阴影样式*/
+        .esriPopup.esriPopupWrapper {
+            box-shadow: none;
+        }
+
+        /*修改鼠标在新增点上的指针样式*/
+        path:hover {
+            cursor: pointer;
+            animation-duration: 0.2s;
+            animation-name: highlight;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+            -webkit-animation-duration: 0.2s;
+            -webkit-animation-name: highlight;
+            -webkit-animation-timing-function: linear;
+            -webkit-animation-fill-mode: forwards;
+        }
+
+        .content1 {
+            width: 500px;
+            height: 350px;
+            position: absolute;
+            overflow: hidden;
+            margin-top: 10px;
+            margin-left: 50px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            padding: 10px;
+            box-sizing: border-box;
+            /*不会把盒子撑开*/
+        }
+
+        .content1::before {
+            content: "";
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            z-index: -1;
+            /*-1 可以当背景*/
+            -webkit-filter: blur(10px);
+            filter: blur(10px);
+            margin: -10px; /*消除边缘透明url(../../images/footer_bg.png) center top;  */
+            background-color: rgba(255, 255, 255, 0.2);
+
+            background-size: cover;
+            /*平铺*/
+            background-attachment: fixed;
+            /*位置固定*/
+        }
+    </style>
+    <script type="text/javascript">
+        //var ptcount = "120.6035,31.49395/120.6037,31.49477/120.604,31.49593/120.6043,31.49701/120.6045,31.49736";
+        var PointObj;
+        var defaultSymbol;
+        var myMap;
+        var icount;
+        var i = 0;
+        var Department = "";
+        var toolbar;
+        var grateMap;
+        var grateruslut;
+        var pointData = []; //点数据
+
+        $(function () {
+
+            //初始化地图引擎
+            dojo.require("esri/map",
+                "esri/layers/ArcGISTiledMapServiceLayer",
+                "esri/layers/ArcGISDynamicMapServiceLayer",
+                "dojo/on",
+                "dojo/dom",
+                "esri/config",
+                "esri/geometry/Polygon",
+                "esri/layers/GraphicsLayer",
+                "esri/tasks/FindTask",
+                "esri/tasks/FindParameters",
+                "esri/symbols/SimpleLineSymbol",
+                "esri/symbols/SimpleMarkerSymbol",
+                "esri/graphic",
+                "esri/tasks/query",
+                "esri/tasks/QueryTask",
+                "esri.symbol.Symbol",
+                "esri.symbol.MarkerSymbol",
+                "esri.symbols.PictureMarkerSymbol",
+                "dojo/domReady!",
+                "esri/toolbars/draw",
+                "esri/tasks/LinearUnit",
+                "esri/SpatialReference"
+            );
+            dojo.require("esri.graphic");
+
+
+            //初始化加载
+            dojo.addOnLoad(init);
+
+        })
+
+
+        function init() {
+
+            //设置尺寸
+            var h = window.document.body.clientHeight;
+            var w = window.document.body.clientWidth;
+            var canvas = document.getElementById('mapDiv');
+            canvas.setAttribute("height", h - 80);
+            canvas.setAttribute("width", w - 4);
+
+
+            //根据div的id属性创建地图
+            myMap = new esri.Map("mapDiv", {logo: false});
+
+
+            //初始化加载底图
+            var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/szdzdt_wgs84/MapServer", {id: "ptdt"});
+            myMap.addLayer(layer);
+
+            // var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/sz84_blue/MapServer", { id: "lsdt" });
+            // myMap.addLayer(layer);
+
+//	        var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer", { id: "lsdt" });
+//	        	myMap.addLayer(layer);
+            //是否启用代理
+            esriConfig.defaults.io.proxyUrl = "JS/proxy.ashx";
+            esriConfig.defaults.io.alwaysUseProxy = false;
+
+
+            // var location = new esri.geometry.Point(120.6043, 31.49701, myMap.spatialReference);
+            // myMap.centerAndZoom(location, 2);
+            var location = new esri.geometry.Point(120.6305, 31.31801, myMap.spatialReference);
+            myMap.centerAndZoom(location, 3);
+
+            grateMap = new esri.layers.GraphicsLayer();//记录点图层
+            myMap.addLayer(grateMap);
+
+            grateruslut = new esri.layers.GraphicsLayer();//显示结果图层
+            myMap.addLayer(grateruslut);
+
+            // myMap.on("load", createToolbar);
+
+        };
+
+        function createToolbar(themap) {
+            toolbar = new Draw(myMap);
+            toolbar.on("draw-end", addToMap);
+        }
+
+        function addToMap(evt) {
+            var pointsymbol = new esri.symbol.SimpleMarkerSymbol();
+            pointsymbol.setColor(new dojo.Color([255, 255, 0, 0.5]));
+            require(["esri/graphic"], function (Graphic) {
+                var graphic = new Graphic(evt.geometry, pointsymbol);
+                grateMap.add(graphic);
+            })
+        }
+
+        // function drawPoint() {
+        //     require([
+        //         "esri/toolbars/draw"
+        //     ], function (Draw) {
+        //         toolbar = new Draw(myMap);
+        //         toolbar.on("draw-end", addToMap);
+        //         toolbar.activate(Draw.POINT);
+        //     });
+        // }
+
+        function endPoint() {
+            toolbar.deactivate();
+        }
+
+        // 测试功能，同步调用，已成功
+        function testGPSynchronous() {
+            // 设置输入参数
+            var features = [];
+            for (var i = 0; i < grateMap.graphics.length; i++) {
+                features.push(grateMap.graphics[i]);
+            }
+            var pointFeatureSet = new esri.tasks.FeatureSet();
+            pointFeatureSet.features = features;
+            pointFeatureSet.spatialReference = myMap.spatialReference;
+
+            console.log(pointFeatureSet)
+
+
+            require(["esri/tasks/Geoprocessor"], function (Geoprocessor) {
+                var gptask = new esri.tasks.Geoprocessor("https://localhost:6443/arcgis/rest/services/test/toLineSynchronous/GPServer/toLine");
+                var gpParams = {"stops": pointFeatureSet};
+
+                console.log(gpParams)
+                gptask.execute(gpParams, gpfunc);
+
+                function gpfunc(results, messages) {
+                    // 设置线类型
+                    var linesymbol = new esri.symbol.SimpleLineSymbol();
+                    linesymbol.setColor(new dojo.Color([255, 255, 130, 1]));
+                    linesymbol.setWidth(5);
+
+                    alert("Synchronous")
+
+                    var features = results[0].value.features;
+
+                    if (features.length > 0) {
+                        var feature = features[0];
+                        feature.setSymbol(linesymbol);
+                        grateruslut.add(feature);
+                    }
+                }
+            });
+        }
+
+
+        // 测试功能，异步调用，已成功，无样式设置
+        function testGPAsynchronous() {
+            // 设置输入参数
+            var features = [
+                { "type":"Feature",
+                    "id":0,
+                    "attributes": {
+                        "FID": 0,
+                        "stop_id": "b47888e6-edbf-4210-8de2-5851d9578c33",
+                        "stop_name": "蠡口中学"
+                    },
+                    "geometry": {
+                        "type":"Point",
+                        "coordinates":[120.61614990234,31.406209945678999]
+
+                    },
+                    "properties":{
+                        "id":0
+                    }
+                },
+                { "type":"Feature",
+                    "id":1,
+                    "attributes": {
+                        "FID": 1,
+                        "stop_id": "d0d98553-52ff-4335-ae7d-9a7457481eca",
+                        "stop_name": "蠡口中学"
+                    },
+                    "geometry": {
+                        "type":"Point",
+                        "coordinates":[120.6192779541,31.406789779663001]
+
+                    },
+                    "properties":{
+                        "id":1
+                    }
+                }
+            ];
+
+
+            var json={
+                "displayFieldName": "",
+                "fieldAliases": {
+                    "FID": "FID",
+                    "Id": "Id"
+                },
+                "geometryType": "esriGeometryPoint",
+                "spatialReference": {
+                    "wkid": 3426
+                },
+                "fields": [
+                    {
+                        "name": "FID",
+                        "type": "esriFieldTypeOID",
+                        "alias": "FID"
+                    },
+                    {
+                        "name": "Id",
+                        "type": "esriFieldTypeInteger",
+                        "alias": "Id"
+                    }
+                ],
+                "features": [
+                    {
+                        "attributes": {
+                            "FID": 0,
+                            "Id": 0
+                        },
+                        "geometry": {
+                            "x": 120.61614990234,
+                            "y": 31.406209945678999
+                        }
+                    },
+                    {
+                        "attributes": {
+                            "FID": 1,
+                            "Id": 0
+                        },
+                        "geometry": {
+                            "x": 120.6192779541,
+                            "y": 31.406789779663001
+                        }
+                    }
+                ]
+            }
+            // for (var i = 0; i < grateMap.graphics.length; i++) {
+            //     features.push(grateMap.graphics[i]);
+            // }
+            var pointFeatureSet = new esri.tasks.FeatureSet(json);
+            // pointFeatureSet.features = features;
+            pointFeatureSet.spatialReference = myMap.spatialReference;
+
+
+            require(["esri/tasks/Geoprocessor", "esri/layers/ImageParameters"], function (Geoprocessor, ImageParameters) {
+                var gptask = new esri.tasks.Geoprocessor("https://localhost:6443/arcgis/rest/services/test/toLineAsynchronous/GPServer/toLineAsynchronous%20");
+                var gpParams = {"stops": pointFeatureSet};
+                console.log(gpParams)
+
+                gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                function statusCallback(jobInfo) {
+                    console.log(jobInfo.jobStatus);
+                }
+
+                function completeCallback(jobInfo) {
+                    var imageParams = new ImageParameters();
+                    imageParams.imageSpatialReference = myMap.spatialReference;
+                    gptask.getResultImageLayer(jobInfo.jobId, null, null, function (gpLayer) {
+                        gpLayer.setOpacity(0.5);
+                        myMap.addLayer(gpLayer);
+                    });
+                }
+            });
+        }
+
+        function pointDraw() {
+
+            //创建一个GraphicsLayer
+            displayPointLayer = new esri.layers.GraphicsLayer();
+            myMap.addLayer(displayPointLayer);
+
+            $.ajax({
+                url:"./jsonData/site.json",
+                type:"GET",
+                success: function (data) {
+                    var pointData = data['Site'];
+                    var features = [];
+                    pointsymbol = new esri.symbol.SimpleMarkerSymbol();
+                    pointsymbol.setColor(new dojo.Color([255, 255, 0, 0.5]));
+                    pointsymbol.setSize(5)
+
+                    for(var i = 0; i < pointData.length; i++) {
+                        var point = new esri.geometry.Point([pointData[i].fslon,pointData[i].fslat], new esri.SpatialReference({ wkid:4326 }));
+                        var pointGraphic = new esri.Graphic({
+                            geometry: point,
+                            attributes: {
+                                "FID" : i,
+                            },
+                            symbol: pointsymbol
+                        })
+                        var pointGraphic = new esri.Graphic(point, pointsymbol)
+                        displayPointLayer.add(pointGraphic);
+                    }
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            })
+        }
+
+        // buffer功能，已完成，使用的是实际数据
+        function bufferGPTool() {
+            var pointFeatureSet;
+            var polygonFeatureSet;
+            var aPoint = {
+                "displayFieldName" : "",
+                "fieldAliases" : {
+                    "FID" : "FID",
+                },
+                "geometryType" : "esriGeometryPoint",
+                "spatialReference" : {
+                    "wkid" : 4326,
+                    "latestWkid" : 4326
+                },
+                "fields" : [
+                    {
+                        "name" : "FID",
+                        "type" : "esriFieldTypeOID",
+                        "alias" : "FID"
+                    }
+                ],
+                "features" : []
+            };
+
+            var Dis = {
+                "distance": 500,
+                "units": "esriMeters"
+            };
+
+
+            // 设置输入参数(公交点
+            // 数据格式要求： 小数点6位，经纬度范围
+            require(["esri/geometry/Point","esri/SpatialReference","esri/graphic"], function(SpatialReference, Graphic) {
+                $.ajax({
+                    url:"./jsonData/site.json",
+                    type:"GET",
+                    success: function (data) {
+                        var pointData = data['Site'];
+                        var features = [];
+
+                        for(var i = 0; i < pointData.length; i++) {
+                            var point = new esri.geometry.Point([pointData[i].fslon,pointData[i].fslat], new SpatialReference({ wkid:4326 }));
+                            var graphic = new Graphic({
+                                geometry: point,
+                                attributes: {
+                                    "FID" : i,
+                                },
+                                symbol: {}
+                            })
+                            features.push(graphic)
+                        }
+                        aPoint['features'] = features
+                        // console.log(aPoint)
+                        pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
+                        pointFeatureSet.spatialReference = myMap.spatialReference;
+                    },
+                    error: function (error) {
+                        alert(error)
+                    }
+                })
+
+            });
+
+            // 设置输入参数(测试公交点
+            // $.ajax({
+            //     url:'./jsonData/stops.json',
+            //     type:'GET',
+            //     success: function (data) {
+            //         pointfeatures = data;
+            //         // 设置输入参数（多边形
+            //         pointFeatureSet = new esri.tasks.FeatureSet(pointfeatures);
+            //         // polygonFeatureSet.features = centercityfeatures;
+            //         pointFeatureSet.spatialReference = myMap.spatialReference;
+            //         console.log(pointFeatureSet)
+            //     },
+            //     error: function (error) {
+            //         alert(error)
+            //     }
+            // });
+
+
+            // 设置输入参数(中心城区
+            $.ajax({
+                url:'./jsonData/centercity.json',
+                type:'GET',
+                success: function (data) {
+                    centercityfeatures = data;
+                    // 设置输入参数（多边形
+                    polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
+                    polygonFeatureSet.spatialReference = myMap.spatialReference;
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            })
+
+            require(["esri/tasks/Geoprocessor", "esri/layers/ImageParameters"], function (Geoprocessor, ImageParameters) {
+                var gptask = new esri.tasks.Geoprocessor("https://localhost:6443/arcgis/rest/services/test/coverTest/GPServer/coverTool");
+                var gpParams = {
+                    "stops": pointFeatureSet,
+                    "Dis": Dis,
+                    "city": polygonFeatureSet
+                };
+
+                gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                function statusCallback(jobInfo) {
+                    console.log(jobInfo.jobStatus);
+                }
+
+                function completeCallback(jobInfo) {
+                    // 结果图加载
+                    var imageParams = new ImageParameters();
+                    imageParams.imageSpatialReference = myMap.spatialReference;
+                    gptask.getResultImageLayer(jobInfo.jobId, null, null, function (gpLayer) {
+                        // gpLayer.setColor(new Color([232,104,80,0.25]))
+                        gpLayer.setOpacity(0.5);
+                        myMap.addLayer(gpLayer);
+                        console.log(gpLayer)
+                    });
+                    // 面积求算
+                    gptask.getResultData(jobInfo.jobId,"bufferOutput").then(function (value) {
+                        areaData = value.value.features[0].attributes['coverArea']
+                        alert("面积为："+areaData);
+                    })
+                }
+            });
+        }
+
+        //绑定底图
+
+        function dituSelect() {
+
+            //移除底图
+            if (myMap.getLayer("ptdt") != null) {
+                myMap.removeLayer(myMap.getLayer("ptdt"));
+            }
+
+            if (myMap.getLayer("lsdt") != null) {
+                myMap.removeLayer(myMap.getLayer("lsdt"));
+            }
+
+            if ($("#DTselect").val() == "普通底图") {
+                var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/szdzdt_wgs84/MapServer", {id: "ptdt"});
+
+                myMap.addLayer(layer);
+
+            }
+
+            if ($("#DTselect").val() == "蓝色底图") {
+                var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/sz84_blue/MapServer", {id: "lsdt"});
+
+                myMap.addLayer(layer);
+            }
+
+            if ($("#DTselect").val() == "全部底图") {
+                var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/szdzdt_wgs84/MapServer", {id: "ptdt"});
+
+                myMap.addLayer(layer);
+
+                var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/sz84_blue/MapServer", {id: "lsdt"});
+
+                myMap.addLayer(layer);
+            }
+
+        };
+
+
+        //绑定图层
+        function tuchengSelect() {
+
+            //绑定图层
+
+            if (myMap.getLayer("gl") != null) {
+                myMap.removeLayer(myMap.getLayer("gl"));
+            }
+            if (myMap.getLayer("hd") != null) {
+                myMap.removeLayer(myMap.getLayer("hd"));
+            }
+            if (myMap.getLayer("wg") != null) {
+                myMap.removeLayer(myMap.getLayer("wg"));
+            }
+            if ($("#TCSelect").val() == "公路") {
+                var layer = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/szdom_road/MapServer", {id: "gl"});
+
+                myMap.addLayer(layer);
+
+            }
+
+            if ($("#TCSelect").val() == "水路") {
+                var layer = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZHD20171201/MapServer", {id: "hd"});
+
+                myMap.addLayer(layer);
+            }
+
+            if ($("#TCSelect").val() == "网格") {
+                var layer = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZGrid2/MapServer", {id: "wg"});
+
+                myMap.addLayer(layer);
+            }
+
+            if ($("#TCSelect").val() == "全部") {
+                var layer = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/TOCC/szdom_road/MapServer", {id: "gl"});
+
+                myMap.addLayer(layer);
+
+                var layer = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZHD20171201/MapServer", {id: "hd"});
+
+                myMap.addLayer(layer);
+            }
+
+        };
+
+
+        //一个图层里面的子图层显示
+        function zituSelect() {
+
+            if ($("#ZTSelect").val() == "") {
+                if (myMap.getLayer("hd") != null) {
+                    myMap.removeLayer(myMap.getLayer("hd"));
+                }
+            }
+
+            if ($("#ZTSelect").val() == "航道") {
+
+                var XCDL = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZHD20171201/MapServer", {id: "hd"});
+                myMap.addLayer(XCDL);
+                myMap._layers["hd"].setVisibility(true);
+                myMap._layers["hd"].setVisibleLayers([0]);
+
+            }
+
+            if ($("#ZTSelect").val() == "护岸码头") {
+
+                var XCDL = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZHD20171201/MapServer", {id: "hd"});
+                myMap.addLayer(XCDL);
+                myMap._layers["hd"].setVisibility(true);
+                myMap._layers["hd"].setVisibleLayers([1]);
+
+            }
+
+
+            if ($("#ZTSelect").val() == "过河桥梁") {
+
+                var XCDL = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZHD20171201/MapServer", {id: "hd"});
+                myMap.addLayer(XCDL);
+                myMap._layers["hd"].setVisibility(true);
+                myMap._layers["hd"].setVisibleLayers([2]);
+
+            }
+
+
+            if ($("#ZTSelect").val() == "全部") {
+
+                var XCDL = new esri.layers.ArcGISDynamicMapServiceLayer("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZHD20171201/MapServer", {id: "hd"});
+                myMap.addLayer(XCDL);
+                myMap._layers["hd"].setVisibility(true);
+                myMap._layers["hd"].setVisibleLayers([0, 1, 2]);
+
+            }
+
+
+        };
+
+
+        //画点
+        function Piont() {
+
+            //弹出框大小设定
+            myMap.infoWindow.resize(600, 350);
+
+            //创建一个GraphicsLayer
+            var displayLayer = myMap.getLayer('pp');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+            else {
+                displayLayer = new esri.layers.GraphicsLayer({id: 'pp'});
+                myMap.addLayer(displayLayer);
+            };
+
+            //点位样式设定
+            var Symbol = new esri.symbol.PictureMarkerSymbol('images/bus.png', 30, 30);
+
+
+            //模拟数据
+            var josns = {
+                Data: [{
+                    "BridgeName": "桥梁1",
+                    "BridgeCode": "111221",
+                    "RoadName": "所属路线",
+                    "BridgeLength": "桥梁长度",
+                    "LON": "31.4637467",
+                    "LAT": "120.65573668"
+                }, {
+                    "BridgeName": "桥梁1",
+                    "BridgeCode": "111222",
+                    "RoadName": "所属路线",
+                    "BridgeLength": "桥梁长度",
+                    "LON": "31.47683665",
+                    "LAT": "120.66360666"
+                }, {
+                    "BridgeName": "桥梁1",
+                    "BridgeCode": "111223",
+                    "RoadName": "所属路线",
+                    "BridgeLength": "桥梁长度",
+                    "LON": "31.40339",
+                    "LAT": "120.6599"
+                }]
+            };
+
+
+            //添加点位
+            for (var i = 0; i < josns.Data.length; i++) {
+
+                var pt = new esri.geometry.Point(josns.Data[i]["LAT"], josns.Data[i]["LON"], myMap.spatialReference);
+
+
+                // 点击该元素时的信息窗
+                var infoTemplate = new esri.InfoTemplate("${BridgeName}", "桥梁名称: ${BridgeName}<br/>桥梁编号: ${BridgeCode}<br/>所属路线: ${RoadName}<br/>桥梁长度: ${BridgeLength}米<br/><P><img width='250px' height='250px' src='qiaoliang/${BridgeCode}_1.jpg'/><img width='250px' height='250px' src='qiaoliang/${BridgeCode}_2.jpg'/></P>");
+
+                var graphic = new esri.Graphic(pt, Symbol, josns.Data[i], infoTemplate);
+
+                displayLayer.add(graphic);
+            }
+
+
+        }
+
+
+        //清除点位
+        function ClearPiont() {
+            var displayLayer = myMap.getLayer('pp');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+            else {
+                displayLayer = new esri.layers.GraphicsLayer({id: 'pp'});
+                myMap.addLayer(displayLayer);
+            }
+            ;
+        }
+
+        //画线
+        function SetLine() {
+
+//	        var Thpaths = new Array();
+//	        var location;
+
+//	        var Twpaths = new Array();
+//	        if (PchildNodes != null) {
+//	            for (var j = 0; j < PchildNodes.length; j++) {
+
+//	                Twpaths.push([PchildNodes[j]["Lon"], PchildNodes[j]["Lat"]]);
+
+//	            }
+//	        }
+//	        else {
+//	            var a = 1;
+//	        }
+
+            //	        Thpaths.push(Twpaths);
+            var displayLayer = myMap.getLayer('ll');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+            else {
+                displayLayer = new esri.layers.GraphicsLayer({id: 'll'});
+                myMap.addLayer(displayLayer);
+            }
+            ;
+
+            //弹出框大小设定
+            myMap.infoWindow.resize(600, 350);
+
+
+            var line = new esri.geometry.Polyline({
+                "paths": [[[120.5744, 31.46142], [120.5751, 31.46106], [120.5789, 31.45902], [120.5798, 31.45866], [120.5809, 31.4581], [120.5813, 31.45782], [120.5821, 31.45734], [120.5836, 31.45664], [120.5861, 31.45541], [120.5884, 31.45403], [120.5895, 31.45359], [120.5895, 31.45354], [120.5904, 31.4538], [120.5914, 31.4551], [120.5927, 31.45694], [120.5943, 31.45624], [120.5965, 31.45523], [120.5989, 31.45443], [120.6014, 31.45346], [120.6036, 31.45269], [120.6071, 31.45193], [120.6095, 31.45089], [120.6116, 31.44996], [120.6135, 31.44924], [120.6144, 31.44892], [120.6156, 31.44854], [120.6172, 31.44794], [120.6186, 31.44855], [120.6192, 31.45234], [120.6198, 31.45647], [120.6201, 31.46045]]],
+                //"paths": Thpaths,
+                "spatialReference": {"wkid": 4326}
+            });
+
+
+            // 每个元素的属性值
+            var attr = {"LXBM": "慷慨大道", "LXMC": "慷慨大道", "QDZH": "100001", "ZDZH": "11", "YXJLD": "20", "SFZCL": "是"};
+
+            // 点击该元素时的信息窗
+            var infoTemplate = new esri.InfoTemplate("${LXMC}", "路线名称: ${LXMC}<br/>路段编码: ${LXBM}  <br/>起点桩号: ${QDZH}<br/>终点桩号: ${ZDZH}<br/>路段里程: ${YXJLD}公里<br/>是否有中隔栏: ${SFZCL}<br/><P><img width='250px' height='250px' src='qiaoliang/111222_1.jpg'/><img width='250px' height='250px' src='qiaoliang/111222_2.jpg'/></P>");
+
+
+            var lens = 8;
+
+            var lineSymbol = new esri.symbol.CartographicLineSymbol(esri.symbol.CartographicLineSymbol.STYLE_SOLID, new dojo.Color("#00CD00"), lens, esri.symbol.CartographicLineSymbol.CAP_ROUND, esri.symbol.CartographicLineSymbol.JOIN_MITER, 5);
+
+
+            //画线
+
+            var polyline = new esri.Graphic(line, lineSymbol, attr, infoTemplate);
+
+            displayLayer.add(polyline);
+            // 定位
+
+            var location = new esri.geometry.Point(120.5989, 31.45443, myMap.spatialReference);
+            myMap.centerAndZoom(location, 5);
+
+        }
+
+
+        //清除线路
+        function ClearLine() {
+            var displayLayer = myMap.getLayer('ll');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+            else {
+                displayLayer = new esri.layers.GraphicsLayer({id: 'll'});
+                myMap.addLayer(displayLayer);
+            }
+            ;
+        }
+
+        //清除轨迹回放
+        function ClearHuiFang() {
+            myMap.graphics.clear();
+            var displayLayer = myMap.getLayer('ll');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+        }
+
+        //轨迹回放
+        function HuiFang() {
+
+
+            myMap.graphics.clear();
+            i = 0;
+            //后台查询数据
+//	        var points = $.transformDataJson(null, {
+//	            DataType: "QueryPoint",
+//	            CarID: { Value: $("#CP").val(), Type: "TEXT" },
+//	            BTime: { Value: $("#Time_B").val(), Type: "TEXT" },
+//	            ETime: { Value: $("#Time_E").val(), Type: "TEXT" },
+//	            OrderMethod: { Value: "Org_Order" }, SortMethod: { Value: "asc" }, PageSize: { Value: 1000 }, IsDelete: { Value: "0" }
+//	        });
+
+            //赋值给回放数组
+            PointObj = [[120.5744, 31.46142], [120.5751, 31.46106], [120.5789, 31.45902], [120.5798, 31.45866], [120.5809, 31.4581], [120.5813, 31.45782], [120.5821, 31.45734], [120.5836, 31.45664], [120.5861, 31.45541], [120.5884, 31.45403], [120.5895, 31.45359], [120.5895, 31.45354], [120.5904, 31.4538], [120.5914, 31.4551], [120.5927, 31.45694], [120.5943, 31.45624], [120.5965, 31.45523], [120.5989, 31.45443], [120.6014, 31.45346], [120.6036, 31.45269], [120.6071, 31.45193], [120.6095, 31.45089], [120.6116, 31.44996], [120.6135, 31.44924], [120.6144, 31.44892], [120.6156, 31.44854], [120.6172, 31.44794], [120.6186, 31.44855], [120.6192, 31.45234], [120.6198, 31.45647], [120.6201, 31.46045]]
+            icount = PointObj.length;
+            if (icount > 0) {
+                SetLineOfValue(PointObj);
+                gogps();
+            }
+
+        };
+
+
+        //画线
+        function SetLineOfValue(Twpaths) {
+
+            var Thpaths = new Array();
+
+            Thpaths.push(Twpaths);
+            var displayLayer = myMap.getLayer('ll');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+            else {
+                displayLayer = new esri.layers.GraphicsLayer({id: 'll'});
+                myMap.addLayer(displayLayer);
+            }
+            ;
+
+            //弹出框大小设定
+            myMap.infoWindow.resize(600, 350);
+
+
+            var line = new esri.geometry.Polyline({
+                //"paths": [[[120.5744, 31.46142], [120.5751, 31.46106], [120.5789, 31.45902], [120.5798, 31.45866], [120.5809, 31.4581], [120.5813, 31.45782], [120.5821, 31.45734], [120.5836, 31.45664], [120.5861, 31.45541], [120.5884, 31.45403], [120.5895, 31.45359], [120.5895, 31.45354], [120.5904, 31.4538], [120.5914, 31.4551], [120.5927, 31.45694], [120.5943, 31.45624], [120.5965, 31.45523], [120.5989, 31.45443], [120.6014, 31.45346], [120.6036, 31.45269], [120.6071, 31.45193], [120.6095, 31.45089], [120.6116, 31.44996], [120.6135, 31.44924], [120.6144, 31.44892], [120.6156, 31.44854], [120.6172, 31.44794], [120.6186, 31.44855], [120.6192, 31.45234], [120.6198, 31.45647], [120.6201, 31.46045]]],
+                "paths": Thpaths,
+                "spatialReference": {"wkid": 4326}
+            });
+
+
+            // 每个元素的属性值
+            var attr = {"LXBM": "慷慨大道", "LXMC": "慷慨大道", "QDZH": "100001", "ZDZH": "11", "YXJLD": "20", "SFZCL": "是"};
+
+            // 点击该元素时的信息窗
+            var infoTemplate = new esri.InfoTemplate("${LXMC}", "路线名称: ${LXMC}<br/>路段编码: ${LXBM}  <br/>起点桩号: ${QDZH}<br/>终点桩号: ${ZDZH}<br/>路段里程: ${YXJLD}公里<br/>是否有中隔栏: ${SFZCL}<br/><P><img width='250px' height='250px' src='qiaoliang/111222_1.jpg'/><img width='250px' height='250px' src='qiaoliang/111222_2.jpg'/></P>");
+
+
+            var lens = 8;
+
+            var lineSymbol = new esri.symbol.CartographicLineSymbol(esri.symbol.CartographicLineSymbol.STYLE_SOLID, new dojo.Color("#00CD00"), lens, esri.symbol.CartographicLineSymbol.CAP_ROUND, esri.symbol.CartographicLineSymbol.JOIN_MITER, 5);
+
+
+            //画线
+
+            var polyline = new esri.Graphic(line, lineSymbol, attr, infoTemplate);
+
+            displayLayer.add(polyline);
+            // 定位
+
+            var location = new esri.geometry.Point(120.5989, 31.45443, myMap.spatialReference);
+            myMap.centerAndZoom(location, 5);
+
+        }
+
+
+        //更加参数画线
+        function linePoint(PchildNodes) {
+
+            var Thpaths = new Array();
+            // var PchildNodes = childNode[i]["Point"];
+            var location;
+
+            var Twpaths = new Array();
+            if (PchildNodes != null) {
+                for (var j = 0; j < PchildNodes.length; j++) {
+                    // alert(PchildNodes[j]["lat"]);
+
+                    Twpaths.push([PchildNodes[j]["Lon"], PchildNodes[j]["Lat"]]);
+
+                }
+            }
+            else {
+                var a = 1;
+            }
+
+            Thpaths.push(Twpaths);
+
+            var line = new esri.geometry.Polyline({
+                // "paths": [[[120.6035, 31.49395], [120.6037, 31.49477], [120.604, 31.49593], [120.6043, 31.49701], [120.6045, 31.49736]], [[120.6135, 31.49395], [120.6137, 31.49477], [120.614, 31.49593], [120.6143, 31.49701], [120.6145, 31.49736]]],
+                "paths": Thpaths,
+                "spatialReference": {"wkid": 4326}
+            });
+            var lineSymbol = new esri.symbol.CartographicLineSymbol(esri.symbol.CartographicLineSymbol.STYLE_SOLID, new dojo.Color("#4EEE94"), 5, esri.symbol.CartographicLineSymbol.CAP_ROUND, esri.symbol.CartographicLineSymbol.JOIN_MITER, 5);
+            var polyline = new esri.Graphic(line, lineSymbol);
+
+            //画线
+            myMap.graphics.add(polyline);
+
+            // 定位
+            if (PchildNodes) {
+                location = new esri.geometry.Point(parseFloat(PchildNodes[0]["Lon"]), parseFloat(PchildNodes[0]["Lat"]), myMap.spatialReference);
+                myMap.centerAndZoom(location, 12);
+            }
+        }
+
+
+        //回放描点
+        function go() {
+
+            var symbol = new esri.symbol.PictureMarkerSymbol('images/timg.gif', 35, 35);
+
+            //设置方向角
+            symbol.setAngle(270);
+            //var childNodes = GetDocArray(PointObj, "Point");
+
+            if (PointObj[i] == null) {
+                return;
+            }
+            // 每个元素的属性值
+            var attr = {"CarID": "苏E033NV", "Time": "2019-03-18 13:40:40", "Speed": "32", "Type": "危货"};
+
+            // 点击该元素时的信息窗
+            var infoTemplate = new esri.InfoTemplate("${CarID}", "车牌: ${CarID}<br/>时间: ${Time}<br/>速度: ${Speed}<br/>车辆类型: ${Type}<br/>");
+
+            // var graphic = new esri.Graphic(pt, symbol, attr, infoTemplate);
+
+            //   myMap.graphics.add(graphic);
+
+            // myMap.centerAndZoom(pt, 4);
+
+            var geometry = new esri.geometry.Point(PointObj[i]);
+            var graphic = new esri.Graphic(geometry, symbol, attr, infoTemplate);
+            myMap.graphics.add(graphic);
+            var extent = myMap.extent;
+            if (!extent.contains(graphic.geometry)) {
+                myMap.centerAt(geometry);
+            }
+            i++;
+        }
+
+        //循环播放
+        function gogps() {
+            go();
+            if (i < icount) {
+                var ts = 1000 / $('#speed').val();
+                window.setTimeout("gogps()", ts);
+            }
+            else {
+                window.clearTimeout("gogps()");
+                i = 0;
+            }
+        }
+
+
+        //查询行政区域
+        function QYnet() {
+
+
+            var queryTask = new esri.tasks.QueryTask
+            ("http://221.224.9.194:6950/ArcGIS/rest/services/SZ/SZXZ20180328/MapServer/0");
+            //定义查询参数对象
+            var query = new esri.tasks.Query();
+            //查询条件，类似于sql语句的where子句
+
+            var where = "NAME='" + $("#XLXZQY").val() + "'";
+
+            if ($("#XLXZQY").val() == "全部") {
+                where = "1=1";
+            }
+
+            query.where = where;
+            //返回的字段信息：*代表返回全部字段
+            query.outFields = ["*"];
+            //是否返回几何形状
+            query.returnGeometry = true;
+            //执行属性查询
+            queryTask.execute(query, showQueryResultQYnet);
+        }
+
+        //属性查询完成之后，用showQueryResult来处理返回的结果
+        function showQueryResultQYnet(queryResult) {
+            //创建线符号
+
+            // var lineSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_DIAGONAL_CROSS, new dojo.Color([0, 139, 69]), 4);
+
+            myMap.infoWindow.resize(600, 350);
+
+            var displayLayer = myMap.getLayer('gjxlxr1');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+            else {
+                displayLayer = new esri.layers.GraphicsLayer({id: 'gjxlxr1'});
+                myMap.addLayer(displayLayer);
+            }
+            ;
+
+            // var lineSymbol = new esri.symbol.SimpleLineSymbol(SimpleLineSymbol.SOLID, new dojo.Color([0, 139, 69]), 4);
+            var lineSymbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_DASH, new dojo.Color([128, 128, 128]), 1);
+            //var fill = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_HORIZONTAL, lineSymbol);
+            //  var fill = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, lineSymbol, new dojo.Color("#363636"));
+
+            var fill = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255, 0, 0, 0.65]), 2), new dojo.Color([255, 0, 0, 0.35]));
+
+
+            if (queryResult.features.length == 0) {
+                dom.byId("divShowResult").innerHTML = "";
+                return;
+            }
+            if (queryResult.features.length >= 1) {
+
+                for (var i = 0; i < queryResult.features.length; i++) {
+
+
+                    // 每个元素的属性值
+                    //var attr = { "MC": queryResult.features[i]["MC"], "LEVEL": queryResult.features[i]["LEVEL"], "Legth_XZQ": queryResult.features[i]["Legth_XZQ"] };
+
+                    // 点击该元素时的信息窗
+                    var infoTemplate = new esri.InfoTemplate("${NAME}", "行政区名称: ${NAME}<br/><P><img width='580px' height='300px' onclick='a()'  src='qiaoliang/tl.gif'/></P>");
+
+
+                    //获得图形graphic
+                    var graphic = queryResult.features[i];
+                    //赋予相应的符号
+                    graphic.setSymbol(fill);
+                    graphic.setInfoTemplate(infoTemplate);
+                    //将graphic添加到地图中，从而实现高亮效果
+                    //  myMap.graphics.add(graphic);
+                    displayLayer.add(graphic);
+                }
+
+            }
+        };
+
+        function a() {
+            alert("Hello word!");
+        };
+
+        //清除行政区划
+        function ClearXZQH() {
+            myMap.graphics.clear();
+            var displayLayer = myMap.getLayer('gjxlxr1');
+            if (displayLayer) {
+                displayLayer.clear();
+            }
+        };
+
+        //打开热力图
+        function OpenRLT() {
+            window.open("ArcgisHitmapdemo.html");
+        }
+
+        //打开热力图
+        function OpenQYT() {
+            window.open("迁移图/examples/index.html");
+        }
+
+    </script>
+</head>
+<body>
+<div class="content1">
+    <table>
+
+        <tr>
+            <td style="font-size:15px;color:Green;">底图选择
+                <select id="DTselect" style="width: 174px;" name="DTselect"
+                        required="true" onchange="dituSelect()">
+                    <option value="普通底图">普通底图</option>
+                    <option value="蓝色底图">蓝色底图</option>
+                    <option value="全部底图">全部底图</option>
+                </select></td>
+        </tr>
+        <tr>
+            <td style="font-size:15px; color:Green; "> 图层选择
+                <select id="TCSelect" style="width: 172px;"
+                        name="TCSelect" onchange="tuchengSelect()" required="true">
+                    <option value=""></option>
+                    <option value="水路">水路</option>
+                    <option value="公路">公路</option>
+                    <option value="网格">网格</option>
+                    <option value="全部">全部</option>
+                </select>&nbsp;
+
+
+            </td>
+        </tr>
+        <tr>
+            <td style="font-size:15px;color:Green; ">子图选择
+                <select id="ZTSelect" style="width: 172px;" name="ZTSelect" onchange="zituSelect()" required="true">
+                    <option value=""></option>
+                    <option value="航道">航道</option>
+                    <option value="护岸码头">护岸码头</option>
+                    <option value="过河桥梁">过河桥梁</option>
+                    <option value="全部">全部</option>
+                </select>&nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td style="font-size:15px;color:Green; ">点位显示&nbsp;
+                <button onclick="Piont()">画点</button> &nbsp;<button onclick="ClearPiont()">清除</button>
+            </td>
+
+        </tr>
+        <tr>
+            <td style="font-size:15px;color:Green; ">线路显示&nbsp;
+                <button onclick="SetLine()">画线</button> &nbsp;<button onclick="ClearLine()">清除</button>
+            </td>
+
+        </tr>
+        <tr>
+            <td style="font-size:15px;color:Green; ">轨迹回放&nbsp;
+                <select id="speed" name="chep" style="width: 150px;">
+                    <option value="1">×1倍</option>
+                    <option value="2">×2倍</option>
+                    <option value="2">×5倍</option>
+                    <option value="10">×10倍</option>
+                </select>
+                <button onclick="HuiFang()">回放</button> &nbsp;<button onclick="ClearHuiFang()">清除</button>
+            </td>
+
+        </tr>
+        <tr>
+            <td style="font-size:15px;color:Green; ">行政区域&nbsp;
+                <select id="XLXZQY" style="width: 100px;" onchange="QYnet()" name="XZQY" required="true">
+                    <option value="全部">全部</option>
+                    <option value="姑苏区">姑苏区</option>
+                    <option value="吴中区">吴中区</option>
+                    <option value="相城区">相城区</option>
+                    <option value="园区">园区</option>
+                    <option value="新区">新区</option>
+                    <option value="吴江区">吴江区</option>
+                    <option value="太湖">太湖</option>
+                    <option value="昆山市">昆山市</option>
+                    <option value="常熟市">常熟市</option>
+                    <option value="太仓市">太仓市</option>
+                    <option value="张家港市">张家港市</option>
+                </select>&nbsp;<button onclick="ClearXZQH()">清除</button>
+            </td>
+
+        </tr>
+
+        <tr>
+            <td style="font-size:15px;color:Green; ">热力图&nbsp;
+                <button onclick="OpenRLT()">热力图</button>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="font-size:15px;color:Green; ">迁移图&nbsp;
+                <button onclick="OpenQYT()">迁移图</button>
+            </td>
+        </tr>
+
+        <!--测试使用-->
+        <!--<tr>-->
+            <!--<td style="font-size:15px;color:Green; ">GP服务(点转线)&nbsp;-->
+                <!--<button onclick="drawPoint()">开始画点</button>-->
+                <!--<button onclick="endPoint()">结束画点</button>-->
+                <!--<button onclick="testGPSynchronous()">同步调用</button>-->
+                <!--<button onclick="testGPAsynchronous()">异步调用</button>-->
+            <!--</td>-->
+        <!--</tr>-->
+
+        <tr>
+            <td style="font-size:15px;color:Green; ">GP服务
+                <button onclick="pointDraw()">原始点数据加载</button>
+                <button onclick="bufferGPTool()">500米缓冲区</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="mapDiv" class="MapClass" style="height:100%"></div>
+<div id="divShowResult" class="MapClass"></div>
+</body>
+</html>
+

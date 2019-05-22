@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公交仿真系统DEMO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://unpkg.com/shapefile@0.6"></script>
+
+    <link rel="stylesheet" href="CSS/bootstrap.css">
+    <script src="JS/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="JS/bootstrap.js"></script>
+
+    <link href="http://58.210.10.26:8011/arcgis_js_api/library/3.16/3.16compact/dijit/themes/claro/claro.css"
+          rel="stylesheet"/>
+    <link href="http://58.210.10.26:8011/arcgis_js_api/library/3.16/3.16compact/dijit/themes/tundra/tundra.css"
+          rel="stylesheet"/>
+
+
+
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .main-content {
+            width: 100%;
+            height: 100%;
+        }
+
+        #mapDiv {
+            width: 100%;
+            height: 90%;
+            margin: auto auto;
+        }
+
+        #tableCard {
+            position: absolute;
+            z-index: 999;
+            right: 20px;
+            top: 70px;
+        }
+    </style>
+</head>
+<body>
+<div class="main-content">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">公交仿真系统DEMO</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">工具栏</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        绘制
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" onclick="drawPointData()">点绘制</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        数据加载
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" onclick="addPointData()">公交站点数据</a>
+                        <!--<a class="dropdown-item" href="#" onclick="addPointData()">中心城区数据</a>-->
+                        <!--<div class="dropdown-divider"></div>-->
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        GP服务
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" onclick="bufferGPTool()">500米覆盖率</a>
+                        <a class="dropdown-item" href="#" onclick="simulationGPTool()">公交仿真模拟</a>
+                        <a class="dropdown-item" href="#" onclick="testShp()">加载shp</a>
+                        <!--<a class="dropdown-item" href="#" onclick="appendText()">测试</a>-->
+                    </div>
+                </li>
+                <!--<li class="nav-item">-->
+                    <!--<a class="nav-link" href="#" onclick="cleanup()">清除数据</a>-->
+                <!--</li>-->
+            </ul>
+
+        </div>
+    </nav>
+    <div id="mapDiv"></div>
+    <div class="card" id="tableCard" style="display: none">
+        <div class="card-header">
+            结果展示
+        </div>
+        <div class="card-body text-center">
+            <table class="table table-bordered" style="margin: auto">
+                <thread>
+                    <th scope="col"></th>
+                    <th scope="col">500米覆盖率</th>
+                    <th scope="col">公交仿真模拟</th>
+                </thread>
+                <tbody>
+                <tr>
+                    <th scope="row">面积</th>
+                    <td id="result1"></td>
+                    <td id="result2"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="http://localhost/arcgis_js_api/library/3.28/3.28/esri/css/esri.css">
+<script src="http://localhost/arcgis_js_api/library/3.28/3.28/init.js"></script>
+
+<script>
+    //var ptcount = "120.6035,31.49395/120.6037,31.49477/120.604,31.49593/120.6043,31.49701/120.6045,31.49736";
+    var myMap;
+    var toolbar;
+    var grateMap;
+    var tempPoint;
+    var tempPolygon;
+
+    $(function () {
+        //初始化地图引擎
+        dojo.require("esri/map",
+            "esri/layers/ArcGISTiledMapServiceLayer",
+            "esri/layers/ArcGISDynamicMapServiceLayer",
+            "dojo/on",
+            "dojo/dom",
+            "esri/config",
+            "esri/geometry/Polygon",
+            "esri/layers/GraphicsLayer",
+            "esri/tasks/FindTask",
+            "esri/tasks/FindParameters",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/graphic",
+            "esri/tasks/query",
+            "esri/tasks/QueryTask",
+            "esri.symbol.Symbol",
+            "esri.symbol.MarkerSymbol",
+            "esri.symbols.PictureMarkerSymbol",
+            "dojo/domReady!",
+            "esri/toolbars/draw",
+            "esri/tasks/LinearUnit",
+            "esri/SpatialReference"
+        );
+        dojo.require("esri.graphic");
+
+
+        //初始化加载
+        dojo.addOnLoad(init);
+    })
+
+    function init() {
+        //根据div的id属性创建地图
+        myMap = new esri.Map("mapDiv", {
+            basemap: "osm",
+            center: [120.6105, 31.31801],
+            zoom: 12,
+            logo: false
+        });
+
+        //绘制点数据保存图层
+        grateMap = new esri.layers.GraphicsLayer();
+        myMap.addLayer(grateMap);
+    }
+
+    // 绘制公交站点数据
+    function addPointData() {
+        //创建一个GraphicsLayer
+        var displayPointLayer = new esri.layers.GraphicsLayer({ id: "gjpL" });
+        myMap.addLayer(displayPointLayer);
+
+        $.ajax({
+            url: "./jsonData/site.json",
+            type: "GET",
+            success: function (data) {
+                var pointData = data['Site'];
+                var pointsymbol = new esri.symbol.SimpleMarkerSymbol();
+                pointsymbol.setColor(new dojo.Color([25,25,112]));
+                pointsymbol.setSize(3);
+                pointsymbol.setOutline(null);
+
+                for (var i = 0; i < pointData.length; i++) {
+                    var point = new esri.geometry.Point([pointData[i].fslon, pointData[i].fslat], new esri.SpatialReference({wkid: 4326}));
+                    var pointGraphic = new esri.Graphic(point, pointsymbol)
+                    displayPointLayer.add(pointGraphic);
+                }
+            },
+            error: function (error) {
+                alert(error)
+            }
+        })
+    }
+
+
+    // 坐标转换
+    function mercatorTolonlat(mercatorX, mercatorY){
+        var lonlat={x:0,y:0};
+        var x = mercatorX/20037508.34*180;
+        var y = mercatorY/20037508.34*180;
+        y= 180/Math.PI*(2*Math.atan(Math.exp(y*Math.PI/180))-Math.PI/2);
+        lonlat.x = x;
+        lonlat.y = y;
+        return lonlat;
+    }
+
+    // 500米覆盖率，已完成
+    function bufferGPTool() {
+        var pointFeatureSet;
+        var polygonFeatureSet;
+        var aPoint = {
+            "displayFieldName" : "",
+            "fieldAliases" : {
+                "FID" : "FID",
+            },
+            "geometryType" : "esriGeometryPoint",
+            "spatialReference" : {
+                "wkid" : 4326,
+                "latestWkid" : 4326
+            },
+            "fields" : [
+                {
+                    "name" : "FID",
+                    "type" : "esriFieldTypeOID",
+                    "alias" : "FID"
+                }
+            ],
+            "features" : []
+        };
+
+        var Dis = {
+            "distance": 500,
+            "units": "esriMeters"
+        };
+
+        var grateruslut = new esri.layers.GraphicsLayer();//显示结果图层，无用
+        myMap.addLayer(grateruslut);
+
+        // 设置输入参数(公交点
+        // 数据格式要求： 小数点6位，经纬度范围
+        require(["esri/SpatialReference","esri/graphic"], function(SpatialReference, Graphic) {
+            $.ajax({
+                url:"./jsonData/site.json",
+                type:"GET",
+                success: function (data) {
+                    var pointData = data['Site'];
+                    var features = [];
+
+                    for(var i = 0; i < pointData.length; i++) {
+                        var point = new esri.geometry.Point([pointData[i].fslon,pointData[i].fslat], new SpatialReference({ wkid:4326 }));
+                        var graphic = new Graphic({
+                            geometry: point,
+                            attributes: {
+                                "FID" : i,
+                            },
+                            symbol: {}
+                        })
+                        features.push(graphic)
+                    }
+                    tempPoint = features;
+                    aPoint['features'] = features
+                    // console.log(aPoint)
+                    pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
+                    pointFeatureSet.spatialReference = myMap.spatialReference;
+
+                    // 设置输入参数(中心城区
+                    $.ajax({
+                        url:'./jsonData/centercity.json',
+                        // url:'./jsonData/centercityCopy_FeaturesToJSO.json',
+                        type:'GET',
+                        success: function (data) {
+                            centercityfeatures = data;
+                            // 设置输入参数（多边形
+                            tempPolygon = data;
+                            polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
+                            polygonFeatureSet.spatialReference = myMap.spatialReference;
+
+                            // 清除已有结果
+                            cleanup();
+
+                            // GP服务调用
+                            require(["esri/tasks/Geoprocessor", "esri/layers/ImageParameters"], function (Geoprocessor, ImageParameters) {
+                                var gptask = new esri.tasks.Geoprocessor("https://localhost:6443/arcgis/rest/services/Tool/500coverTool/GPServer/coverTool");
+                                var gpParams = {
+                                    "stops": pointFeatureSet,
+                                    "Dis1": Dis,
+                                    "Dis2": Dis,
+                                    "city1": polygonFeatureSet,
+                                    "city2": polygonFeatureSet
+                                };
+
+                                gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                                // 运行状态显示
+                                function statusCallback(jobInfo) {
+                                    console.log(jobInfo.jobStatus);
+                                }
+
+                                // 结果图加载
+                                function completeCallback(jobInfo) {
+                                    var imageParams = new ImageParameters();
+                                    imageParams.imageSpatialReference = myMap.spatialReference;
+                                    // 面积求算
+                                    gptask.getResultData(jobInfo.jobId,"bufferOutput").then(function (value) {
+                                        areaData = value.value.features[0].attributes['coverArea'];
+                                        // alert("面积为："+areaData);
+                                        // console.log(areaData)
+                                        $("#tableCard").css('display','block');
+                                        $("#result1").text(areaData);
+                                    });
+                                    gptask.getResultImageLayer(jobInfo.jobId, null, null, function (gpLayerT) {
+                                        gpLayerT.setOpacity(0.5);
+                                        gpLayerT.id = "bufferLayer";
+                                        myMap.addLayer(gpLayerT);
+                                        // console.log(gpLayer)
+
+
+                                    });
+
+                                }
+                            });
+                        },
+                        error: function (error) {
+                            alert(error)
+                        }
+                    })
+
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            })
+
+        });
+    }
+
+    // 公交仿真，已完成
+    function simulationGPTool() {
+        var features = [];
+        var pointFeatureSet;
+        var polygonFeatureSet;
+        var aPoint = {
+            "displayFieldName" : "",
+            "fieldAliases" : {
+                "FID" : "FID",
+            },
+            "geometryType" : "esriGeometryPoint",
+            "spatialReference" : {
+                "wkid" : 4326,
+                "latestWkid" : 4326
+            },
+            "fields" : [
+                {
+                    "name" : "FID",
+                    "type" : "esriFieldTypeOID",
+                    "alias" : "FID"
+                }
+            ],
+            "features" : []
+        };
+
+        var Dis = {
+            "distance": 500,
+            "units": "esriMeters"
+        };
+
+        require(["esri/SpatialReference","esri/graphic", "esri/tasks/Geoprocessor", "esri/layers/ImageParameters"], function (SpatialReference, Graphic, Geoprocessor, ImageParameters) {
+
+            for (var i = 0; i < grateMap.graphics.length; i++) {
+                tempData = mercatorTolonlat((grateMap.graphics[i].geometry)['x'], (grateMap.graphics[i].geometry)['y'])
+                // console.log(tempData)
+                var pointA = new esri.geometry.Point([tempData.x, tempData.y], new SpatialReference({ wkid:4326 }));
+                var graphicA = new Graphic({
+                    geometry: pointA,
+                    attributes: {
+                        "FID" : i,
+                    },
+                    symbol: {}
+                })
+                tempPoint.push(graphicA);
+            }
+
+            aPoint['features'] = tempPoint
+            // // console.log(aPoint)
+            pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
+            pointFeatureSet.spatialReference = myMap.spatialReference;
+            //
+            polygonFeatureSet = new esri.tasks.FeatureSet(tempPolygon);
+            polygonFeatureSet.spatialReference = myMap.spatialReference;
+
+            var gptask = new esri.tasks.Geoprocessor("https://localhost:6443/arcgis/rest/services/test/coverTest/GPServer/coverTool");
+            var gpParams = {
+                "stops": pointFeatureSet,
+                "Dis": Dis,
+                "city": polygonFeatureSet
+            };
+            console.log(gpParams);
+
+            gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+            // 运行状态显示
+            function statusCallback(jobInfo) {
+                console.log(jobInfo.jobStatus);
+            }
+
+            // 结果图加载
+            function completeCallback(jobInfo) {
+                var simuParams = new ImageParameters();
+                simuParams.imageSpatialReference = myMap.spatialReference;
+                gptask.getResultImageLayer(jobInfo.jobId, null, null, function (gpSLayer) {
+                    gpSLayer.setOpacity(0.5);
+                    gpSLayer.id = "simuLayer";
+                    myMap.addLayer(gpSLayer);
+                    // console.log(gpLayer)
+                });
+                // 面积求算
+                gptask.getResultData(jobInfo.jobId,"bufferOutput").then(function (value) {
+                    // console.log(value.value)
+                    areaData = value.value.features[0].attributes['coverArea']
+                    // alert("面积为："+areaData);
+
+                    $("#result2").text(areaData);
+                });
+            }
+        });
+    }
+
+    // 移除GP服务结果
+    function cleanup() {
+        // remove the geoprocessing result
+        if (myMap.getLayer("bufferLayer") != null) {
+            myMap.removeLayer(myMap.getLayer("bufferLayer"));
+        }
+        if (myMap.getLayer("simuLayer") != null) {
+            myMap.removeLayer(myMap.getLayer("simuLayer"));
+        }
+    }
+
+    // 移除公交点数据图层
+    function dataCleanUp() {
+        // remove the point data
+        if (myMap.getLayer("gjpL") != null) {
+            myMap.removeLayer(myMap.getLayer("gjpL"));
+        }
+    }
+
+    function addToMap(evt) {
+        var pointsymbol = new esri.symbol.SimpleMarkerSymbol();
+        pointsymbol.setColor(new dojo.Color([255, 106, 106]));
+        pointsymbol.setSize(8);
+        pointsymbol.setOutline(null);
+        require(["esri/graphic"], function (Graphic) {
+            var graphic = new Graphic(evt.geometry, pointsymbol);
+            grateMap.add(graphic);
+        })
+    }
+
+    // 绘制点
+    function drawPointData() {
+        require([
+            "esri/toolbars/draw"
+        ], function (Draw) {
+            toolbar = new Draw(myMap);
+            toolbar.on("draw-end", addToMap);
+            toolbar.activate(Draw.POINT);
+        });
+    }
+
+    function appendText() {
+        $("#result1").text("appendText");
+        console.log($("#result1").text())
+    }
+    
+    function testShp() {
+        shapefile.open("https://raw.githubusercontent.com/matplotlib/basemap/v1.1.0/lib/mpl_toolkits/basemap/data/UScounties.shp")
+            .then(source => source.read()
+                .then(function log(result) {
+                    if (result.done) return;
+                    console.log(result.value);
+                    return source.read().then(log);
+                }))
+            .catch(error => console.error(error.stack));
+
+    }
+</script>
+</body>
+</html>

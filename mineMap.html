@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公交仿真系统DEMO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-content {
+            width: 100%;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            margin: auto auto;
+        }
+    </style>
+</head>
+<body>
+<div class="main-content">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">智慧交通二期</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">工具栏</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        数据加载
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" onclick="addPointData()">公交站点数据</a>
+                        <a class="dropdown-item" href="#" onclick="addPointData()">中心城区数据</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        GP服务
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" onclick="testGPAsynchronous()">异步功能测试</a>
+                        <a class="dropdown-item" href="#" onclick="bufferGPTool()">500米覆盖率</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="cleanup()">清除数据</a>
+                </li>
+            </ul>
+
+        </div>
+    </nav>
+    <div id="map"></div>
+
+
+</div>
+<script src="JS/wgs2mars.min.js"></script>
+<link rel="stylesheet" href="//minedata.cn/minemapapi/v2.0.0/minemap.css">
+<script src="//minedata.cn/minemapapi/v2.0.0/minemap.js"></script>
+<link rel="stylesheet" href="CSS/bootstrap.css">
+<script src="JS/jquery.js"></script>
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="JS/bootstrap.js"></script>
+
+<link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
+<script src="http://localhost/arcgis_js_api/library/3.28/3.28/init.js"></script>
+
+<script type="text/javascript">
+    var map;
+    /**
+     * 基本地图加载
+     * 地图缩放级别限制
+     */
+    var conf_domainUrl; //内部使用已隐藏
+    var conf_dataDomainUrl = conf_domainUrl;
+    var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
+    var conf_serviceUrl = conf_domainUrl + '/service';
+    var conf_accessToken; //内部使用已隐藏
+    var conf_solution = 4744;
+    var conf_centerPoint = [120.6305, 31.31801];
+    var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution
+
+    $(document).ready(function () {
+        minemap.domainUrl = conf_domainUrl;
+        minemap.dataDomainUrl = conf_dataDomainUrl;
+        minemap.spriteUrl = conf_spriteUrl;
+        minemap.serviceUrl = conf_serviceUrl;
+        minemap.accessToken = conf_accessToken;
+        minemap.solution = conf_solution;
+        map = new minemap.Map({
+            container: 'map',
+            // 4745
+            style: conf_style, /*底图样式*/
+            center: conf_centerPoint, /*地图中心点*/
+            zoom: 11, /*地图默认缩放等级*/
+            pitch: 0, /*地图俯仰角度*/
+            maxZoom: 17, /*地图最大缩放等级*/
+            minZoom: 3  /*地图最小缩放等级*/
+        });
+        map.on("load", function () {
+            $.ajax({
+                url: "./geojsonData/centerPolygon.json",
+                type: "GET",
+                success: function (data) {
+                    var gcjData = wgsToGcj(data);
+                    map.addSource('polygonSource', {
+                        'type': 'geojson',
+                        'data': gcjData
+                    });
+                    map.addLayer({
+                        'id': 'polygonLayer',
+                        'type': 'fill',
+                        'source': 'polygonSource',
+                        'layout': {},
+                        'paint': {
+                            'fill-color': '#79ada9',
+                            'fill-opacity': 0.2
+                        }
+                    });
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            })
+
+        })
+
+    })
+
+    //_____________________________________________________
+    // WGS84 => GCJ02
+    function wgsToGcj(wgsData) {
+        geometryData = (wgsData.features)[0].geometry;
+        geoType = geometryData.type;
+        coordinateData = (geometryData.coordinates)[0];
+        switch (geoType) {
+            case "Polygon":
+                coordinateData = polyWgsGcj(coordinateData);
+                (((wgsData.features)[0].geometry).coordinates)[0] = coordinateData;
+                break;
+            default:
+                console.log("error");
+                break;
+        }
+        return wgsData;
+    }
+
+    function polyWgsGcj(coordinateData) {
+        coordinateData.map(function (currentValue, index) {
+            const lngWGS = Number(currentValue[0]);  //经度
+            const latWGS = Number(currentValue[1]);  //纬度
+            var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+            currentValue[0] = gcjCoordinate.lng;
+            currentValue[1] = gcjCoordinate.lat;
+        })
+        return coordinateData;
+        // console.log((corData[0])[0])
+    }
+
+    //_____________________________________________________
+
+
+    //得到Json数据
+    function getJson(url) {
+        return $.ajax({
+            type: "get",
+            url: url,
+            async: false,
+            dataType: "json",
+            success: function (data) {
+            }, error: function () {
+            }
+        });
+    }
+
+    //_____________________________________________________
+    //GP服务
+
+    function bufferGPTool() {
+        var pointFeatureSet;
+        var polygonFeatureSet;
+        var aPoint = {
+            "displayFieldName": "",
+            "fieldAliases": {
+                "FID": "FID"
+            },
+            "geometryType": "esriGeometryPoint",
+            "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+            },
+            "fields": [
+                {
+                    "name": "FID",
+                    "type": "esriFieldTypeOID",
+                    "alias": "FID"
+                }
+            ],
+            "features": []
+        };
+
+        var Dis = {
+            "distance": 500,
+            "units": "esriMeters"
+        };
+
+        // 设置输入参数(公交点
+        // 数据格式要求： 小数点6位，经纬度范围
+        require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+            $.ajax({
+                url: "./jsonData/site.json",
+                type: "GET",
+                success: function (data) {
+                    var pointData = data['Site'];
+                    var features = [];
+
+                    for (var i = 0; i < pointData.length; i++) {
+                        var point = new esri.geometry.Point([pointData[i].fslon, pointData[i].fslat], new SpatialReference({wkid: 4326}));
+                        var graphic = new Graphic({
+                            geometry: point,
+                            attributes: {
+                                "FID": i
+                            },
+                            symbol: {}
+                        })
+                        features.push(graphic)
+                    }
+                    tempPoint = features;
+                    aPoint['features'] = features
+                    // console.log(aPoint)
+                    pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
+                    pointFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                    // 设置输入参数(中心城区
+                    $.ajax({
+                        url: './jsonData/centercity.json',
+                        // url:'./jsonData/centercityCopy_FeaturesToJSO.json',
+                        type: 'GET',
+                        success: function (data) {
+                            centercityfeatures = data;
+                            // 设置输入参数（多边形
+                            tempPolygon = data;
+                            polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
+                            polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                            // 清除已有结果
+                            // cleanup();
+
+                            // GP服务调用
+                            var gptask = new Geoprocessor("https://localhost:6443/arcgis/rest/services/Tool/500coverTool/GPServer/coverTool");
+                            var gpParams = {
+                                "stops": pointFeatureSet,
+                                "Dis1": Dis,
+                                "Dis2": Dis,
+                                "city1": polygonFeatureSet,
+                                "city2": polygonFeatureSet
+                            };
+
+                            gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                            // 运行状态显示
+                            function statusCallback(jobInfo) {
+                                console.log(jobInfo.jobStatus);
+                            }
+
+                            // 结果图加载
+                            function completeCallback(jobInfo) {
+                                // var imageParams = new ImageParameters();
+                                // imageParams.imageSpatialReference = myMap.spatialReference;
+                                // 面积求算
+                                gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
+                                    // 面积
+                                    areaData = value.value.features[0].attributes['coverArea'];
+                                    bufferResult = value.value.features[0].geometry['rings'];
+                                    bufferJson = transtoJson(bufferResult);
+                                    bufferJson = wgsToGcj(bufferJson);
+                                    if (bufferJson) {
+                                        map.addSource('bufferJson', {
+                                            'type': 'geojson',
+                                            'data': bufferJson
+                                        });
+                                        map.addLayer({
+                                            'id': 'polygonLayer',
+                                            'type': 'fill',
+                                            'source': 'bufferJson',
+                                            'layout': {},
+                                            'paint': {
+                                                'fill-color': '#eef966',
+                                                'fill-opacity': 0.2
+                                            }
+                                        });
+                                    } else {
+                                        console.log("aaaa");
+                                    }
+
+                                    // console.log(bufferResult)
+                                    // alert("面积为："+areaData);
+                                    // console.log(areaData)
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            alert(error)
+                        }
+                    })
+
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            })
+
+        });
+    }
+    //_____________________________________________________
+    
+    function transtoJson(data) {
+        polygonJson = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": data
+                    }
+                }
+            ]
+        }
+        return polygonJson;
+    }
+
+</script>
+</body>
+</html>
