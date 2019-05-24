@@ -68,8 +68,6 @@
         </div>
     </nav>
     <div id="map"></div>
-
-
 </div>
 <script src="JS/wgs2mars.min.js"></script>
 <link rel="stylesheet" href="//minedata.cn/minemapapi/v2.0.0/minemap.css">
@@ -151,11 +149,11 @@
     function wgsToGcj(wgsData) {
         geometryData = (wgsData.features)[0].geometry;
         geoType = geometryData.type;
-        coordinateData = (geometryData.coordinates)[0];
+        coordinateData = geometryData.coordinates;
         switch (geoType) {
             case "Polygon":
                 coordinateData = polyWgsGcj(coordinateData);
-                (((wgsData.features)[0].geometry).coordinates)[0] = coordinateData;
+                ((wgsData.features)[0].geometry).coordinates = coordinateData;
                 break;
             default:
                 console.log("error");
@@ -165,12 +163,14 @@
     }
 
     function polyWgsGcj(coordinateData) {
-        coordinateData.map(function (currentValue, index) {
-            const lngWGS = Number(currentValue[0]);  //经度
-            const latWGS = Number(currentValue[1]);  //纬度
-            var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-            currentValue[0] = gcjCoordinate.lng;
-            currentValue[1] = gcjCoordinate.lat;
+        coordinateData.map(function (coordianateValue, index) {
+            coordianateValue.map(function (currentValue) {
+                const lngWGS = Number(currentValue[0]);  //经度
+                const latWGS = Number(currentValue[1]);  //纬度
+                var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+                currentValue[0] = gcjCoordinate.lng;
+                currentValue[1] = gcjCoordinate.lat;
+            })
         })
         return coordinateData;
         // console.log((corData[0])[0])
@@ -195,6 +195,7 @@
     //_____________________________________________________
     //GP服务
 
+    // 站点覆盖率
     function bufferGPTool() {
         var pointFeatureSet;
         var polygonFeatureSet;
@@ -246,7 +247,7 @@
                     }
                     tempPoint = features;
                     aPoint['features'] = features
-                    // console.log(aPoint)
+                    console.log(aPoint)
                     pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
                     pointFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
@@ -261,9 +262,6 @@
                             tempPolygon = data;
                             polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
                             polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-
-                            // 清除已有结果
-                            // cleanup();
 
                             // GP服务调用
                             var gptask = new Geoprocessor("https://localhost:6443/arcgis/rest/services/Tool/500coverTool/GPServer/coverTool");
@@ -284,15 +282,17 @@
 
                             // 结果图加载
                             function completeCallback(jobInfo) {
-                                // var imageParams = new ImageParameters();
-                                // imageParams.imageSpatialReference = myMap.spatialReference;
                                 // 面积求算
-                                gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
+                                gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                     // 面积
                                     areaData = value.value.features[0].attributes['coverArea'];
-                                    bufferResult = value.value.features[0].geometry['rings'];
+                                    console.log(areaData)
+                                    bufferResult = value.value.features;
+                                    console.log(bufferResult)
+
+                                    // 输出格式转换，坐标尚未进行转换
                                     bufferJson = transtoJson(bufferResult);
-                                    bufferJson = wgsToGcj(bufferJson);
+                                    // bufferJson = wgsToGcj(bufferJson);
                                     if (bufferJson) {
                                         map.addSource('bufferJson', {
                                             'type': 'geojson',
@@ -304,17 +304,13 @@
                                             'source': 'bufferJson',
                                             'layout': {},
                                             'paint': {
-                                                'fill-color': '#eef966',
+                                                'fill-color': '#83dcf2',
                                                 'fill-opacity': 0.2
                                             }
                                         });
                                     } else {
-                                        console.log("aaaa");
+                                        console.log("buffer结果加载出错了");
                                     }
-
-                                    // console.log(bufferResult)
-                                    // alert("面积为："+areaData);
-                                    // console.log(areaData)
                                 });
                             }
                         },
@@ -322,26 +318,30 @@
                             alert(error)
                         }
                     })
-
                 },
                 error: function (error) {
                     alert(error)
                 }
             })
-
         });
     }
     //_____________________________________________________
-    
+
+    // MultiPolygon的格式转换
     function transtoJson(data) {
+        var multiPoly = [];
+        data.map(function (value) {
+            const geoCoordinate = value.geometry['rings'];
+            multiPoly.push(geoCoordinate);
+        })
         polygonJson = {
             "type": "FeatureCollection",
             "features": [
                 {
                     "type": "Feature",
                     "geometry": {
-                        "type": "Polygon",
-                        "coordinates": data
+                        "type": "MultiPolygon",
+                        "coordinates": multiPoly
                     }
                 }
             ]
