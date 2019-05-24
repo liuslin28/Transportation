@@ -139,7 +139,45 @@
                     alert(error)
                 }
             })
+            $.ajax({
+                // url: "./geojsonData/centerPolygon.json",
+                url: "./geojsonData/stopsPoint.json",
+                type: "GET",
+                success: function (data) {
+                    // var gcjData = wgsToGcj(data);
+                    map.addSource('stopsPoint', {
+                        'type': 'geojson',
+                        'data': data
+                    });
+                    map.addLayer({
+                        'id': 'stopsPoint',
+                        'type': 'circle',
+                        'source': 'stopsPoint',
+                        'paint': {
+                            'circle-radius': {
+                                /**
+                                 * base:圆的半径随zoom级别变化的剧烈程度，
+                                 *      1：        近似于直线线
+                                 *      <1:        曲线开口向下
+                                 *      >1 && <1.9 曲线开口向上
+                                 * stops：[minzoom,minPixel],[maxzoom,maxPixel]
+                                 *        对应：最小zoom时的半径pixel像素大小，最大时的半径像素大小
+                                 * 其他中间zoom级别，根据base规定的线性（1）或曲线曲率，半径大小会相应变化
+                                 */
+                                'base': 1.5,
+                                'stops': [[5, 2], [18, 4]]
+                            },
 
+                            'circle-color': "#b2cb94",      //填充圆形的颜色
+                            'circle-blur': 0.1,              //模糊程度，默认0
+                            'circle-opacity': 0.6,             //透明度，默认为1
+                        }
+                    });
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            })
         })
 
     })
