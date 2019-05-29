@@ -16,8 +16,11 @@
     <!--arcgis for js js已本地化，css未本地化-->
     <!--<link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/esri/css/main.css">-->
     <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/4.11/esri/themes/light/main.css">
-    <script type="text/javascript" src="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/init.js"></script>
-
+    <script type="text/javascript"
+            src="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/init.js"></script>
+    <!--Font Awesome图标-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
     <style>
         html, body {
             padding: 0;
@@ -26,546 +29,218 @@
             width: 100%;
         }
 
-        .main-content {
+        /*primary-nav*/
+        .primary-nav {
+            height: 50px;
+        }
+
+        /*second-nav*/
+        #second-nav {
+            height: 50px;
+            width: 100%;
+            background-color: #6c757d;
+            display: none;
+        }
+
+        #second-nav nav {
+            padding-bottom: 0;
+        }
+
+        .second-nav-ul {
+            width: 100%;
+
+        }
+
+        .second-nav-ul li a {
+            color: white;
+        }
+
+        /*禁用折叠动画*/
+        .collapsing {
+            -webkit-transition: none;
+            transition: none;
+            display: none;
+        }
+
+        #wrapper {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        #sidebar-wrapper {
+            float: right;
+            z-index: 1;
+            width: 0;
+            height: 100%;
+            overflow-y: hidden;
+            background: #d7d7d7;
+            opacity: 0.9;
+            transition: all .5s;
+            display: block;
+            /*水平居左*/
+            /*position: absolute;*/
+            /*display: flex;*/
+            /*align-items: center;*/
+        }
+
+        /* Change the width of the sidebar to display it*/
+        #wrapper.menuDisplayed #sidebar-wrapper {
+            width: 250px;
+        }
+
+        #wrapper.menuDisplayed #page-content-wrapper {
+            padding-right: 250px;
+        }
+
+        /* Main Content */
+        #page-content-wrapper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            /*padding:15px;*/
+            transition: all .5s;
+        }
+
+        /*地图*/
+        #viewDiv {
             width: 100%;
             height: 100%;
         }
 
-        #viewDiv {
-            width: 100%;
-            height: 90%;
-            margin: auto auto;
-        }
     </style>
 
 </head>
 <body>
-<div class="main-content">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">公交仿真系统DEMO</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">工具栏</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#"  role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        数据加载
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#" onclick="addPointData()">公交站点数据</a>
-                        <a class="dropdown-item" href="#" onclick="addPointData()">中心城区数据</a>
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        GP服务
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#" onclick="testGPAsynchronous()">异步功能测试</a>
-                        <a class="dropdown-item" href="#" onclick="bufferGPTool()">500米覆盖率</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="cleanup()">清除数据</a>
-                </li>
-            </ul>
-
-        </div>
+<!--导航栏 primary-nav -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark primary-nav">
+    <a class="navbar-brand" href="#">
+        <img src="CSS/svg/bus-alt-solid.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+        <span style="margin-left: 20px;margin-right: 20px;">公交仿真系统</span>
+    </a>
+    <div class="collapse navbar-collapse justify-content-center">
+        <ul class="navbar-nav ">
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav1" aria-expanded="false"
+                   aria-controls="secondNav1">数据加载</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav2" aria-expanded="false"
+                   aria-controls="secondNav2">覆盖性分析</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav3" aria-expanded="false"
+                   aria-controls="secondNav3">连通性分析</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav4" aria-expanded="false"
+                   aria-controls="secondNav4">衔接性分析</a>
+            </li>
+            <li class="nav-item" id="menu-toggle">
+                <a class="nav-link" href="#">清除数据</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!--次级导航栏 second-nav-->
+<div id="second-nav">
+    <nav class="navbar navbar-expand bg-secondary collapse" id="secondNav1" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="addPointData()">公交站点数据</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">中心城区数据</a>
+            </li>
+        </ul>
     </nav>
-    <div id="viewDiv"></div>
-
-    <div id="paneDiv">等待GP结果</div>
+    <nav class="navbar navbar-expand bg-secondary collapse" id="secondNav2" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="bufferGPTool()">站点覆盖</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">线网覆盖</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="testGPAsynchronous()">功能测试</a>
+            </li>
+        </ul>
+    </nav>
+    <nav class="navbar navbar-expand bg-secondary collapse" id="secondNav3" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">节点</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">路径</a>
+            </li>
+        </ul>
+    </nav>
+    <nav class="navbar navbar-expand bg-secondary collapse" id="secondNav4" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">公交-地铁换乘</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">公交-公共自行车换乘</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">地铁-公共自行 车换乘</a>
+            </li>
+        </ul>
+    </nav>
 </div>
+
+<div id="wrapper">
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid" style="height: 100%;margin: 0;padding: 0;">
+            <div class="row" style="height: 100%;margin: 0;padding: 0;">
+                <div class="col-lg-12" style="height: 100%;margin: 0;padding: 0;">
+                    <!--<div id="viewDiv"></div>-->
+                    <h1 class="text-center">Bootstrap Sidebar</h1>
+                    <h2 class="small text-center">Second Header</h2>
+                    <p class="text-center">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium
+                        perferendis maiores velit ad id delectus nisi eligendi doloremque officia necessitatibus,
+                        repellendus alias omnis, natus nam voluptates dolor vel minus ab?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Sidebar-->
+    <div id="sidebar-wrapper">
+        此处应有显示结果
+    </div>
+</div>
+
 </body>
 
-<script type="text/javascript">
-    var map;
-    var drawLayer;  //绘制后图层数据存储
-    var pointLayer; //点数据图层
-    var gptask;
-    require([
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/layers/GraphicsLayer",
-        "esri/Graphic",
-        "esri/widgets/Expand",
-        "esri/widgets/BasemapToggle",
-        "esri/widgets/Compass",
-        "esri/widgets/Sketch",
-        "esri/tasks/Geoprocessor"], function (Map, MapView, GraphicsLayer, Graphic, Expand, Sketch, BasemapToggle, Compass,Geoprocessor) {
-        //图层加载
-        // pointLayer = new GraphicsLayer();
-        // pointLayer.title = "pointData"
-        // 工具栏绘制数据存储图层
-        drawLayer = new GraphicsLayer();
+<script type="text/javascript" src="JS/initMap.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("menuDisplayed");
 
-        map = new Map({
-            basemap: "dark-gray",
-            // basemap: "osm",
-            layers: [drawLayer],
-            portalItem: {
-                id: "8dda0e7b5e2d4fafa80132d59122268c"  // WGS84 Streets Vector webmap
+        });
+        $(".nav-item").click(function (e) {
+                navTarget = $("#second-nav")
+                console.log(navTarget.find("nav").hasClass("show"));
+                if (navTarget.find("nav").hasClass("show")) {
+                    navTarget.slideUp();
+                } else {
+                    navTarget.slideDown();
+                }
             }
-        });
+        )
+        $(".nav-link").click(function (e) {
 
-        var view = new MapView({
-            container: "viewDiv",
-            map: map,
-            zoom: 12,
-            center: [120.6105, 31.31801] // longitude, latitude
-        });
-
-        //--------------------------------------------------------------------------
-
-        view.ui.remove("attribution");//移除底部ESRI logo
-        // 以下代码有bug
-        // 工具栏Sketch,现在为底图切换
-        const mapSketch = new Sketch({
-            nextBasemap: "osm", // 待更改
-            // layer: drawLayer,
-            view: view
-        });
-        // view.ui.add(mapSketch, "top-right");
-        const bgExpand = new Expand({ // 待更改
-            view: view,
-            content: mapSketch,
-            expandIconClass: "esri-icon-collection",
-            collapseTooltip: mapSketch
-            // autoCollapse: true
-        });
-        view.ui.add(bgExpand, "top-left");
-
-
-        //指北针Compass,现在为工具栏
-        const mapCompass = new Compass({
-            layer: drawLayer,
-            view: view
-        });
-        view.ui.add(mapCompass, "top-right");
-
-        //底图切换BasemapToggle，现在为指北针
-        const mapToggle = new BasemapToggle({
-            //     // 2 - Set properties
-            view: view // view that provides access to the map's 'topo' basemap
-            //     nextBasemap: "osm" // allows for toggling to the 'hybrid' basemap
-        });
-        view.ui.add(mapToggle, "top-left");
-        //
-        // const bgExpand = new Expand({
-        //     view: view,
-        //     content: mapmapToggle
-        // });
-        // view.ui.add(bgExpand, "top-left");
-
-        // mapToggle.on('toggle', function(event){
-        //     console.log("current basemap title: ", event.current.title);
-        //     console.log("previous basemap title: ", event.previous.title);
-        // });
-        //--------------------------------------------------------------------------
-
-
-        gptask = new Geoprocessor("https://localhost:6443/arcgis/rest/services/test/toLineAsynchronous/GPServer/toLineAsynchronous%20");
-
-        gptask.outSpatialReference = {
-            // autocasts as new SpatialReference()
-            wkid: 4326
-        };
-
+            }
+        )
     });
 
-    // 正在测试
-    function testGPAsynchronous() {
-        // 设置输入参数
-        var features = [
-            { "type":"Feature",
-                "id":0,
-                "attributes": {
-                    "FID": 0,
-                    "stop_id": "b47888e6-edbf-4210-8de2-5851d9578c33",
-                    "stop_name": "蠡口中学"
-                },
-                "geometry": {
-                    "type":"Point",
-                    "coordinates":[120.61614990234,31.406209945678999]
-
-                },
-                "properties":{
-                    "id":0
-                }
-            },
-            { "type":"Feature",
-                "id":1,
-                "attributes": {
-                    "FID": 1,
-                    "stop_id": "d0d98553-52ff-4335-ae7d-9a7457481eca",
-                    "stop_name": "蠡口中学"
-                },
-                "geometry": {
-                    "type":"Point",
-                    "coordinates":[120.6192779541,31.406789779663001]
-
-                },
-                "properties":{
-                    "id":1
-                }
-            }
-        ];
-
-
-        var json={
-            "displayFieldName": "",
-            "fieldAliases": {
-                "FID": "FID",
-                "Id": "Id"
-            },
-            "geometryType": "esriGeometryPoint",
-            "spatialReference": {
-                "wkid": 4326
-            },
-            "fields": [
-                {
-                    "name": "FID",
-                    "type": "esriFieldTypeOID",
-                    "alias": "FID"
-                },
-                {
-                    "name": "Id",
-                    "type": "esriFieldTypeInteger",
-                    "alias": "Id"
-                }
-            ],
-            "features": [
-                {
-                    "attributes": {
-                        "FID": 0,
-                        "Id": 0
-                    },
-                    "geometry": {
-                        "x": 120.61614990234,
-                        "y": 31.406209945678999
-                    }
-                },
-                {
-                    "attributes": {
-                        "FID": 1,
-                        "Id": 0
-                    },
-                    "geometry": {
-                        "x": 120.6192779541,
-                        "y": 31.406789779663001
-                    }
-                }
-            ]
-        }
-
-
-        var inputGraphicContainer = [];
-        require(["esri/geometry/Point", "esri/tasks/Geoprocessor", "esri/Graphic", "esri/tasks/support/FeatureSet","esri/layers/MapImageLayer"
-        ], function (MapImageLayer, Point, Geoprocessor, Graphic, FeatureSet) {
-
-            var markerSymbol = {
-                type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
-                color: [255, 0, 0],
-                outline: {
-                    // autocasts as new SimpleLineSymbol()
-                    color: [255, 255, 255],
-                    width: 2
-                }
-            };
-            for (var i = 0; i < json.features.length; i++) {
-                console.log(json.features[i].geometry.x)
-                var point = new Point({
-                    longitude: json.features[i].geometry.x,
-                    latitude: json.features[i].geometry.y
-                });
-
-                var inputGraphic = new Graphic({
-                    geometry: point,
-                    symbol: markerSymbol
-                });
-                inputGraphicContainer.push(inputGraphic);
-            }
-            var pointFeatureSet = new FeatureSet();
-            pointFeatureSet.features = inputGraphicContainer;
-
-            var gpParams = {stops: pointFeatureSet};
-            console.log(gpParams)
-            console.log(gptask)
-
-            gptask.submitJob(gpParams).then(statusCallback, completeCallback);
-
-            function statusCallback(jobInfo) {
-                console.log(jobInfo.jobStatus);
-            }
-
-            function completeCallback(jobInfo) {
-                console.log(jobInfo.jobStatus);
-                lineSymbol = {
-                    type: "simple-line", // autocasts as SimpleLineSymbol()
-                    color: [226, 119, 40],
-                    width: 4
-                };
-                var resultLayer = gptask.getResultMapImageLayer(jobInfo.jobId);
-                resultLayer.opacity = 0.7;
-                resultLayer.title = "HotspotLayer";
-
-                // add the result layer to the map
-                map.layers.add(resultLayer);
-
-            }
-        });
-    }
-
-
-    // 测试中
-    function bufferGPTool() {
-        var pointFeatureSet;
-        var polygonFeatureSet;
-        var testPointData;
-        var aPoint = {
-            "displayFieldName" : "",
-            "fieldAliases" : {
-                "FID" : "FID",
-            },
-            "geometryType" : "esriGeometryPoint",
-            "spatialReference" : {
-                "wkid" : 4326,
-                "latestWkid" : 4326
-            },
-            "fields" : [
-                {
-                    "name" : "FID",
-                    "type" : "esriFieldTypeOID",
-                    "alias" : "FID"
-                }
-            ],
-            "features" : []
-        };
-
-        var Dis = {
-            "distance": 500,
-            "units": "esriMeters"
-        };
-
-
-        require(["esri/geometry/Point",
-            "esri/geometry/SpatialReference",
-            "esri/Graphic",
-            "esri/tasks/support/FeatureSet",
-            "esri/tasks/Geoprocessor",
-            "esri/layers/MapImageLayer"], function(SpatialReference, Graphic, FeatureSet, Point, Geoprocessor, MapImageLayer) {
-
-            // 点样式
-            var markerSymbol = {
-                type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
-                color: [255, 0, 0],
-                outline: {
-                    // autocasts as new SimpleLineSymbol()
-                    color: [255, 255, 255],
-                    width: 2
-                }
-            };
-
-            // 面样式
-            var fillSymbol = {
-                type: "simple-fill", // autocasts as new SimpleFillSymbol()
-                color: [227, 139, 79, 0.8],
-                outline: {
-                    // autocasts as new SimpleLineSymbol()
-                    color: [255, 255, 255],
-                    width: 1
-                }
-            };
-
-            // 设置输入参数(公交点
-            // 数据格式要求： 小数点6位，经纬度范围
-            $.ajax({
-                url:"./jsonData/site.json",
-                type:"GET",
-                success: function (data) {
-                    var pointData = data['Site'];
-                    var pointFeatures = [];
-
-                    for(var i = 0; i < pointData.length; i++) {
-                        var point = new Point({
-                            longitude: pointData[i].fslon,
-                            latitude: pointData[i].fslat
-                        });
-
-                        var inputGraphic = new Graphic({
-                            geometry: point,
-                            symbol: markerSymbol
-                        });
-                        pointFeatures.push(inputGraphic);
-                    }
-                    var pointFeatureSet = new FeatureSet();
-                    pointFeatureSet.features = pointFeatures;
-
-
-                    // 设置输入参数(中心城区
-                    $.ajax({
-                        url:'./jsonData/centercity.json',
-                        type:'GET',
-                        success: function (data) {
-
-                            // 格式转换
-                            ringsData = (((data['features'])[0])['geometry'])['rings'];
-                            var polygonData = {
-                                type: "polygon", // autocasts as new Polygon()
-                                rings: ringsData
-                            };
-                            var polygonGraphic = new Graphic({
-                                geometry: polygonData,
-                                symbol: fillSymbol
-                            });
-                            // 设置输入参数（多边形
-                            polygonFeatureSet = new FeatureSet();
-                            polygonFeatureSet.features = polygonGraphic;
-                            // polygonFeatureSet.spatialReference = map.spatialReference;
-
-                            var gptask = new Geoprocessor("https://localhost:6443/arcgis/rest/services/test/coverTest/GPServer/coverTool");
-                            gptask.outSpatialReference = {
-                                wkid: 4326
-                            };
-
-                            var gpParams = {
-                                "stops": pointFeatureSet,
-                                "Dis": Dis,
-                                "city": polygonFeatureSet
-                            };
-                            console.log(gpParams)
-
-                            gptask.submitJob(gpParams).then(statusCallback)
-
-                            function statusCallback(jobInfo) {
-                                console.log(jobInfo.jobStatus);
-                                console.log(jobInfo.messages);
-                            }
-                            function errBack() {
-                                console.log("gp error: ", error);
-                            }
-
-                            function completeCallback(jobInfo) {
-                                // 结果图加载
-                                var imageParams = new MapImageLayer();
-                                // imageParams.imageSpatialReference = map.spatialReference;
-                                gptask.getResultMapImageLayer(jobInfo.jobId, null, null, function (gpLayer) {
-                                    // gpLayer.setColor(new Color([232,104,80,0.25]))
-                                    gpLayer.setOpacity(0.5);
-                                    map.addLayer(gpLayer);
-                                    console.log(gpLayer)
-                                });
-                                // 面积求算
-                                gptask.getResultData(jobInfo.jobId,"bufferOutput").then(function (value) {
-                                    areaData = value.value.features[0].attributes['coverArea']
-                                    alert("面积为："+areaData);
-                                })
-                            }
-                        },
-                        error: function (error) {
-                            alert(error)
-                        }
-                    })
-
-                },
-                error: function (error) {
-                    alert(error)
-                }
-            })
-            $.ajax({
-                url:'./jsonData/stops.json',
-                type:'GET',
-                success: function (data) {
-                    testPointData = data;
-                    // 设置输入参数（多边形
-                    pointFeatureSet = new FeatureSet(testPointData);
-                    // polygonFeatureSet.features = centercityfeatures;
-                    pointFeatureSet.spatialReference = map.spatialReference;
-
-
-
-                },
-                error: function (error) {
-                    alert(error)
-                }
-            });
-
-
-        });
-
-    }
-
-    // 点图层加载
-    function addPointData() {
-
-        require(["esri/layers/GraphicsLayer","esri/Graphic"],function(GraphicsLayer, Graphic){
-            pointLayer = new GraphicsLayer();
-            pointLayer.title = "pointData";
-            map.layers.add(pointLayer);
-
-
-            $.ajax({
-                url: "./jsonData/site.json",
-                type: "GET",
-                success: function (data) {
-                    var pointData = data['Site'];
-                    // Create a symbol for drawing the point
-                    var markerSymbol = {
-                        type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-                        color: [226, 119, 40],
-                        size: "2px",
-                        outline: {
-                            color: [255, 255, 0],
-                            width: 0.5  // points
-                        }
-                    };
-
-                    for (var i = 0; i < pointData.length; i++) {
-                        let point = {
-                            type: "point",
-                            longitude: pointData[i].fslon,
-                            latitude: pointData[i].fslat
-                        };
-                        let pointGraphic = new Graphic({
-                            geometry: point,
-                            symbol: markerSymbol
-                        });
-                        pointLayer.add(pointGraphic);
-                    }
-                },
-                error: function (error) {
-                    alert(error)
-                }
-            });
-        });
-    }
-
-    function addPolygonData() {
-        var featureSet = new esri.tasks.FeatureSet(dz);
-        var featureCollection = {
-            layerDefinition: layerDefinition,
-            featureSet: featureSet
-        };
-        var featurelayer = new esri.layer.FeatureLayer(featureCollection);
-    }
-
-    // 删除地图要素
-    function cleanup() {
-        // remove the geoprocessing result and point layer from the map
-        map.layers.forEach(function (layer, i) {
-            if (layer.title === "pointData") {
-                map.layers.remove(layer);
-            }
-        });
-    }
 </script>
 
 </html>
