@@ -38,15 +38,15 @@
             </li>
             <li class="nav-item nav-item-primary">
                 <a class="nav-link" data-toggle="collapse" href="#secondNav2" aria-expanded="false"
-                   aria-controls="secondNav2">覆盖性分析</a>
+                   aria-controls="secondNav2">站点分析</a>
             </li>
             <li class="nav-item nav-item-primary">
                 <a class="nav-link" data-toggle="collapse" href="#secondNav3" aria-expanded="false"
-                   aria-controls="secondNav3">连通性分析</a>
+                   aria-controls="secondNav3">线路分析</a>
             </li>
             <li class="nav-item nav-item-primary">
                 <a class="nav-link" data-toggle="collapse" href="#secondNav4" aria-expanded="false"
-                   aria-controls="secondNav4">衔接性分析</a>
+                   aria-controls="secondNav4">可达性分析</a>
             </li>
         </ul>
     </div>
@@ -57,7 +57,7 @@
     <nav class="navbar navbar-expand collapse" id="secondNav1" data-parent="#second-nav">
         <ul class="nav justify-content-center second-nav-ul">
             <li class="nav-item nav-item-second">
-                <a class="nav-link active" href="#" onclick="addPointData()">公交站点数据</a>
+                <a class="nav-link" href="#" onclick="addPointData()">公交站点数据</a>
             </li>
             <li class="nav-item nav-item-second">
                 <a class="nav-link" href="#">中心城区数据</a>
@@ -67,36 +67,39 @@
     <nav class="navbar navbar-expand collapse" id="secondNav2" data-parent="#second-nav">
         <ul class="nav justify-content-center second-nav-ul">
             <li class="nav-item nav-item-second">
-                <a class="nav-link active" href="#" onclick="bufferGPTool()">站点覆盖</a>
+                <a class="nav-link" href="#">站点信息</a>
             </li>
             <li class="nav-item nav-item-second">
-                <a class="nav-link" href="#">线网覆盖</a>
+                <a class="nav-link" href="#" onclick="bufferGPTool()">站点覆盖分析</a>
             </li>
             <li class="nav-item nav-item-second">
-                <a class="nav-link" href="#" onclick="testGPAsynchronous()">功能测试</a>
+                <a class="nav-link" href="#">客流集散点分析</a>
             </li>
+            <!--<li class="nav-item nav-item-second">-->
+            <!--<a class="nav-link" href="#" onclick="testGPAsynchronous()">功能测试</a>-->
+            <!--</li>-->
         </ul>
     </nav>
     <nav class="navbar navbar-expand collapse" id="secondNav3" data-parent="#second-nav">
         <ul class="nav justify-content-center second-nav-ul">
             <li class="nav-item nav-item-second">
-                <a class="nav-link active" href="#">节点分析</a>
+                <a class="nav-link" href="#">线路信息</a>
             </li>
             <li class="nav-item nav-item-second">
-                <a class="nav-link" href="#">路径分析</a>
+                <a class="nav-link" href="#">连通度分析</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">复杂度分析</a>
             </li>
         </ul>
     </nav>
     <nav class="navbar navbar-expand collapse" id="secondNav4" data-parent="#second-nav">
         <ul class="nav justify-content-center second-nav-ul">
             <li class="nav-item nav-item-second">
-                <a class="nav-link active" href="#">公交-地铁换乘</a>
+                <a class="nav-link active" href="#">居民出行</a>
             </li>
             <li class="nav-item nav-item-second">
-                <a class="nav-link" href="#">公交-公共自行车换乘</a>
-            </li>
-            <li class="nav-item nav-item-second">
-                <a class="nav-link" href="#">地铁-公共自行 车换乘</a>
+                <a class="nav-link" href="#">交通换乘</a>
             </li>
         </ul>
     </nav>
