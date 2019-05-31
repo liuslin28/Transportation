@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>智慧公交二期地图功能展示</title>
+    <title>公交仿真系统DEMO</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="CSS/bootstrap.css">
@@ -50,9 +50,6 @@
             </li>
         </ul>
     </div>
-    <a class="navbar-brand" href="#" id="menu-toggle">
-        <img src="CSS/svg/menu.svg" width="25" height="25" class="d-inline-block align-top" alt="">
-    </a>
 </nav>
 
 <!--次级导航栏 second-nav-->
@@ -124,7 +121,44 @@
 
     <!--Sidebar-->
     <div id="sidebar-wrapper">
-        此处应有显示结果
+        <div class="sidebar-header">
+            <div class="sidebar-header-title">站点信息</div>
+            <div class="sidebar-header-icon" id="menu-toggle"><i class="fa fa-equals"></i></div>
+        </div>
+
+        <div class="sidebar-content">
+            <table class="table table-bordered sidebar-table">
+                <thead>
+                <tr class="sidebar-table-header">
+                    <th>指标</th>
+                    <th>结果</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody  class="sidebar-table-body">
+                <tr>
+                    <th>站点数</th>
+                    <th>829</th>
+                    <th>个</th>
+                </tr>
+                <tr>
+                    <th>平均站间距</th>
+                    <th>20</th>
+                    <th>米</th>
+                </tr>
+                <tr>
+                    <th>超阈值比例</th>
+                    <th>20%</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>低阈值比例</th>
+                    <th>12%</th>
+                    <th></th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 </body>
