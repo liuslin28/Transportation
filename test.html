@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公交仿真系统DEMO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="CSS/bootstrap.css">
+    <script src="JS/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="JS/bootstrap.js"></script>
+
+
+    <!--arcgis for js js已本地化，css未本地化-->
+    <!--<link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/esri/css/main.css">-->
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/4.11/esri/themes/light/main.css">
+    <script type="text/javascript"
+            src="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/init.js"></script>
+    <!--Font Awesome图标-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="CSS/arcgisMap4.css">
+    <style>
+        .btn-stops {
+            /*background-color: rgb(59, 93, 149);*/
+            background-color: rgb(69, 128, 166);
+            color: rgb(227, 227, 227);
+        }
+
+        .btn-stops:hover {
+            background-color: rgb(211, 62, 90);
+            color: rgb(227, 227, 227);
+
+        }
+
+
+    </style>
+</head>
+<body>
+<!--导航栏 primary-nav -->
+<nav class="navbar navbar-expand-lg navbar-dark  primary-nav">
+    <a class="navbar-brand" href="#">
+        <img src="CSS/svg/bus.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+        <span style="margin-left: 20px;margin-right: 20px;font-weight: bold;">公交仿真系统</span>
+    </a>
+    <div class="collapse navbar-collapse justify-content-center">
+        <ul class="navbar-nav ">
+            <li class="nav-item nav-item-primary">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav1" aria-expanded="false"
+                   aria-controls="secondNav1">数据加载</a>
+            </li>
+            <li class="nav-item nav-item-primary">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav2" aria-expanded="false"
+                   aria-controls="secondNav2">站点分析</a>
+            </li>
+            <li class="nav-item nav-item-primary">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav3" aria-expanded="false"
+                   aria-controls="secondNav3">线路分析</a>
+            </li>
+            <li class="nav-item nav-item-primary">
+                <a class="nav-link" data-toggle="collapse" href="#secondNav4" aria-expanded="false"
+                   aria-controls="secondNav4">可达性分析</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!--次级导航栏 second-nav-->
+<div class="tab-content" id="second-nav">
+    <nav class="navbar navbar-expand collapse" id="secondNav1" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#" onclick="addPointData()">公交站点数据</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">中心城区数据</a>
+            </li>
+        </ul>
+    </nav>
+    <nav class="navbar navbar-expand collapse" id="secondNav2" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">站点信息</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#" onclick="bufferGPTool()">站点覆盖分析</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">客流集散点分析</a>
+            </li>
+            <!--<li class="nav-item nav-item-second">-->
+            <!--<a class="nav-link" href="#" onclick="testGPAsynchronous()">功能测试</a>-->
+            <!--</li>-->
+        </ul>
+    </nav>
+    <nav class="navbar navbar-expand collapse" id="secondNav3" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">线路信息</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">连通度分析</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">复杂度分析</a>
+            </li>
+        </ul>
+    </nav>
+    <nav class="navbar navbar-expand collapse" id="secondNav4" data-parent="#second-nav">
+        <ul class="nav justify-content-center second-nav-ul">
+            <li class="nav-item nav-item-second">
+                <a class="nav-link active" href="#">居民出行</a>
+            </li>
+            <li class="nav-item nav-item-second">
+                <a class="nav-link" href="#">交通换乘</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div id="wrapper">
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid" style="height: 100%;margin: 0;padding: 0;">
+            <div class="row" style="height: 100%;margin: 0;padding: 0;">
+                <div class="col-lg-12" style="height: 100%;margin: 0;padding: 0;">
+                    <div id="viewDiv"></div>
+                    <!--<h1 class="text-center">Bootstrap Sidebar</h1>-->
+                    <!--<h2 class="small text-center">Second Header</h2>-->
+                    <!--<p class="text-center">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium-->
+                    <!--perferendis maiores velit ad id delectus nisi eligendi doloremque officia necessitatibus,-->
+                    <!--repellendus alias omnis, natus nam voluptates dolor vel minus ab?</p>-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Sidebar-->
+    <div id="sidebar-wrapper">
+        <div class="sidebar-header">
+            <div class="sidebar-header-title">站点信息</div>
+            <div class="sidebar-header-icon" id="menu-toggle"><i class="fa fa-equals"></i></div>
+        </div>
+
+        <div class="sidebar-content">
+            <table class="table table-bordered sidebar-table">
+                <thead>
+                <tr class="sidebar-table-header">
+                    <th>指标</th>
+                    <th>结果</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody  class="sidebar-table-body">
+                <tr>
+                    <th>站点数</th>
+                    <th>829</th>
+                    <th>个</th>
+                </tr>
+                <tr>
+                    <th>平均站间距</th>
+                    <th>20</th>
+                    <th>米</th>
+                </tr>
+                <tr>
+                    <th>超阈值比例</th>
+                    <th>20%</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>低阈值比例</th>
+                    <th>12%</th>
+                    <th></th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript" src="JS/initHtml.js"></script>
+<script type="text/javascript" src="JS/initMap.js"></script>
+</html>

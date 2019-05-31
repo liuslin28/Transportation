@@ -28,6 +28,9 @@ html, body {
     display: none;
     padding-left: 210px;
 }
+#second-nav nav {
+    padding: 4.5px 16px;
+}
 
 .second-nav-ul {
     width: 100%;
@@ -78,6 +81,40 @@ html, body {
     /*position: absolute;*/
     /*display: flex;*/
     /*align-items: center;*/
+}
+
+.sidebar-header {
+    position: relative;
+    background-color: #5f98cd;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    height: 50px;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+}
+.sidebar-header-icon {
+    cursor: pointer;
+}
+.sidebar-content {
+    width: 90%;
+    margin: 30px auto;
+}
+.sidebar-table {
+    text-align: center;
+    border: 1px solid rgb(27, 54, 71);
+}
+.sidebar-table-header {
+    background-color: #5f98cd;
+    color: white;
+    text-align: center;
+
+}
+.sidebar-table-body{
+    font-size: 0.8rem;
 }
 
 /*------------------------------*/
