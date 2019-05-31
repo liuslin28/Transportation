@@ -122,6 +122,18 @@ html, body {
     font-size: 0.8rem;
 }
 
+.sidebar-content-button {
+    width: 100%;
+    text-align: center;
+    background-color: rgb(69, 128, 166);
+    color: rgb(227, 227, 227);
+}
+
+.sidebar-content-button:hover {
+    background-color: rgb(211, 62, 90);
+    color: rgb(227, 227, 227);
+
+}
 /*------------------------------*/
 /* Main Content */
 #page-content-wrapper {

@@ -1,7 +1,7 @@
 $(document).ready(function () {
     var secondNav = null;
     var primaryNav = null;
-    $("#menu-toggle").click(function (e) {
+    $(".menu-toggle").click(function (e) {
         e.preventDefault();
         $("#wrapper").toggleClass("menuDisplayed");
 
@@ -42,4 +42,8 @@ $(document).ready(function () {
             secondNav = targetNav;
         }
     )
+    
+    $("#cover-button").click(function (e) {
+        $("#cover-button-content").slideToggle()
+    })
 });
