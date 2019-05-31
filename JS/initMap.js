@@ -19,8 +19,8 @@ require([
     drawLayer = new GraphicsLayer();
 
     map = new Map({
-        basemap: "streets-night-vector",
-        // basemap: "osm",
+        // basemap: "streets-night-vector",
+        basemap: "osm",
         layers: [drawLayer],
         portalItem: {
             id: "8dda0e7b5e2d4fafa80132d59122268c"  // WGS84 Streets Vector webmap
@@ -40,7 +40,8 @@ require([
     // 以下代码有bug
     // 工具栏Sketch,现在为底图切换
     const mapSketch = new Sketch({
-        nextBasemap: "osm", // 待更改
+        // nextBasemap: "osm", // 待更改
+        nextBasemap: "streets-night-vector", // 待更改
         // layer: drawLayer,
         view: view
     });
@@ -56,11 +57,11 @@ require([
 
 
     //指北针Compass,现在为工具栏
-    const mapCompass = new Compass({
-        layer: drawLayer,
-        view: view
-    });
-    view.ui.add(mapCompass, "top-right");
+    // const mapCompass = new Compass({
+    //     layer: drawLayer,
+    //     view: view
+    // });
+    // view.ui.add(mapCompass, "top-right");
 
     //底图切换BasemapToggle，现在为指北针
     const mapToggle = new BasemapToggle({
