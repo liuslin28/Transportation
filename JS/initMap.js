@@ -267,7 +267,6 @@ function bufferGPTool() {
         "units": "esriMeters"
     };
 
-
     require(["esri/geometry/Point",
         "esri/geometry/SpatialReference",
         "esri/Graphic",
@@ -401,63 +400,69 @@ function bufferGPTool() {
                 pointFeatureSet = new FeatureSet(testPointData);
                 // polygonFeatureSet.features = centercityfeatures;
                 pointFeatureSet.spatialReference = map.spatialReference;
-
-
-
             },
             error: function (error) {
                 alert(error)
             }
         });
-
 
     });
 
 }
 
 // 点图层加载
-function addPointData() {
-
-    require(["esri/layers/GraphicsLayer","esri/Graphic"],function(GraphicsLayer, Graphic){
-        pointLayer = new GraphicsLayer();
-        pointLayer.title = "pointData";
-        map.layers.add(pointLayer);
-
-
-        $.ajax({
-            url: "./jsonData/site.json",
-            type: "GET",
-            success: function (data) {
-                var pointData = data['Site'];
-                // Create a symbol for drawing the point
-                var markerSymbol = {
-                    type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
-                    color: [226, 119, 40],
-                    size: "2px",
-                    outline: {
-                        color: [255, 255, 0],
-                        width: 0.5  // points
-                    }
-                };
-
-                for (var i = 0; i < pointData.length; i++) {
-                    let point = {
-                        type: "point",
-                        longitude: pointData[i].fslon,
-                        latitude: pointData[i].fslat
-                    };
-                    let pointGraphic = new Graphic({
-                        geometry: point,
-                        symbol: markerSymbol
-                    });
-                    pointLayer.add(pointGraphic);
-                }
-            },
-            error: function (error) {
-                alert(error)
+function addGeoPoint() {
+    require(["esri/layers/GraphicsLayer","esri/layers/GeoJSONLayer"],function(GraphicsLayer, GeoJSONLayer){
+        const renderer = {
+            type: "simple",
+            field: "mag",
+            symbol: {
+                type: "simple-marker",
+                color: [255, 193, 37],
+                outline: {
+                    color: [255, 215, 0]
+                },
+                size: "5px"
             }
+        };
+        const geoPointLayer = new GeoJSONLayer({
+            url: "geojsonData/stopsPoint.json",
+            renderer: renderer
         });
-    });
+        map.add(geoPointLayer);  // adds the layer to the map
+    })
+}
+
+// 线图层加载
+function addGeoLine() {
+    require(["esri/layers/GraphicsLayer","esri/layers/GeoJSONLayer"],function(GraphicsLayer, GeoJSONLayer){
+        const geoLineLayer = new GeoJSONLayer({
+            url: "geojsonData/busLine.json"
+        });
+        map.add(geoLineLayer);  // adds the layer to the map
+    })
+}
+
+// 面图层加载
+function addGeoPolygon() {
+    const renderer = {
+        type: "simple",
+        symbol: {
+            type: "simple-fill",
+            color: [79, 79, 79, 0.5],
+            outline: {
+                color: [54, 54, 54, 0.6],
+                width: 1
+            }
+        }
+    };
+    require(["esri/layers/GraphicsLayer","esri/layers/GeoJSONLayer"],function(GraphicsLayer, GeoJSONLayer){
+        const geoPolygonLayer = new GeoJSONLayer({
+            url: "geojsonData/centerPolygon.json",
+            renderer: renderer
+        });
+        map.add(geoPolygonLayer);  // adds the layer to the map
+    })
 }
 
 function addPolygonData() {
