@@ -10,7 +10,7 @@ var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
 var conf_serviceUrl = conf_domainUrl + '/service';
 var conf_accessToken; //内部使用已隐藏
 var conf_solution = 4744;
-var conf_centerPoint = [120.5205, 31.31801];
+var conf_centerPoint = [120.64, 31.31801];
 var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution
 
 $(document).ready(function () {
@@ -67,8 +67,8 @@ function wgsToGcj(wgsData) {
 }
 
 function polyWgsGcj(coordinateData) {
-    coordinateData.map(function (coordinateValue, index) {
-        coordinateValue.map(function (currentValue) {
+    coordinateData.forEach(function (coordinateValue, index) {
+        coordinateValue.forEach(function (currentValue) {
             const lngWGS = Number(currentValue[0]);  //经度
             const latWGS = Number(currentValue[1]);  //纬度
             var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
@@ -82,7 +82,7 @@ function polyWgsGcj(coordinateData) {
 function multipolyWgsGcj(coordinateData) {
     coordinateData.forEach(function (arrayValue, index) {
         arrayValue.forEach(function (listValue, index) {
-            listValue.forEach(function (currentValue,index) {
+            listValue.forEach(function (currentValue, index) {
                 const lngWGS = Number(currentValue[0]);  //经度
                 const latWGS = Number(currentValue[1]);  //纬度
                 var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
@@ -96,9 +96,9 @@ function multipolyWgsGcj(coordinateData) {
 }
 
 function lineWgsGcj(coordinateData) {
-    coordinateData.map(function (coordinateValue, index) {
+    coordinateData.forEach(function (coordinateValue, index) {
         coorWGS = (coordinateValue.geometry).coordinates
-        coorWGS.map(function (currentValue) {
+        coorWGS.forEach(function (currentValue) {
             const lngWGS = Number(currentValue[0]);  //经度
             const latWGS = Number(currentValue[1]);  //纬度
             var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
@@ -111,6 +111,57 @@ function lineWgsGcj(coordinateData) {
 
 //_____________________________________________________
 //GP服务
+
+// 公交专用道
+function buslaneGPTool() {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+        $.ajax({
+            url: "./esrijsonData/esribusLane.json",
+            type: "GET",
+            success: function (data) {
+                let buslaneData = data;
+                var buslaneFeatureSet = new esri.tasks.FeatureSet(buslaneData);
+                buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                $.ajax({
+                    url: "./esrijsonData/esriroadLine.json",
+                    type: "GET",
+                    success: function (data) {
+                        let roadData = data;
+                        var roadFeatureSet = new esri.tasks.FeatureSet(roadData);
+                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        var gpParams = {
+                            "road": roadFeatureSet,
+                            "buslane": buslaneFeatureSet
+                        };
+                        console.log(gpParams);
+                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                        // 运行状态显示
+                        function statusCallback(jobInfo) {
+                            console.log(jobInfo.jobStatus);
+                        }
+
+                        // 结果图加载
+                        function completeCallback(jobInfo) {
+                            // 面积求算
+                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                                // 面积
+                                console.log(value);
+                                console.log(lineLength);
+                            });
+                        }
+                    }
+                })
+                // GP服务调用
+
+            }
+        })
+    });
+}
 
 // 站点覆盖率
 function bufferGPTool() {
@@ -155,7 +206,7 @@ function bufferGPTool() {
                 pointData.forEach(function (pointValue) {
                     i += 1;
                     let coordinateValue = (pointValue['geometry'])['coordinates']
-                    var point = new esri.geometry.Point([coordinateValue[0],coordinateValue[1]], new SpatialReference({wkid: 4326}));
+                    var point = new esri.geometry.Point([coordinateValue[0], coordinateValue[1]], new SpatialReference({wkid: 4326}));
                     var graphic = new Graphic({
                         geometry: point,
                         attributes: {
@@ -177,18 +228,19 @@ function bufferGPTool() {
                     success: function (data) {
                         centercityfeatures = data;
                         // 设置输入参数（多边形
-                        tempPolygon = data;
+                        // tempPolygon = data;
                         polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
                         polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         // GP服务调用
-                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/test/coverTool/GPServer/coverTool");
+                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/coverArea/GPServer/coverArea");
+                        // var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/test/coverTest/GPServer/coverTest");
                         var gpParams = {
                             "stops": pointFeatureSet,
                             "Dis1": Dis,
                             "Dis2": Dis,
-                            "city1": polygonFeatureSet,
-                            "city2": polygonFeatureSet
+                            "city1": polygonFeatureSet
+                            // "city2": polygonFeatureSet
                         };
                         console.log(gpParams);
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
@@ -200,11 +252,13 @@ function bufferGPTool() {
 
                         // 结果图加载
                         function completeCallback(jobInfo) {
+                            gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
+                                areaData = value.value.features[0].attributes['Shape_Area'];
+                                console.log(areaData)
+                            })
                             // 面积求算
                             gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                 // 面积
-                                areaData = value.value.features[0].attributes['coverArea'];
-                                console.log(areaData)
                                 bufferResult = value.value.features;
                                 console.log(bufferResult)
 
@@ -377,9 +431,11 @@ function addBuslane() {
 }
 
 /*------------------------------*/
+
 // 图层显示切换
-function layerVisibilityToggle(layerName,checkValue) {
+function layerVisibilityToggle(layerName, checkValue) {
     map.setLayoutProperty(layerName, 'visibility', checkValue);
 }
+
 /*------------------------------*/
 
