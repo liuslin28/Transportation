@@ -4,13 +4,13 @@ var map;
  * 地图缩放级别限制
  */
 
-// var conf_domainUrl; //内部使用已隐藏
+var conf_domainUrl; //内部使用已隐藏
 var conf_dataDomainUrl = conf_domainUrl;
 var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
 var conf_serviceUrl = conf_domainUrl + '/service';
-// var conf_accessToken; //内部使用已隐藏
+var conf_accessToken; //内部使用已隐藏
 var conf_solution = 4744;
-var conf_centerPoint = [120.5405, 31.31801];
+var conf_centerPoint = [120.5205, 31.31801];
 var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution
 
 $(document).ready(function () {
@@ -40,13 +40,18 @@ $(document).ready(function () {
 //_____________________________________________________
 // WGS84 => GCJ02
 function wgsToGcj(wgsData) {
+    // 获取数据类型
     geometryData = (wgsData.features)[0].geometry;
     geoType = geometryData.type;
-    console.log(wgsData.features)
     switch (geoType) {
         case "Polygon":
             coordinateData = geometryData.coordinates;
             coordinateData = polyWgsGcj(coordinateData);
+            ((wgsData.features)[0].geometry).coordinates = coordinateData;
+            break;
+        case "MultiPolygon":
+            coordinateData = geometryData.coordinates;
+            coordinateData = multipolyWgsGcj(coordinateData);
             ((wgsData.features)[0].geometry).coordinates = coordinateData;
             break;
         case "LineString":
@@ -70,7 +75,23 @@ function polyWgsGcj(coordinateData) {
             currentValue[0] = gcjCoordinate.lng;
             currentValue[1] = gcjCoordinate.lat;
         })
-    })
+    });
+    return coordinateData;
+}
+
+function multipolyWgsGcj(coordinateData) {
+    coordinateData.forEach(function (arrayValue, index) {
+        arrayValue.forEach(function (listValue, index) {
+            listValue.forEach(function (currentValue,index) {
+                const lngWGS = Number(currentValue[0]);  //经度
+                const latWGS = Number(currentValue[1]);  //纬度
+                var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+                currentValue[0] = gcjCoordinate.lng;
+                currentValue[1] = gcjCoordinate.lat;
+            })
+
+        })
+    });
     return coordinateData;
 }
 
@@ -84,8 +105,6 @@ function lineWgsGcj(coordinateData) {
             currentValue[0] = gcjCoordinate.lng;
             currentValue[1] = gcjCoordinate.lat;
         })
-        // coordinateValue.map()
-
     });
     return coordinateData;
 }
@@ -123,36 +142,37 @@ function bufferGPTool() {
     };
 
     // 设置输入参数(公交点
-    // 数据格式要求： 小数点6位，经纬度范围
+    // 数据格式要求：小数点6位，经纬度范围
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
         $.ajax({
-            url: "./jsonData/site.json",
+            url: "./geojsonData/stopsPoint.json",
             type: "GET",
             success: function (data) {
-                var pointData = data['Site'];
-                var features = [];
+                var pointData = data['features'];
 
-                for (var i = 0; i < pointData.length; i++) {
-                    var point = new esri.geometry.Point([pointData[i].fslon, pointData[i].fslat], new SpatialReference({wkid: 4326}));
+                var features = [];
+                var i = 0;
+                pointData.forEach(function (pointValue) {
+                    i += 1;
+                    let coordinateValue = (pointValue['geometry'])['coordinates']
+                    var point = new esri.geometry.Point([coordinateValue[0],coordinateValue[1]], new SpatialReference({wkid: 4326}));
                     var graphic = new Graphic({
                         geometry: point,
                         attributes: {
                             "FID": i
                         },
                         symbol: {}
-                    })
+                    });
                     features.push(graphic)
-                }
+                });
                 tempPoint = features;
-                aPoint['features'] = features
-                console.log(aPoint)
+                aPoint['features'] = features;
                 pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
                 pointFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                 // 设置输入参数(中心城区
                 $.ajax({
-                    url: './jsonData/centercity.json',
-                    // url:'./jsonData/centercityCopy_FeaturesToJSO.json',
+                    url: './esrijsonData/centerPolygon.json',
                     type: 'GET',
                     success: function (data) {
                         centercityfeatures = data;
@@ -162,7 +182,7 @@ function bufferGPTool() {
                         polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         // GP服务调用
-                        var gptask = new Geoprocessor("https://localhost:6443/arcgis/rest/services/Tool/500coverTool/GPServer/coverTool");
+                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/test/coverTool/GPServer/coverTool");
                         var gpParams = {
                             "stops": pointFeatureSet,
                             "Dis1": Dis,
@@ -170,7 +190,7 @@ function bufferGPTool() {
                             "city1": polygonFeatureSet,
                             "city2": polygonFeatureSet
                         };
-
+                        console.log(gpParams);
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
                         // 运行状态显示
@@ -232,7 +252,7 @@ function transtoJson(data) {
     data.map(function (value) {
         const geoCoordinate = value.geometry['rings'];
         multiPoly.push(geoCoordinate);
-    })
+    });
     polygonJson = {
         "type": "FeatureCollection",
         "features": [
@@ -244,14 +264,14 @@ function transtoJson(data) {
                 }
             }
         ]
-    }
-    return polygonJson;
+    };
+    transPolyJson = wgsToGcj(polygonJson);
+    return transPolyJson;
 }
 
-
 //_____________________________________________________
-// 加载数据
 
+// 加载数据
 function addStops() {
     $.ajax({
         // url: "./geojsonData/centerPolygon.json",
@@ -284,7 +304,6 @@ function addStops() {
                         'base': 1.5,
                         'stops': [[5, 2], [18, 4]]
                     },
-
                     'circle-color': "#b2cb94",      //填充圆形的颜色
                     'circle-blur': 0.1,              //模糊程度，默认0
                     'circle-opacity': 0.6             //透明度，默认为1
