@@ -38,7 +38,7 @@
                     <i class="fa fa fa-list-alt"></i>
                     <span>交通信息</span>
                 </li>
-                <li class="navWrapper-nav-li">
+                <li class="navWrapper-nav-li" onclick="bufferGPTool()">
                     <i class="fa fa-bus-alt"></i>
                     <span>交通仿真</span>
                 </li>
@@ -98,9 +98,10 @@
                 </ul>
             </div>
         </div>
-        <div class="dataWrapper-content" style="margin-left: 20px;">
+        <div class="dataWrapper-content">
+            <button onclick="buslaneGPTool()">GP测试临时按钮</button>
             <!--线路分析-->
-            <div class="tab-pane" style="color:white;margin-top: 20px;width: 80%;text-align: center;">
+            <div class="dataWrapper-content-pane">
                 <table class="table table-bordered">
                     <thead>
                     <tr class="sidebar-table-header" style="color:white;">
@@ -117,12 +118,12 @@
                     </tr>
                     <tr>
                         <th>线网长度</th>
-                        <th>/</th>
+                        <th>3.54</th>
                         <th>米</th>
                     </tr>
                     <tr>
                         <th>线网密度</th>
-                        <th>/</th>
+                        <th>0.0086</th>
                         <th></th>
                     </tr>
                     <tr>
@@ -138,7 +139,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
     <div class="layerWrapper">
@@ -171,7 +171,6 @@
                 </label>
             </div>
         </div>
-
     </div>
 
     <div class="mapWrapper">
