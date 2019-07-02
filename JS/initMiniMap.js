@@ -34,6 +34,7 @@ $(document).ready(function () {
         addCenter();
         addStops();
         addBuslane();
+        addBusroute();
     })
 })
 
@@ -105,7 +106,7 @@ function lineWgsGcj(coordinateData) {
             currentValue[0] = gcjCoordinate.lng;
             currentValue[1] = gcjCoordinate.lat;
         })
-    });
+    })
     return coordinateData;
 }
 
@@ -162,6 +163,57 @@ function buslaneGPTool() {
         })
     });
 }
+
+function busrouteGPTool() {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+        $.ajax({
+            url: "./esrijsonData/esribusRoute.json",
+            type: "GET",
+            success: function (data) {
+                let buslaneData = data;
+                var buslaneFeatureSet = new esri.tasks.FeatureSet(buslaneData);
+                buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                $.ajax({
+                    url: "./esrijsonData/esriroadLine.json",
+                    type: "GET",
+                    success: function (data) {
+                        let roadData = data;
+                        var roadFeatureSet = new esri.tasks.FeatureSet(roadData);
+                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        var gpParams = {
+                            "road": roadFeatureSet,
+                            "buslane": buslaneFeatureSet
+                        };
+                        console.log(gpParams);
+                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                        // 运行状态显示
+                        function statusCallback(jobInfo) {
+                            console.log(jobInfo.jobStatus);
+                        }
+
+                        // 结果图加载
+                        function completeCallback(jobInfo) {
+                            // 面积求算
+                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                                // 面积
+                                console.log(value);
+                                console.log(lineLength);
+                            });
+                        }
+                    }
+                })
+                // GP服务调用
+
+            }
+        })
+    });
+}
+
 
 // 站点覆盖率
 function bufferGPTool() {
@@ -404,6 +456,7 @@ function addBuslane() {
         url: "./geojsonData/busLane.json",
         type: "GET",
         success: function (data) {
+            console.log(data);
             var gcjData = wgsToGcj(data);
             map.addSource('buslaneSource', {
                 'type': 'geojson',
@@ -420,6 +473,38 @@ function addBuslane() {
                 },
                 "paint": {
                     "line-color": "rgba(253, 128, 93,1)",
+                    "line-width": 2
+                }
+            });
+        },
+        error: function (error) {
+            alert(error)
+        }
+    })
+}
+
+function addBusroute() {
+    $.ajax({
+        url: "./geojsonData/busRoute.json",
+        type: "GET",
+        success: function (data) {
+            console.log(data);
+            var gcjData = wgsToGcj(data);
+            map.addSource('busrouteSource', {
+                'type': 'geojson',
+                'data': gcjData
+            });
+            map.addLayer({
+                'id': 'busrouteLayer',
+                'type': 'line',
+                'source': 'busrouteSource',
+                "layout": {
+                    "line-join": "round",
+                    "line-cap": "round",
+                    "visibility": "none"
+                },
+                "paint": {
+                    "line-color": "rgba(253, 128, 93, 1)",
                     "line-width": 2
                 }
             });
