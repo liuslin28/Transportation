@@ -384,6 +384,7 @@ function addStops() {
         url: "./geojsonData/stopsPoint.json",
         type: "GET",
         success: function (data) {
+            console.log(data['features'].length)
             // var gcjData = wgsToGcj(data);
             map.addSource('stopsSource', {
                 'type': 'geojson',
@@ -472,7 +473,8 @@ function addBuslane() {
                     "visibility": "none"
                 },
                 "paint": {
-                    "line-color": "rgba(253, 128, 93,1)",
+                    "line-color": "#FFD08F",
+                    // "line-color": "rgba(253, 128, 93,1)",
                     "line-width": 2
                 }
             });
@@ -504,7 +506,8 @@ function addBusroute() {
                     "visibility": "none"
                 },
                 "paint": {
-                    "line-color": "rgba(253, 128, 93, 1)",
+                    "line-color": "#82B38F",
+                    "line-opacity": 0.6,
                     "line-width": 2
                 }
             });
@@ -524,3 +527,7 @@ function layerVisibilityToggle(layerName, checkValue) {
 
 /*------------------------------*/
 
+function showTemp() {
+    $('.temp-data').show();
+    $('.temp-data-none').hide();
+}

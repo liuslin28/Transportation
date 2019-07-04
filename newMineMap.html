@@ -34,11 +34,12 @@
                     <i class="fa fa-layer-group"></i>
                     <span>图层加载</span>
                 </li>
-                <li class="navWrapper-nav-li">
+                <li class="navWrapper-nav-li" id="info-click">
                     <i class="fa fa fa-list-alt"></i>
                     <span>交通信息</span>
                 </li>
-                <li class="navWrapper-nav-li" onclick="bufferGPTool()">
+                <!--<li class="navWrapper-nav-li" onclick="bufferGPTool()">-->
+                <li class="navWrapper-nav-li" onclick="showTemp()">
                     <i class="fa fa-bus-alt"></i>
                     <span>交通仿真</span>
                 </li>
@@ -47,24 +48,26 @@
     </div>
     <div class="dataWrapper">
         <div class="dataWrapper-menu">
-            <ul>
+            <ul class="aaa">
                 <li class="dataWrapper-menu-li">
-                    <a href="#">站点分析</a>
+                    <a href="#" name="stops-list">站点分析</a>
                 </li>
+                <li class="dataWrapper-menu-li-split"></li>
                 <li class="dataWrapper-menu-li">
-                    <a href="#">线路分析</a>
+                    <a href="#" name="line-list">线路分析</a>
                 </li>
+                <li class="dataWrapper-menu-li-split"></li>
                 <li class="dataWrapper-menu-li">
-                    <a href="#">可达性分析</a>
+                    <a href="#" name="other-list">可达性分析</a>
                 </li>
             </ul>
 
         </div>
         <div class="dataWrapper-list">
-            <div class="dataWrapper-list-menu" style="display: none;">
+            <div class="dataWrapper-list-menu" id="stops-list">
                 <ul>
                     <li class="dataWrapper-list-menu-li">
-                        <a href="#">站点信息</a>
+                        <a id="stops-nav-tab" data-toggle="tab" href="#stops-info-tab" role="tab" aria-controls="stops-info-tab">站点信息</a>
                     </li>
                     <li class="dataWrapper-list-menu-li">
                         <a href="#">站点覆盖分析</a>
@@ -74,10 +77,10 @@
                     </li>
                 </ul>
             </div>
-            <div class="dataWrapper-list-menu">
+            <div class="dataWrapper-list-menu" id="line-list" style="display: none;" >
                 <ul>
                     <li class="dataWrapper-list-menu-li">
-                        <a href="#">线路信息</a>
+                        <a id="line-nav-tab" data-toggle="tab" href="#line-info-tab" role="tab" aria-controls="line-info-tab">线路信息</a>
                     </li>
                     <li class="dataWrapper-list-menu-li">
                         <a href="#">连通度分析</a>
@@ -87,7 +90,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="dataWrapper-list-menu" style="display: none;">
+            <div class="dataWrapper-list-menu" id="other-list" style="display: none;">
                 <ul>
                     <li class="dataWrapper-list-menu-li">
                         <a href="#">居民出行</a>
@@ -98,10 +101,46 @@
                 </ul>
             </div>
         </div>
-        <div class="dataWrapper-content">
-            <button onclick="buslaneGPTool()">GP测试临时按钮</button>
+        <div class="dataWrapper-content tab-content">
+            <!--<button onclick="buslaneGPTool()">公交专用道测试</button>-->
+            <!--<button onclick="busrouteGPTool()">公交线路测试</button>-->
+            <!--站点分析-->
+            <div class="dataWrapper-content-pane tab-pane active" id="stops-info-tab" role="tabpanel" aria-labelledby="stops-nav-tab">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr class="sidebar-table-header" style="color:white;">
+                        <th>指标</th>
+                        <th>结果</th>
+                        <th>备注</th>
+                    </tr>
+                    </thead>
+                    <tbody  class="sidebar-table-body"  style="color:white;">
+                    <tr>
+                        <th>站点数</th>
+                        <th> </th>
+                        <th>个</th>
+                    </tr>
+                    <tr>
+                        <th>平均站间距</th>
+                        <th> </th>
+                        <th>米</th>
+                    </tr>
+                    <tr>
+                        <th>超阈值比例</th>
+                        <th> </th>
+                        <th>%</th>
+                    </tr>
+                    <tr>
+                        <th>低阈值比例</th>
+                        <th></th>
+                        <th>%</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <!--线路分析-->
-            <div class="dataWrapper-content-pane">
+            <div class="dataWrapper-content-pane tab-pane" id="line-info-tab" role="tabpanel" aria-labelledby="line-nav-tab">
                 <table class="table table-bordered">
                     <thead>
                     <tr class="sidebar-table-header" style="color:white;">
@@ -113,28 +152,33 @@
                     <tbody  class="sidebar-table-body"  style="color:white;">
                     <tr>
                         <th>线网数量</th>
-                        <th>2</th>
+                        <th class="temp-data-none"> </th>
+                        <th class="temp-data">20</th>
                         <th>条</th>
                     </tr>
                     <tr>
                         <th>线网长度</th>
-                        <th>3.54</th>
-                        <th>米</th>
+                        <th class="temp-data-none"> </th>
+                        <th class="temp-data">32.49</th>
+                        <th>千米</th>
                     </tr>
                     <tr>
                         <th>线网密度</th>
-                        <th>0.0086</th>
+                        <th class="temp-data-none"> </th>
+                        <th class="temp-data">0.0789</th>
                         <th></th>
                     </tr>
                     <tr>
                         <th>公交专用道条数</th>
-                        <th>3</th>
+                        <th class="temp-data-none"> </th>
+                        <th class="temp-data">3</th>
                         <th>条</th>
                     </tr>
                     <tr>
                         <th>公交专用道长度</th>
-                        <th>8.586</th>
-                        <th>米</th>
+                        <th class="temp-data-none"> </th>
+                        <th class="temp-data">8.59</th>
+                        <th>千米</th>
                     </tr>
                     </tbody>
                 </table>
@@ -159,8 +203,8 @@
                 </label>
             </div>
             <div class="layerWrapper-check">
-                <input class="check-input" type="checkbox" value="" id="defaultCheck3">
-                <label class="" style="color: white">
+                <input class="check-input" type="checkbox" value="" name="busrouteLayer">
+                <label class="check-label" style="color: white">
                     公交线路
                 </label>
             </div>
