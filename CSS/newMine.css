@@ -68,6 +68,11 @@ ul {
     /*background-color: #396964;*/
 }
 
+.navWrapper-nav-li:hover,.navWrapper-nav-li-active {
+    background-color: white;
+    color: #0c5460;
+}
+
 .navWrapper-nav-li span {
     margin: 2px 0;
     display: block;
@@ -123,9 +128,9 @@ ul {
 }
 
 .dataWrapper-menu-li {
-    width: calc((100% * 3 * 2) / 3 );
-    width: -webkit-calc((100% * 3 * 2) / 3 );
-    width: -moz-calc((100% * 3 * 2) / 3 );
+    width: calc((100% * 3 * 2) / 3);
+    width: -webkit-calc((100% * 3 * 2) / 3);
+    width: -moz-calc((100% * 3 * 2) / 3);
     display: inline;
 
     /*margin-left: 1rem;*/
@@ -135,6 +140,7 @@ ul {
     text-decoration: none;
     color: white;
 }
+
 .dataWrapper-menu-li-split {
     margin-top: 10px;
     height: 30px;
@@ -144,19 +150,19 @@ ul {
 /*------------------------------*/
 .dataWrapper-list {
     width: 100%;
-    height: 40px;
+    height: 50px;
 
 }
 
 .dataWrapper-list-menu {
     width: 100%;
-    height: 40px;
+    height: 50px;
 }
 
 .dataWrapper-list-menu ul {
     width: 100%;
-    height: 40px;
-    line-height: 40px;
+    height: 50px;
+    line-height: 50px;
     font-size: 1rem;
     display: -webkit-flex;
     display: flex;
@@ -167,12 +173,13 @@ ul {
 }
 
 .dataWrapper-list-menu-li {
-    width: calc((100% * 3 * 2) / 3 );
-    width: -webkit-calc((100% * 3 * 2) / 3 );
-    width: -moz-calc((100% * 3 * 2) / 3 );
+    width: calc((100% * 3 * 2) / 3);
+    width: -webkit-calc((100% * 3 * 2) / 3);
+    width: -moz-calc((100% * 3 * 2) / 3);
     display: inline;
     margin: 0;
     text-align: center;
+    background-color: rgb(55, 71, 79);
 }
 
 .dataWrapper-list-menu-li a {
@@ -180,8 +187,15 @@ ul {
     color: white;
 }
 
-.dataWrapper-list-menu-li a:hover, .dataWrapper-list-menu-li a:active {
-    color: rgb(27, 134, 178);
+.dataWrapper-list-menu-li:hover, .dataWrapper-list-menu-li-active{
+    /*color: white;*/
+    background-color: rgba(25, 38, 52, 0.8);
+
+    /*border-color: #fff;*/
+    /*-webkit-transition: border-color 0.3s, color 0.3s;*/
+    /*transition: border-color 0.3s, color 0.3s;*/
+    /*-webkit-transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);*/
+    /*transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);*/
 }
 
 /*------------------------------*/
@@ -195,7 +209,7 @@ ul {
 
 .dataWrapper-content-pane {
     color: white;
-    margin: 20px auto;
+    margin: 40px auto;
     width: 80%;
     text-align: center;
 }
@@ -251,8 +265,6 @@ ul {
     display: none;
 }
 /*------------------------------*/
-
-
 
 .mapWrapper {
     width: 100%;

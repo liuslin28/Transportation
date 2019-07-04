@@ -28,8 +28,7 @@ $('#info-click').click(function () {
     $('.dataWrapper').slideToggle()
 });
 
-
-$('.dataWrapper-menu-li').click(function (e) {
+$('.dataWrapper-menu-li-a').click(function (e) {
     let menuList = e.target;
     let menuListName = menuList.name;
     // 获取当前列表名称
@@ -37,17 +36,16 @@ $('.dataWrapper-menu-li').click(function (e) {
         $(domEle).hide();
     });
     $('#'+ menuListName).show();
+});
 
-    // let currentTarget = $(".dataWrapper-list-menu:visible");
-    // let currentTargetName = currentTarget[0].attributes[1].value;
-    // if(menuListName === currentTargetName) {
-    //     console.log(true)
-    // } else {
-    //
-    //     $('#'+ currentTargetName).toggle();
-    // }
-    // console.log(dataWrapper-list-menu)
-    console.log($(".dataWrapper-list-menu"))
-    console.log(menuList.name)
+/*------------------------------*/
+// 列表切换样式
+$('.navWrapper-nav-li').click(function () {
+    $(this).toggleClass("navWrapper-nav-li-active");
+});
 
-})
+$('.dataWrapper-list-menu-li').click(function () {
+    $(this).siblings('li').removeClass('dataWrapper-list-menu-li-active');
+    $(this).addClass('dataWrapper-list-menu-li-active');
+});
+

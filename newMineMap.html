@@ -24,6 +24,7 @@
 </head>
 <body>
 <div class='wrapper'>
+    <!--导航栏-->
     <div class="navWrapper">
         <div class="navWrapper-title">
             <span>公交仿真系统</span>
@@ -46,19 +47,20 @@
             </ul>
         </div>
     </div>
+    <!--交通信息页面-->
     <div class="dataWrapper">
         <div class="dataWrapper-menu">
-            <ul class="aaa">
+            <ul>
                 <li class="dataWrapper-menu-li">
-                    <a href="#" name="stops-list">站点分析</a>
+                    <a class="dataWrapper-menu-li-a" href="#" name="stops-list">站点分析</a>
                 </li>
                 <li class="dataWrapper-menu-li-split"></li>
                 <li class="dataWrapper-menu-li">
-                    <a href="#" name="line-list">线路分析</a>
+                    <a class="dataWrapper-menu-li-a" href="#" name="line-list">线路分析</a>
                 </li>
                 <li class="dataWrapper-menu-li-split"></li>
                 <li class="dataWrapper-menu-li">
-                    <a href="#" name="other-list">可达性分析</a>
+                    <a class="dataWrapper-menu-li-a" href="#" name="other-list">可达性分析</a>
                 </li>
             </ul>
 
@@ -66,7 +68,7 @@
         <div class="dataWrapper-list">
             <div class="dataWrapper-list-menu" id="stops-list">
                 <ul>
-                    <li class="dataWrapper-list-menu-li">
+                    <li class="dataWrapper-list-menu-li dataWrapper-list-menu-li-active">
                         <a id="stops-nav-tab" data-toggle="tab" href="#stops-info-tab" role="tab" aria-controls="stops-info-tab">站点信息</a>
                     </li>
                     <li class="dataWrapper-list-menu-li">
@@ -185,6 +187,7 @@
             </div>
         </div>
     </div>
+    <!--图层页面-->
     <div class="layerWrapper">
         <span class="layerWrapper-angle">
             <i class="fa fa-angle-double-right"></i>
@@ -216,7 +219,7 @@
             </div>
         </div>
     </div>
-
+    <!--地图页面-->
     <div class="mapWrapper">
         <div id="map" style="width: 100%; height: 100%;"></div>
     </div>
