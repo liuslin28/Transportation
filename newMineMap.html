@@ -7,7 +7,9 @@
 
     <script src="JS/wgs2mars.min.js"></script>
     <link rel="stylesheet" href="//minedata.cn/minemapapi/v2.0.0/minemap.css">
+    <link rel="stylesheet" href="//minedata.cn/minemapapi/v2.0.0/plugins/edit/minemap-edit.css"/>
     <script src="//minedata.cn/minemapapi/v2.0.0/minemap.js"></script>
+    <script src="//minedata.cn/minemapapi/v2.0.0/plugins/edit/minemap-edit.js"></script>
     <link rel="stylesheet" href="CSS/bootstrap.css">
     <script src="JS/jquery.js"></script>
     <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
@@ -40,7 +42,7 @@
                     <span>交通信息</span>
                 </li>
                 <!--<li class="navWrapper-nav-li" onclick="bufferGPTool()">-->
-                <li class="navWrapper-nav-li" id="simulate-click" onclick="showTemp()">
+                <li class="navWrapper-nav-li" id="simulate-click">
                     <i class="fa fa-bus-alt"></i>
                     <span>交通仿真</span>
                 </li>
@@ -106,8 +108,6 @@
             </div>
         </div>
         <div class="dataWrapper-content tab-content">
-            <!--<button onclick="buslaneGPTool()">公交专用道测试</button>-->
-            <!--<button onclick="busrouteGPTool()">公交线路测试</button>-->
             <!--站点分析-->
             <div class="dataWrapper-content-pane tab-pane active" id="stops-info-tab" role="tabpanel"
                  aria-labelledby="stops-nav-tab">
@@ -196,18 +196,19 @@
         <div id="simulate-accordion">
             <div class="simulate-card">
                 <div class="simulate-card-head" id="headingOne">
-                    <span class="btn simulate-card-head-btn" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
-                            aria-controls="collapseOne">
+                    <span class="btn simulate-card-head-btn" data-toggle="collapse" data-target="#collapseOne"
+                          aria-expanded="true"
+                          aria-controls="collapseOne">
                         站点调整
                     </span>
                 </div>
 
                 <div id="collapseOne" class="simulate-card-body collapse show" aria-labelledby="headingOne"
                      data-parent="#simulate-accordion">
-                   <div class="simulate-card-body-btn">
-                       <span>新增站点</span>
-                       <span>编辑站点</span>
-                   </div>
+                    <div class="simulate-card-body-btn">
+                        <span>新增站点</span>
+                        <span>编辑站点</span>
+                    </div>
                     <div class="simulate-card-body-list">
                         <div class="simulate-card-body-check">
                             <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
@@ -239,7 +240,7 @@
             <div class="simulate-card">
                 <div class="simulate-card-head" id="headingTwo">
                     <span class="btn simulate-card-head-btn collapsed" data-toggle="collapse" data-target="#collapseTwo"
-                            aria-expanded="false" aria-controls="collapseTwo">
+                          aria-expanded="false" aria-controls="collapseTwo">
                         线路调整
                     </span>
                 </div>
@@ -279,8 +280,9 @@
             </div>
             <div class="simulate-card">
                 <div class="simulate-card-head" id="headingThree">
-                    <span class="btn simulate-card-head-btn collapsed" data-toggle="collapse" data-target="#collapseThree"
-                            aria-expanded="false" aria-controls="collapseThree">
+                    <span class="btn simulate-card-head-btn collapsed" data-toggle="collapse"
+                          data-target="#collapseThree"
+                          aria-expanded="false" aria-controls="collapseThree">
                         公交专用道调整
                     </span>
                 </div>
@@ -336,7 +338,25 @@
     </div>
     <!--地图页面-->
     <div class="mapWrapper">
-        <div id="map" style="width: 100%; height: 100%;"></div>
+        <div id="map" style="width: 100%; height: 100%;">
+            <div class="map-edit-group">
+                <span class="map-edit-btn" title="画点" onclick="onEditMapClick('point')">
+                    <i class="fa fa-map-marker-alt"></i>
+                </span>
+                <span class="map-edit-btn" title="画线" onclick="onEditMapClick('line')">
+                    <i class="fa fa-slash"></i>
+                </span>
+                <span class="map-edit-btn" title="删除所选" onclick="onEditMapClick('trash')">
+                    <i class="fa fa-trash-alt"></i>
+                </span>
+                <span class="map-edit-btn" title="撤销上一步操作" onclick="onEditMapClick('undo')">
+                    <i class="fa fa-undo-alt"></i>
+                </span>
+                <span class="map-edit-btn" title="重复上一步操作" onclick="onEditMapClick('redo')">
+                    <i class="fa fa-redo-alt"></i>
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 </body>

@@ -328,3 +328,31 @@ ul {
     margin: 0;
     border: none;
 }
+
+/*------------地图编辑工具------------*/
+.map-edit-group {
+    position: absolute;
+    z-index: 300;
+    top: 120px;
+    right: 200px;
+    width: 250px;
+    overflow: hidden;
+}
+
+.map-edit-btn {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    color: white;
+    border: 1px solid #ddd;
+    display: inline-block;
+}
+
+.map-edit-btn:hover {
+    background-color: #efefef;
+    color:#111;
+}
