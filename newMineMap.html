@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>样式更改</title>
+    <title>公交仿真</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <script src="JS/wgs2mars.min.js"></script>
@@ -40,7 +40,7 @@
                     <span>交通信息</span>
                 </li>
                 <!--<li class="navWrapper-nav-li" onclick="bufferGPTool()">-->
-                <li class="navWrapper-nav-li" onclick="showTemp()">
+                <li class="navWrapper-nav-li" id="simulate-click" onclick="showTemp()">
                     <i class="fa fa-bus-alt"></i>
                     <span>交通仿真</span>
                 </li>
@@ -48,7 +48,7 @@
         </div>
     </div>
     <!--交通信息页面-->
-    <div class="dataWrapper">
+    <div class="dataWrapper" id="info-dataWrapper">
         <div class="dataWrapper-menu">
             <ul>
                 <li class="dataWrapper-menu-li">
@@ -69,7 +69,8 @@
             <div class="dataWrapper-list-menu" id="stops-list">
                 <ul>
                     <li class="dataWrapper-list-menu-li dataWrapper-list-menu-li-active">
-                        <a id="stops-nav-tab" data-toggle="tab" href="#stops-info-tab" role="tab" aria-controls="stops-info-tab">站点信息</a>
+                        <a id="stops-nav-tab" data-toggle="tab" href="#stops-info-tab" role="tab"
+                           aria-controls="stops-info-tab">站点信息</a>
                     </li>
                     <li class="dataWrapper-list-menu-li">
                         <a href="#">站点覆盖分析</a>
@@ -79,10 +80,11 @@
                     </li>
                 </ul>
             </div>
-            <div class="dataWrapper-list-menu" id="line-list" style="display: none;" >
+            <div class="dataWrapper-list-menu" id="line-list" style="display: none;">
                 <ul>
                     <li class="dataWrapper-list-menu-li">
-                        <a id="line-nav-tab" data-toggle="tab" href="#line-info-tab" role="tab" aria-controls="line-info-tab">线路信息</a>
+                        <a id="line-nav-tab" data-toggle="tab" href="#line-info-tab" role="tab"
+                           aria-controls="line-info-tab">线路信息</a>
                     </li>
                     <li class="dataWrapper-list-menu-li">
                         <a href="#">连通度分析</a>
@@ -107,7 +109,8 @@
             <!--<button onclick="buslaneGPTool()">公交专用道测试</button>-->
             <!--<button onclick="busrouteGPTool()">公交线路测试</button>-->
             <!--站点分析-->
-            <div class="dataWrapper-content-pane tab-pane active" id="stops-info-tab" role="tabpanel" aria-labelledby="stops-nav-tab">
+            <div class="dataWrapper-content-pane tab-pane active" id="stops-info-tab" role="tabpanel"
+                 aria-labelledby="stops-nav-tab">
                 <table class="table table-bordered">
                     <thead>
                     <tr class="sidebar-table-header" style="color:white;">
@@ -116,20 +119,20 @@
                         <th>备注</th>
                     </tr>
                     </thead>
-                    <tbody  class="sidebar-table-body"  style="color:white;">
+                    <tbody class="sidebar-table-body" style="color:white;">
                     <tr>
                         <th>站点数</th>
-                        <th> </th>
+                        <th></th>
                         <th>个</th>
                     </tr>
                     <tr>
                         <th>平均站间距</th>
-                        <th> </th>
+                        <th></th>
                         <th>米</th>
                     </tr>
                     <tr>
                         <th>超阈值比例</th>
-                        <th> </th>
+                        <th></th>
                         <th>%</th>
                     </tr>
                     <tr>
@@ -142,7 +145,8 @@
             </div>
 
             <!--线路分析-->
-            <div class="dataWrapper-content-pane tab-pane" id="line-info-tab" role="tabpanel" aria-labelledby="line-nav-tab">
+            <div class="dataWrapper-content-pane tab-pane" id="line-info-tab" role="tabpanel"
+                 aria-labelledby="line-nav-tab">
                 <table class="table table-bordered">
                     <thead>
                     <tr class="sidebar-table-header" style="color:white;">
@@ -151,39 +155,150 @@
                         <th>备注</th>
                     </tr>
                     </thead>
-                    <tbody  class="sidebar-table-body"  style="color:white;">
+                    <tbody class="sidebar-table-body" style="color:white;">
                     <tr>
                         <th>线网数量</th>
-                        <th class="temp-data-none"> </th>
+                        <th class="temp-data-none"></th>
                         <th class="temp-data">20</th>
                         <th>条</th>
                     </tr>
                     <tr>
                         <th>线网长度</th>
-                        <th class="temp-data-none"> </th>
+                        <th class="temp-data-none"></th>
                         <th class="temp-data">32.49</th>
                         <th>千米</th>
                     </tr>
                     <tr>
                         <th>线网密度</th>
-                        <th class="temp-data-none"> </th>
+                        <th class="temp-data-none"></th>
                         <th class="temp-data">0.0789</th>
                         <th></th>
                     </tr>
                     <tr>
                         <th>公交专用道条数</th>
-                        <th class="temp-data-none"> </th>
+                        <th class="temp-data-none"></th>
                         <th class="temp-data">3</th>
                         <th>条</th>
                     </tr>
                     <tr>
                         <th>公交专用道长度</th>
-                        <th class="temp-data-none"> </th>
+                        <th class="temp-data-none"></th>
                         <th class="temp-data">8.59</th>
                         <th>千米</th>
                     </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    <!--交通仿真页面-->
+    <div class="dataWrapper" id="simulate-dataWrapper">
+        <div id="simulate-accordion">
+            <div class="simulate-card">
+                <div class="simulate-card-head" id="headingOne">
+                    <span class="btn simulate-card-head-btn" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+                            aria-controls="collapseOne">
+                        站点调整
+                    </span>
+                </div>
+
+                <div id="collapseOne" class="simulate-card-body collapse show" aria-labelledby="headingOne"
+                     data-parent="#simulate-accordion">
+                   <div class="simulate-card-body-btn">
+                       <span>新增站点</span>
+                       <span>编辑站点</span>
+                   </div>
+                    <div class="simulate-card-body-list">
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                站点覆盖率
+                            </label>
+                        </div>
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                平均站间距
+                            </label>
+                        </div>
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                客流集散点
+                            </label>
+                        </div>
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                可达性分析
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="simulate-card">
+                <div class="simulate-card-head" id="headingTwo">
+                    <span class="btn simulate-card-head-btn collapsed" data-toggle="collapse" data-target="#collapseTwo"
+                            aria-expanded="false" aria-controls="collapseTwo">
+                        线路调整
+                    </span>
+                </div>
+                <div id="collapseTwo" class="simulate-card-body collapse" aria-labelledby="headingTwo"
+                     data-parent="#simulate-accordion">
+                    <div class="simulate-card-body-btn">
+                        <span>新增线路</span>
+                        <span>编辑线路</span>
+                    </div>
+                    <div class="simulate-card-body-list">
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                线网长度
+                            </label>
+                        </div>
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                线网密度
+                            </label>
+                        </div>
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                连通性分析
+                            </label>
+                        </div>
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                复杂性分析
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="simulate-card">
+                <div class="simulate-card-head" id="headingThree">
+                    <span class="btn simulate-card-head-btn collapsed" data-toggle="collapse" data-target="#collapseThree"
+                            aria-expanded="false" aria-controls="collapseThree">
+                        公交专用道调整
+                    </span>
+                </div>
+                <div id="collapseThree" class="simulate-card-body collapse" aria-labelledby="headingThree"
+                     data-parent="#simulate-accordion">
+                    <div class="simulate-card-body-btn">
+                        <span>新增道路</span>
+                        <span>编辑道路</span>
+                    </div>
+                    <div class="simulate-card-body-list">
+                        <div class="simulate-card-body-check">
+                            <input class="simulate-card-body-check-input" type="checkbox" value="" name="stopsLayer">
+                            <label>
+                                公交专用道长度
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -194,26 +309,26 @@
         </span>
         <div class="layerWrapper-list">
             <div class="layerWrapper-check">
-                <input class="check-input" type="checkbox" value="" name="stopsLayer">
-                <label class="" style="color: white">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="stopsLayer">
+                <label class="layerWrapper-check-label">
                     公交站点
                 </label>
             </div>
             <div class="layerWrapper-check">
-                <input class="check-input" type="checkbox" value="" name="centerLayer">
-                <label class="" style="color: white">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="centerLayer">
+                <label class="layerWrapper-check-label">
                     城区中心面
                 </label>
             </div>
             <div class="layerWrapper-check">
-                <input class="check-input" type="checkbox" value="" name="busrouteLayer">
-                <label class="check-label" style="color: white">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="busrouteLayer">
+                <label class="layerWrapper-check-label">
                     公交线路
                 </label>
             </div>
             <div class="layerWrapper-check">
-                <input class="check-input" type="checkbox" value="" id="defaultCheck4" name="buslaneLayer">
-                <label class="" style="color: white">
+                <input class="layerWrapper-check-input" type="checkbox" value="" id="defaultCheck4" name="buslaneLayer">
+                <label class="layerWrapper-check-label">
                     公交专用道
                 </label>
             </div>

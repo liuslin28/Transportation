@@ -17,7 +17,7 @@ ul {
     border: none;
 }
 
-/*------------------------------*/
+/*--------------nav----------------*/
 
 .navWrapper {
     width: 100%;
@@ -62,13 +62,14 @@ ul {
     width: 80px;
     display: inline-block;
     text-align: center;
-    border: 1px solid #192634;
+    /*border: 1px solid #192634;*/
+    border: 1px solid white;
     color: white;
     cursor: pointer;
     /*background-color: #396964;*/
 }
 
-.navWrapper-nav-li:hover,.navWrapper-nav-li-active {
+.navWrapper-nav-li:hover, .navWrapper-nav-li-active {
     background-color: white;
     color: #0c5460;
 }
@@ -84,11 +85,9 @@ ul {
 }
 
 /*--------------侧边栏----------------*/
-
 .dataWrapper {
     width: 400px;
     height: 86%;
-    /*display: inline-block;*/
     margin: 0;
     padding: 0;
     top: 120px;
@@ -105,9 +104,7 @@ ul {
 }
 
 /*-------------侧边栏 菜单-----------------*/
-
 .dataWrapper-menu {
-    /*padding-top: 10px;*/
     width: 100%;
     height: 50px;
     text-align: center;
@@ -117,6 +114,7 @@ ul {
     background-image: linear-gradient(to left top, #406bb2, #1b70aa, #00729e, #06738f, #257281, #2c727a, #347273, #3c726d, #3b7369, #3b7464, #3e755e, #427658);
 }
 
+/*-------------交通信息页面 start-----------------*/
 .dataWrapper-menu ul {
     width: 100%;
     height: 50px;
@@ -132,8 +130,6 @@ ul {
     width: -webkit-calc((100% * 3 * 2) / 3);
     width: -moz-calc((100% * 3 * 2) / 3);
     display: inline;
-
-    /*margin-left: 1rem;*/
 }
 
 .dataWrapper-menu-li a {
@@ -151,7 +147,6 @@ ul {
 .dataWrapper-list {
     width: 100%;
     height: 50px;
-
 }
 
 .dataWrapper-list-menu {
@@ -166,9 +161,6 @@ ul {
     font-size: 1rem;
     display: -webkit-flex;
     display: flex;
-    /*align-items: center;*/
-    /*flex-direction: row;*/
-    /*flex-wrap: wrap;*/
     justify-content: center;
 }
 
@@ -187,15 +179,8 @@ ul {
     color: white;
 }
 
-.dataWrapper-list-menu-li:hover, .dataWrapper-list-menu-li-active{
-    /*color: white;*/
+.dataWrapper-list-menu-li:hover, .dataWrapper-list-menu-li-active {
     background-color: rgba(25, 38, 52, 0.8);
-
-    /*border-color: #fff;*/
-    /*-webkit-transition: border-color 0.3s, color 0.3s;*/
-    /*transition: border-color 0.3s, color 0.3s;*/
-    /*-webkit-transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);*/
-    /*transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);*/
 }
 
 /*------------------------------*/
@@ -203,7 +188,6 @@ ul {
 .dataWrapper-content {
     width: 100%;
     height: 80%;
-    /*margin-left: 20px;*/
     color: white;
 }
 
@@ -214,8 +198,76 @@ ul {
     text-align: center;
 }
 
-/*------------------------------*/
-/*图层展示栏*/
+/*-------------交通信息页面 end-----------------*/
+
+/*-------------交通仿真页面-----------------*/
+#simulate-accordion {
+    height: 100%;
+    width: 100%;
+}
+
+.simulate-card {
+    width: 100%;
+}
+
+.simulate-card-head {
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    color: #ebebeb;
+    font-size: 1rem;
+    font-family: "microsoft yahei,helvetica,simhei,simsun,sans-serif";
+    background-color: rgb(55, 71, 79);
+    -moz-box-shadow: 2px 2px 5px #000000;
+    -webkit-box-shadow: 2px 2px 5px #000000;
+    box-shadow: 2px 2px 5px #000000;
+}
+
+.simulate-card-head-btn {
+    color: white;
+}
+
+.simulate-card-body  {
+    width: 100%;
+}
+
+.simulate-card-body-btn {
+    width: 100%;
+    margin: 30px 40px;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.simulate-card-body-btn span {
+    width: 100px;
+    height: 35px;
+    line-height: 35px;
+    margin:0 30px;
+    border: 1px solid white;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+}
+.simulate-card-body-list {
+    width: 100%;
+    margin: 30px 125px;
+}
+
+.simulate-card-body-check {
+    width: 150px;
+    display: block;
+}
+.simulate-card-body-check-input{
+    margin-right: 20px;
+}
+.simulate-card-body-check label {
+    color: white;
+}
+
+/*-------------图层页面-----------------*/
 .layerWrapper {
     position: absolute;
     top: 120px;
@@ -251,11 +303,11 @@ ul {
     margin: 15px auto;
 }
 
-.check-input {
+.layerWrapper-check-input {
     margin-right: 20px;
 }
 
-.check-label {
+.layerWrapper-check-label {
     color: white;
 }
 
@@ -264,8 +316,8 @@ ul {
 .temp-data {
     display: none;
 }
-/*------------------------------*/
 
+/*------------地图页面------------------*/
 .mapWrapper {
     width: 100%;
     height: 100%;
