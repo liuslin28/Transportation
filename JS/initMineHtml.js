@@ -35,12 +35,23 @@ $('#simulate-click').click(function () {
     $('#simulate-dataWrapper').slideToggle();
 });
 
-$('.dataWrapper-menu-li-a').click(function (e) {
-    let menuList = e.target;
-    let menuListName = menuList.name;
+// 交通信息页面一级导航
+$('.dataWrapper-menu-li').click(function () {
+    let menuListName = $(this).find("a").eq(0).attr('name');
     $(".dataWrapper-list-menu").each(function(index,domEle) {
         $(domEle).hide();
     });
+    $('#'+ menuListName).show();
+});
+
+// 交通信息页面二级导航
+$('.dataWrapper-list-menu-li').click(function () {
+    // 修改样式
+    $(this).siblings('li').removeClass('dataWrapper-list-menu-li-active');
+    $(this).addClass('dataWrapper-list-menu-li-active');
+
+    let menuListName = $(this).find("a").eq(0).attr('name');
+    $(".dataWrapper-content-pane").hide();
     $('#'+ menuListName).show();
 });
 
@@ -58,10 +69,5 @@ $('.navWrapper-nav-li').click(function () {
         $('#'+navId).addClass('navWrapper-nav-li-active');
     }
     console.log(this.id);
-});
-// 侧边栏列表
-$('.dataWrapper-list-menu-li').click(function () {
-    $(this).siblings('li').removeClass('dataWrapper-list-menu-li-active');
-    $(this).addClass('dataWrapper-list-menu-li-active');
 });
 
