@@ -1,4 +1,5 @@
 var map;
+var edit;
 /**
  * 基本地图加载
  * 地图缩放级别限制
@@ -9,7 +10,10 @@ var conf_dataDomainUrl = conf_domainUrl;
 var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
 var conf_serviceUrl = conf_domainUrl + '/service';
 var conf_accessToken; //内部使用已隐藏
+// 4744有路况
 var conf_solution = 4744;
+// 4678无路况
+// var conf_solution = 4678;
 var conf_centerPoint = [120.64, 31.31801];
 var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution
 
@@ -35,8 +39,8 @@ $(document).ready(function () {
         addStops();
         addBuslane();
         addBusroute();
-    })
-})
+    });
+});
 
 //_____________________________________________________
 // WGS84 => GCJ02
@@ -351,6 +355,42 @@ function bufferGPTool() {
 }
 
 //_____________________________________________________
+// 指标计算
+
+// 站点密度
+function stopDensity() {
+    $.ajax({
+        url: "./geojsonData/stopsPoint.json",
+        type: "GET",
+        success: function (data) {
+            let stopsNum = data['features'].length;
+            $.ajax({
+                url: "./geojsonData/centerPolygon.json",
+                type: "GET",
+                success: function (data) {
+                    let centerArea = (data['features'])[0].properties.AREA;
+                    let stopDensity = stopsNum/centerArea;
+                    console.log(stopDensity);
+                }
+            })
+        }
+    })
+}
+
+// 网络复杂度
+function networkComplex() {
+    $.ajax({
+        url: "./geojsonData/stopsPoint.json",
+        type: "GET",
+        success: function (data) {
+            let stopsLength = data['features'].length;
+            let networkComplex = (stopsLength-1)/stopsLength;
+            console.log(networkComplex)
+        }
+    })
+}
+
+//_____________________________________________________
 
 // MultiPolygon的格式转换
 function transtoJson(data) {
@@ -525,9 +565,3 @@ function layerVisibilityToggle(layerName, checkValue) {
     map.setLayoutProperty(layerName, 'visibility', checkValue);
 }
 
-/*------------------------------*/
-
-function showTemp() {
-    $('.temp-data').show();
-    $('.temp-data-none').hide();
-}
