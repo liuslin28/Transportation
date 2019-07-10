@@ -34,13 +34,45 @@ $(document).ready(function () {
         maxZoom: 17, /*地图最大缩放等级*/
         minZoom: 3  /*地图最小缩放等级*/
     });
+
+    edit = new minemap.edit.init(map, {
+        boxSelect: true,
+        touchEnabled: true,
+        displayControlsDefault: true,
+        showButtons: false
+    });
+
     map.on("load", function () {
         addCenter();
         addStops();
         addBuslane();
         addBusroute();
     });
+    map.on("edit.undo", onEditUndo);
+    map.on("edit.redo", onEditRedo);
+
+    // 功能测试
+    map.on("mouseup", function (e) {
+        console.log(e);
+        console.log("整只兔兔都很不好了");
+    })
+
 });
+
+function onEditMapClick(mode) {
+    if (edit && mode) {
+        edit.onBtnCtrlActive(mode);
+    }
+}
+
+function onEditUndo(e) {
+    e.record
+}
+
+function onEditRedo(e) {
+    e.record
+}
+
 
 //_____________________________________________________
 // WGS84 => GCJ02
