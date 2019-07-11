@@ -15,7 +15,7 @@ var conf_solution = 4744;
 // 4678无路况
 // var conf_solution = 4678;
 var conf_centerPoint = [120.64, 31.31801];
-var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution
+var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution;
 
 $(document).ready(function () {
     minemap.domainUrl = conf_domainUrl;
@@ -486,6 +486,43 @@ function addStops() {
                     'circle-color': "#b2cb94",      //填充圆形的颜色
                     'circle-blur': 0.1,              //模糊程度，默认0
                     'circle-opacity': 0.6             //透明度，默认为1
+                }
+            });
+
+            // 热力图
+            map.addSource("heatmap-source", {
+                type: "geojson",
+                data: data/*可以是具体的服务*/
+            });
+
+            //添加图层
+            map.addLayer({
+                "id": "heatmap-layer",
+                "type": "heatmap",
+                "source": "heatmap-source",
+                "layout": {
+                    "visibility": "visible"
+                },
+                "paint": {
+                    // 一个热力图数据点的模糊范围，单位是像素，默认值30；要求：值大于等于1，可根据zoom level进行插值设置
+                    "heatmap-radius": 30,
+                    //一个热力图单个数据点的热力程度，默认值为1；要求：值大于等于0，支持使用property中某个的热力值
+                    "heatmap-weight": {
+                        "property": "mag",
+                        "stops": [[0, 0], [10, 1]]
+                    },
+                    // 用于统一控制热力值的强度，默认值1；要求：值大于等于0，可根据zoom level进行插值设置
+                    "heatmap-intensity": 0.2,
+                    // 表示热力图颜色阶梯，阶梯的值域范围为0-1，默认值为["interpolate",["linear"],["heatmap-density"],0,"rgba(0, 0, 255, 0)",0.1,"royalblue",0.3,"cyan",0.5,"lime",0.7,"yellow",1,"red"]
+                    "heatmap-color": [
+                        "interpolate",
+                        ["linear"],
+                        ["heatmap-density"],
+                        0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
+                        // 0, "#101114", 0.1, "#1A3B4A", 0.3, "#006D76", 0.5, "#1CA086", 0.7, "#84D17D", 1, "#F9F871"
+                    ],
+                    // 表示热力图的不透明度，默认值1；值域范围0-1，可根据zoom level进行插值设置
+                    "heatmap-opacity": 0.7,
                 }
             });
         },
