@@ -22,9 +22,8 @@ ul {
 .navWrapper {
     width: 100%;
     height: 90px;
-    /*background-image: linear-gradient(to right top, #406b8a, #287085, #1d747a, #2b766a, #427658);*/
-    /*background-image: linear-gradient(to left top, #406bb2, #1b70aa, #00729e, #06738f, #257281, #2c727a, #347273, #3c726d, #3b7369, #3b7464, #3e755e, #427658);*/
-    background-image: linear-gradient(to right bottom, #406b8a, #386e86, #337081, #34717b, #387274, #397270, #3c736c, #3f7367, #3e7464, #3f7560, #40755c, #427658);
+    background-color: rgba(15,27,36,0.5);
+    /*background-image: linear-gradient(to right bottom, #406b8a, #386e86, #337081, #34717b, #387274, #397270, #3c736c, #3f7367, #3e7464, #3f7560, #40755c, #427658);*/
     position: absolute;
     z-index: 99;
 }
@@ -33,9 +32,10 @@ ul {
     display: inline-block;
     width: 100%;
     height: 90px;
+    /*padding-left: 30px;*/
     text-align: center;
     line-height: 90px;
-    color: rgb(247, 247, 249);
+    color: white;
     font-size: 2rem;
     font-weight: bold;
     letter-spacing: 0.2rem;
@@ -63,15 +63,15 @@ ul {
     display: inline-block;
     text-align: center;
     /*border: 1px solid #192634;*/
-    border: 1px solid white;
-    color: white;
+    border: 1px solid #6C87AB;
+    color: #6C87AB;
     cursor: pointer;
     /*background-color: #396964;*/
 }
 
 .navWrapper-nav-li:hover, .navWrapper-nav-li-active {
-    background-color: white;
-    color: #0c5460;
+    background-color: whitesmoke;
+    color: #6499AC;
 }
 
 .navWrapper-nav-li span {
@@ -198,6 +198,14 @@ ul {
     text-align: center;
 }
 
+.dataWrapper-content-table-head {
+    color: lightslategray;
+}
+
+.dataWrapper-content-table-body {
+    color: lightgray;
+}
+
 /*-------------交通信息页面 end-----------------*/
 
 /*-------------交通仿真页面-----------------*/
@@ -253,11 +261,11 @@ ul {
 }
 .simulate-card-body-list {
     width: 100%;
-    margin: 30px 125px;
+    margin: 30px 100px;
 }
 
 .simulate-card-body-check {
-    width: 150px;
+    width: 200px;
     display: block;
 }
 .simulate-card-body-check-input{
@@ -355,4 +363,46 @@ ul {
 .map-edit-btn:hover {
     background-color: #efefef;
     color:#111;
+}
+
+/*------------地图加载中------------*/
+
+.loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width:300px;
+    height: 90px;
+}
+.loader {
+    color: white;
+    font-weight: bold;
+    animation-duration: 4s;
+    animation-name: spread;
+    animation-iteration-count: infinite;
+    transform: translateZ(0);
+    text-transform: uppercase;
+    display: table-cell;
+    vertical-align: middle;
+    font-size: 1.3em;
+    letter-spacing: 6em;
+    text-indent: -100%;
+}
+@keyframes spread {
+    from {
+        letter-spacing: 6em;
+        text-indent: -150%;
+    }
+    5% {
+    }
+    50% {
+        text-indent: 50%;
+        letter-spacing: 0.3em;
+    }
+    95% {
+    }
+    to {
+        letter-spacing: 6em;
+        text-indent: 120%;
+    }
 }

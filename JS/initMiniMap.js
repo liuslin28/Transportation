@@ -43,6 +43,18 @@ $(document).ready(function () {
     });
 
     map.on("load", function () {
+        var t = setInterval(function() {
+            //if (map && 其它业务判断) {
+            if (map) {
+                if (map.isStyleLoaded()) {
+                    //加载成功后 loading 隐藏
+                    clearInterval(t);
+                    $('.loading').hide();
+                }
+            } else {
+                clearInterval(t);
+            }
+        }, 1000);
         addCenter();
         addStops();
         addBuslane();
@@ -519,6 +531,7 @@ function addStops() {
                         ["linear"],
                         ["heatmap-density"],
                         0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
+                        // 0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
                         // 0, "#101114", 0.1, "#1A3B4A", 0.3, "#006D76", 0.5, "#1CA086", 0.7, "#84D17D", 1, "#F9F871"
                     ],
                     // 表示热力图的不透明度，默认值1；值域范围0-1，可根据zoom level进行插值设置
