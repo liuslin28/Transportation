@@ -560,7 +560,7 @@ function addStops() {
 
             // 热力图
             map.addLayer({
-                "id": "stopheatLayer",
+                "id": "stopHeatLayer",
                 "type": "heatmap",
                 "source": "stopsSource",
                 "layout": {
@@ -631,14 +631,14 @@ function addBuslane() {
         success: function (data) {
             console.log(data);
             var gcjData = wgsToGcj(data);
-            map.addSource('buslaneSource', {
+            map.addSource('busLaneSource', {
                 'type': 'geojson',
                 'data': gcjData
             });
             map.addLayer({
-                'id': 'buslaneLayer',
+                'id': 'busLaneLayer',
                 'type': 'line',
-                'source': 'buslaneSource',
+                'source': 'busLaneSource',
                 "layout": {
                     "line-join": "round",
                     "line-cap": "round",
@@ -664,14 +664,14 @@ function addBusroute() {
         success: function (data) {
             console.log(data);
             var gcjData = wgsToGcj(data);
-            map.addSource('busrouteSource', {
+            map.addSource('busRouteSource', {
                 'type': 'geojson',
                 'data': gcjData
             });
             map.addLayer({
-                'id': 'busrouteLayer',
+                'id': 'busRouteLayer',
                 'type': 'line',
-                'source': 'busrouteSource',
+                'source': 'busRouteSource',
                 "layout": {
                     "line-join": "round",
                     "line-cap": "round",
