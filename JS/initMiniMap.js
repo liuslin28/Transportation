@@ -5,18 +5,6 @@ var edit;
  * 地图缩放级别限制
  */
 
-var conf_domainUrl; //内部使用已隐藏
-var conf_dataDomainUrl = conf_domainUrl;
-var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
-var conf_serviceUrl = conf_domainUrl + '/service';
-var conf_accessToken; //内部使用已隐藏
-// 4744有路况
-// var conf_solution = 4744;
-// 4678无路况
-var conf_solution = 4678;
-var conf_centerPoint = [120.56, 31.10];
-var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution;
-
 $(document).ready(function () {
     minemap.domainUrl = conf_domainUrl;
     minemap.dataDomainUrl = conf_dataDomainUrl;
@@ -43,7 +31,7 @@ $(document).ready(function () {
     });
 
     map.on("load", function () {
-        var t = setInterval(function() {
+        var t = setInterval(function () {
             //if (map && 其它业务判断) {
             if (map) {
                 if (map.isStyleLoaded()) {
@@ -61,7 +49,7 @@ $(document).ready(function () {
                 clearInterval(t);
             }
         }, 1000);
-        addStops();
+        addStation();
     });
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
@@ -87,15 +75,16 @@ function mapFly() {
 
 // 切换点坐标图层
 function changeZoom(mapZoom) {
-    if(mapZoom > 14) {
+    if (mapZoom > 14) {
         // map.setPitch(0);
-        layerVisibilityToggle("stopsLayer", "none");
-        layerVisibilityToggle("stopsLayerL", "visible");
+        layerVisibilityToggle("stationLayer", "none");
+        layerVisibilityToggle("stationLayerL", "visible");
     } else {
-        layerVisibilityToggle("stopsLayer", "visible");
-        layerVisibilityToggle("stopsLayerL", "none");
+        layerVisibilityToggle("stationLayer", "visible");
+        layerVisibilityToggle("stationLayerL", "none");
     }
 }
+//_____________________________________________________
 
 function onEditMapClick(mode) {
     if (edit && mode) {
@@ -112,95 +101,7 @@ function onEditRedo(e) {
 }
 
 //_____________________________________________________
-// WGS84 => GCJ02
-function wgsToGcj(wgsData) {
-    // 获取数据类型
-    geometryData = (wgsData.features)[0].geometry;
-    geoType = geometryData.type;
-    switch (geoType) {
-        case "Point":
-            coordinateData = wgsData.features;
-            coordinateData = pointWgsGcj(coordinateData);
-            break;
-        case "LineString":
-            coordinateData = wgsData.features;
-            coordinateData = lineWgsGcj(coordinateData);
-            wgsData.features = coordinateData;
-            break;
-        case "Polygon":
-            coordinateData = geometryData.coordinates;
-            coordinateData = polyWgsGcj(coordinateData);
-            ((wgsData.features)[0].geometry).coordinates = coordinateData;
-            break;
-        case "MultiPolygon":
-            coordinateData = geometryData.coordinates;
-            coordinateData = multipolyWgsGcj(coordinateData);
-            ((wgsData.features)[0].geometry).coordinates = coordinateData;
-            break;
-        default:
-            console.log("error");
-            break;
-    }
-    return wgsData;
-}
-
-function pointWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue, index) {
-        coorWGS = (coordinateValue.geometry).coordinates;
-        const lngWGS = Number(coorWGS[0]);  //经度
-        const latWGS = Number(coorWGS[1]);  //纬度
-        var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-        coorWGS[0] = gcjCoordinate.lng;
-        coorWGS[1] = gcjCoordinate.lat;
-    });
-    return coordinateData;
-}
-
-function lineWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue, index) {
-        coorWGS = (coordinateValue.geometry).coordinates
-        coorWGS.forEach(function (currentValue) {
-            const lngWGS = Number(currentValue[0]);  //经度
-            const latWGS = Number(currentValue[1]);  //纬度
-            var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-            currentValue[0] = gcjCoordinate.lng;
-            currentValue[1] = gcjCoordinate.lat;
-        })
-    })
-    return coordinateData;
-}
-
-function polyWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue, index) {
-        coordinateValue.forEach(function (currentValue) {
-            const lngWGS = Number(currentValue[0]);  //经度
-            const latWGS = Number(currentValue[1]);  //纬度
-            var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-            currentValue[0] = gcjCoordinate.lng;
-            currentValue[1] = gcjCoordinate.lat;
-        })
-    });
-    return coordinateData;
-}
-
-function multipolyWgsGcj(coordinateData) {
-    coordinateData.forEach(function (arrayValue, index) {
-        arrayValue.forEach(function (listValue, index) {
-            listValue.forEach(function (currentValue, index) {
-                const lngWGS = Number(currentValue[0]);  //经度
-                const latWGS = Number(currentValue[1]);  //纬度
-                var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-                currentValue[0] = gcjCoordinate.lng;
-                currentValue[1] = gcjCoordinate.lat;
-            })
-
-        })
-    });
-    return coordinateData;
-}
-//_____________________________________________________
 //GP服务
-
 // 公交专用道
 function buslaneGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
@@ -293,13 +194,10 @@ function busrouteGPTool() {
                         }
                     }
                 })
-                // GP服务调用
-
             }
         })
     });
 }
-
 
 // 站点覆盖率
 function bufferGPTool() {
@@ -361,12 +259,11 @@ function bufferGPTool() {
 
                 // 设置输入参数(中心城区
                 $.ajax({
-                    url: './esrijsonData/centerPolygon.json',
+                    url: './esrijsonData/esricenterPolygon.json',
                     type: 'GET',
                     success: function (data) {
                         centercityfeatures = data;
                         // 设置输入参数（多边形
-                        // tempPolygon = data;
                         polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
                         polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
@@ -400,7 +297,6 @@ function bufferGPTool() {
 
                                 // 输出格式转换，坐标尚未进行转换
                                 bufferJson = transtoJson(bufferResult);
-                                // bufferJson = wgsToGcj(bufferJson);
                                 if (bufferJson) {
                                     map.addSource('bufferJson', {
                                         'type': 'geojson',
@@ -433,41 +329,29 @@ function bufferGPTool() {
         })
     });
 }
-
 //_____________________________________________________
 // 指标计算
 
 // 站点密度
 function stopDensity() {
-    $.ajax({
-        url: "./geojsonData/stopsPoint.json",
-        type: "GET",
-        success: function (data) {
-            let stopsNum = data['features'].length;
-            $.ajax({
-                url: "./geojsonData/centerPolygon.json",
-                type: "GET",
-                success: function (data) {
-                    let centerArea = (data['features'])[0].properties.AREA;
-                    let stopDensity = stopsNum/centerArea;
-                    console.log(stopDensity);
-                }
-            })
-        }
+    $.when(getJson(conf_station_query)).then(function (data) {
+        let stationNum = data['features'].length;
+        $.when(getJson(conf_center_query)).then(function (data) {
+            let centerArea = (data['features'])[0].properties.AREA;
+            let stationDensity = stationNum / centerArea;
+            console.log(stationDensity);
+        })
+
     })
 }
 
 // 网络复杂度
 function networkComplex() {
-    $.ajax({
-        url: "./geojsonData/stopsPoint.json",
-        type: "GET",
-        success: function (data) {
-            let stopsLength = data['features'].length;
-            let networkComplex = (stopsLength-1)/stopsLength;
-            console.log(networkComplex)
-        }
-    })
+    $.when(getJson(conf_station_query)).then(function (data) {
+        let stationLength = data['features'].length;
+        let networkComplex = (stationLength - 1) / stationLength;
+        console.log(networkComplex)
+    });
 }
 
 //_____________________________________________________
@@ -498,196 +382,166 @@ function transtoJson(data) {
 //_____________________________________________________
 
 // 加载数据
-function addStops() {
-    $.ajax({
-        // url: "./geojsonData/centerPolygon.json",
-        url: "./geojsonData/stopsPoint.json",
-        type: "GET",
-        success: function (data) {
-            var gcjData = wgsToGcj(data);
-            map.addSource('stopsSource', {
-                'type': 'geojson',
-                'data': gcjData
-            });
-            map.addLayer({
-                'id': 'stopsLayer',
-                'type': 'circle',
-                'source': 'stopsSource',
-                'layout': {
-                    "visibility": "visible"
+function addStation() {
+    $.when(getJson(conf_station_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        map.addSource('stopsSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'stationLayer',
+            'type': 'circle',
+            'source': 'stopsSource',
+            'layout': {
+                "visibility": "visible"
+            },
+            'paint': {
+                'circle-radius': {
+                    /**
+                     * base:圆的半径随zoom级别变化的剧烈程度，
+                     *      1：        近似于直线线
+                     *      <1:        曲线开口向下
+                     *      >1 && <1.9 曲线开口向上
+                     * stops：[minzoom,minPixel],[maxzoom,maxPixel]
+                     *        对应：最小zoom时的半径pixel像素大小，最大时的半径像素大小
+                     * 其他中间zoom级别，根据base规定的线性（1）或曲线曲率，半径大小会相应变化
+                     */
+                    'base': 1.5,
+                    'stops': [[5, 2], [18, 4]]
                 },
-                'paint': {
-                    'circle-radius': {
-                        /**
-                         * base:圆的半径随zoom级别变化的剧烈程度，
-                         *      1：        近似于直线线
-                         *      <1:        曲线开口向下
-                         *      >1 && <1.9 曲线开口向上
-                         * stops：[minzoom,minPixel],[maxzoom,maxPixel]
-                         *        对应：最小zoom时的半径pixel像素大小，最大时的半径像素大小
-                         * 其他中间zoom级别，根据base规定的线性（1）或曲线曲率，半径大小会相应变化
-                         */
-                        'base': 1.5,
-                        'stops': [[5, 2], [18, 4]]
-                    },
-                    // 'circle-color': "#b2cb94",      //填充圆形的颜色
-                    'circle-color': "#6C87AB",      //填充圆形的颜色
-                    'circle-blur': 0.1,              //模糊程度，默认0
-                    'circle-opacity': 0.6             //透明度，默认为1
-                }
-            });
-            map.addLayer({
-                "id": "stopsLayerL",
-                "type": "symbol",
-                "source": 'stopsSource',
-                "layout": {
-                    "icon-image": "bus-15", //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
-                    //"icon-size":1.5
-                    "visibility": "none"
-                }
+                // 'circle-color': "#b2cb94",      //填充圆形的颜色
+                'circle-color': "#6C87AB",      //填充圆形的颜色
+                'circle-blur': 0.1,              //模糊程度，默认0
+                'circle-opacity': 0.6             //透明度，默认为1
+            }
+        });
+        map.addLayer({
+            "id": "stationLayerL",
+            "type": "symbol",
+            "source": 'stopsSource',
+            "layout": {
+                "icon-image": "bus-15", //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
+                //"icon-size":1.5
+                "visibility": "none"
+            }
 
-            });
-            map.addLayer({
-                "id": "stopsStationLayer",
-                "type": "symbol",
-                "source": 'stopsSource',
-                "layout": {
-                    "icon-image": "bus-15", //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
-                    //"icon-size":1.5
-                },
-                filter: ["in","stop_name","丽波湾首末站"]
-            });
+        });
+        map.addLayer({
+            "id": "terminalLayer",
+            "type": "symbol",
+            "source": 'stopsSource',
+            "layout": {
+                "icon-image": "bus-15" //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
+                //"icon-size":1.5
+            },
+            filter: ["in", "stop_name", "丽波湾首末站"]
+        });
 
-            // 热力图
-            map.addLayer({
-                "id": "stopHeatLayer",
-                "type": "heatmap",
-                "source": "stopsSource",
-                "layout": {
-                    "visibility": "none"
+        // 热力图
+        map.addLayer({
+            "id": "stopHeatLayer",
+            "type": "heatmap",
+            "source": "stopsSource",
+            "layout": {
+                "visibility": "none"
+            },
+            "paint": {
+                // 一个热力图数据点的模糊范围，单位是像素，默认值30；要求：值大于等于1，可根据zoom level进行插值设置
+                "heatmap-radius": 30,
+                //一个热力图单个数据点的热力程度，默认值为1；要求：值大于等于0，支持使用property中某个的热力值
+                "heatmap-weight": {
+                    "property": "mag",
+                    "stops": [[0, 0], [10, 1]]
                 },
-                "paint": {
-                    // 一个热力图数据点的模糊范围，单位是像素，默认值30；要求：值大于等于1，可根据zoom level进行插值设置
-                    "heatmap-radius": 30,
-                    //一个热力图单个数据点的热力程度，默认值为1；要求：值大于等于0，支持使用property中某个的热力值
-                    "heatmap-weight": {
-                        "property": "mag",
-                        "stops": [[0, 0], [10, 1]]
-                    },
-                    // 用于统一控制热力值的强度，默认值1；要求：值大于等于0，可根据zoom level进行插值设置
-                    "heatmap-intensity": 0.2,
-                    // 表示热力图颜色阶梯，阶梯的值域范围为0-1，默认值为["interpolate",["linear"],["heatmap-density"],0,"rgba(0, 0, 255, 0)",0.1,"royalblue",0.3,"cyan",0.5,"lime",0.7,"yellow",1,"red"]
-                    "heatmap-color": [
-                        "interpolate",
-                        ["linear"],
-                        ["heatmap-density"],
-                        // 0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
-                        0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
-                    ],
-                    // 表示热力图的不透明度，默认值1；值域范围0-1，可根据zoom level进行插值设置
-                    "heatmap-opacity": 0.7,
-                }
-            });
-        },
-        error: function (error) {
-            alert(error)
-        }
+                // 用于统一控制热力值的强度，默认值1；要求：值大于等于0，可根据zoom level进行插值设置
+                "heatmap-intensity": 0.2,
+                // 表示热力图颜色阶梯，阶梯的值域范围为0-1，默认值为["interpolate",["linear"],["heatmap-density"],0,"rgba(0, 0, 255, 0)",0.1,"royalblue",0.3,"cyan",0.5,"lime",0.7,"yellow",1,"red"]
+                "heatmap-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["heatmap-density"],
+                    // 0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
+                    0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
+                ],
+                // 表示热力图的不透明度，默认值1；值域范围0-1，可根据zoom level进行插值设置
+                "heatmap-opacity": 0.7
+            }
+        });
     })
 }
 
 function addCenter() {
-    $.ajax({
-        url: "./geojsonData/centerPolygon.json",
-        type: "GET",
-        success: function (data) {
-            var gcjData = wgsToGcj(data);
-            map.addSource('centerSource', {
-                'type': 'geojson',
-                'data': gcjData
-            });
-            map.addLayer({
-                'id': 'centerLayer',
-                'type': 'fill',
-                'source': 'centerSource',
-                'layout': {
-                    "visibility": "none"
-                },
-                'paint': {
-                    'fill-color': '#79ada9',
-                    'fill-opacity': 0.2
-                }
-            });
-        },
-        error: function (error) {
-            alert(error)
-        }
+    $.when(getJson(conf_center_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        map.addSource('centerSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'centerLayer',
+            'type': 'fill',
+            'source': 'centerSource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'fill-color': '#79ada9',
+                'fill-opacity': 0.2
+            }
+        });
     })
 }
 
 function addBuslane() {
-    $.ajax({
-        url: "./geojsonData/busLane.json",
-        type: "GET",
-        success: function (data) {
-            console.log(data);
-            var gcjData = wgsToGcj(data);
-            map.addSource('busLaneSource', {
-                'type': 'geojson',
-                'data': gcjData
-            });
-            map.addLayer({
-                'id': 'busLaneLayer',
-                'type': 'line',
-                'source': 'busLaneSource',
-                "layout": {
-                    "line-join": "round",
-                    "line-cap": "round",
-                    "visibility": "none"
-                },
-                "paint": {
-                    "line-color": "#FFD08F",
-                    // "line-color": "rgba(253, 128, 93,1)",
-                    "line-width": 2
-                }
-            });
-        },
-        error: function (error) {
-            alert(error)
-        }
-    })
+    $.when(getJson(conf_buslane_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        map.addSource('busLaneSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'busLaneLayer',
+            'type': 'line',
+            'source': 'busLaneSource',
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round",
+                "visibility": "none"
+            },
+            "paint": {
+                "line-color": "#FFD08F",
+                // "line-color": "rgba(253, 128, 93,1)",
+                "line-width": 2
+            }
+        });
+    });
 }
 
 function addBusroute() {
-    $.ajax({
-        url: "./geojsonData/busRoute.json",
-        type: "GET",
-        success: function (data) {
-            console.log(data);
-            var gcjData = wgsToGcj(data);
-            map.addSource('busRouteSource', {
-                'type': 'geojson',
-                'data': gcjData
-            });
-            map.addLayer({
-                'id': 'busRouteLayer',
-                'type': 'line',
-                'source': 'busRouteSource',
-                "layout": {
-                    "line-join": "round",
-                    "line-cap": "round",
-                    "visibility": "none"
-                },
-                "paint": {
-                    "line-color": "#82B38F",
-                    "line-opacity": 0.6,
-                    "line-width": 2
-                }
-            });
-        },
-        error: function (error) {
-            alert(error)
-        }
-    })
+    $.when(getJson(conf_busroute_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        map.addSource('busRouteSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'busRouteLayer',
+            'type': 'line',
+            'source': 'busRouteSource',
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round",
+                "visibility": "none"
+            },
+            "paint": {
+                // "line-color": "#82B38F",
+                "line-color": "#7FD492",
+                "line-opacity": 0.8,
+                "line-width": 2
+            }
+        });
+    });
 }
 
 /*------------------------------*/
@@ -697,3 +551,15 @@ function layerVisibilityToggle(layerName, checkValue) {
     map.setLayoutProperty(layerName, 'visibility', checkValue);
 }
 
+//得到Json数据
+function getJson(url) {
+    return $.ajax({
+        type: "get",
+        url: url,
+        async: false,
+        dataType: "json",
+        success: function (data) {
+        }, error: function () {
+        }
+    });
+}
