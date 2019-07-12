@@ -11,10 +11,10 @@ var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
 var conf_serviceUrl = conf_domainUrl + '/service';
 var conf_accessToken; //内部使用已隐藏
 // 4744有路况
-var conf_solution = 4744;
+// var conf_solution = 4744;
 // 4678无路况
-// var conf_solution = 4678;
-var conf_centerPoint = [120.64, 31.31801];
+var conf_solution = 4678;
+var conf_centerPoint = [120.60, 31.318];
 var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution;
 
 $(document).ready(function () {
@@ -30,7 +30,7 @@ $(document).ready(function () {
         style: conf_style, /*底图样式*/
         center: conf_centerPoint, /*地图中心点*/
         zoom: 11, /*地图默认缩放等级*/
-        pitch: 0, /*地图俯仰角度*/
+        pitch: 90, /*地图俯仰角度*/
         maxZoom: 17, /*地图最大缩放等级*/
         minZoom: 3  /*地图最小缩放等级*/
     });
@@ -59,6 +59,7 @@ $(document).ready(function () {
         addStops();
         addBuslane();
         addBusroute();
+        stopDensity();
     });
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
@@ -93,6 +94,11 @@ function wgsToGcj(wgsData) {
     geometryData = (wgsData.features)[0].geometry;
     geoType = geometryData.type;
     switch (geoType) {
+        case "Point":
+            coordinateData = wgsData.features;
+            coordinateData = pointWgsGcj(coordinateData);
+            break;
+
         case "Polygon":
             coordinateData = geometryData.coordinates;
             coordinateData = polyWgsGcj(coordinateData);
@@ -113,6 +119,18 @@ function wgsToGcj(wgsData) {
             break;
     }
     return wgsData;
+}
+
+function pointWgsGcj(coordinateData) {
+    coordinateData.forEach(function (coordinateValue, index) {
+        coorWGS = (coordinateValue.geometry).coordinates;
+        const lngWGS = Number(coorWGS[0]);  //经度
+        const latWGS = Number(coorWGS[1]);  //纬度
+        var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+        coorWGS[0] = gcjCoordinate.lng;
+        coorWGS[1] = gcjCoordinate.lat;
+    });
+    return coordinateData;
 }
 
 function polyWgsGcj(coordinateData) {
@@ -468,11 +486,10 @@ function addStops() {
         url: "./geojsonData/stopsPoint.json",
         type: "GET",
         success: function (data) {
-            console.log(data['features'].length)
-            // var gcjData = wgsToGcj(data);
+            var gcjData = wgsToGcj(data);
             map.addSource('stopsSource', {
                 'type': 'geojson',
-                'data': data
+                'data': gcjData
             });
             map.addLayer({
                 'id': 'stopsLayer',
@@ -530,9 +547,8 @@ function addStops() {
                         "interpolate",
                         ["linear"],
                         ["heatmap-density"],
-                        0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
-                        // 0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
-                        // 0, "#101114", 0.1, "#1A3B4A", 0.3, "#006D76", 0.5, "#1CA086", 0.7, "#84D17D", 1, "#F9F871"
+                        // 0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
+                        0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
                     ],
                     // 表示热力图的不透明度，默认值1；值域范围0-1，可根据zoom level进行插值设置
                     "heatmap-opacity": 0.7,
