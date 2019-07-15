@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公交仿真</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script src="JS/wgs2mars.min.js"></script>
+    <link rel="stylesheet" href="//minedata.cn/minemapapi/v2.0.0/minemap.css">
+    <link rel="stylesheet" href="//minedata.cn/minemapapi/v2.0.0/plugins/edit/minemap-edit.css"/>
+
+    <link rel="stylesheet" href="CSS/bootstrap.css">
+    <script src="JS/jquery.js"></script>
+    <!--<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"-->
+    <!--integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"-->
+    <!--crossorigin="anonymous"></script>-->
+
+    <!--Font Awesome图标-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="stylesheet" href="CSS/newMine2.css">
+
+</head>
+<body>
+<div class='wrapper'>
+    <!--导航栏-->
+    <div class="navWrapper">
+        <div class="navWrapper-title">
+            <span>公交仿真系统</span>
+        </div>
+        <div class="navWrapper-nav">
+            <ul>
+                <li class="navWrapper-nav-li" id="layer-click">
+                    <i class="fa fa-layer-group"></i>
+                    <span>图层加载</span>
+                </li>
+                <li class="navWrapper-nav-li" id="info-click">
+                    <i class="fa fa fa-list-alt"></i>
+                    <span>交通信息</span>
+                </li>
+                <!--<li class="navWrapper-nav-li" onclick="bufferGPTool()">-->
+                <li class="navWrapper-nav-li" id="simulate-click">
+                    <i class="fa fa-bus-alt"></i>
+                    <span>交通仿真</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!--交通信息页面-->
+    <div class="dataWrapper" id="info-dataWrapper">
+        <div class="dataWrapper-info-menu">
+            <div class="dataWrapper-info-list">
+                <span class="dataWrapper-info-header">站点分析</span>
+                <span class="dataWrapper-info-li" id="info-station" onclick="infoStation()">站点信息</span>
+                <span class="dataWrapper-info-li">站点覆盖</span>
+                <!--<span class="dataWrapper-info-list">站点分析</span>-->
+            </div>
+            <div class="dataWrapper-info-list">
+                <span class="dataWrapper-info-header">线路分析</span>
+                <span class="dataWrapper-info-li"  onclick="infoBusRoute()">线路信息</span>
+                <span class="dataWrapper-info-li">线网连通性</span>
+                <!--<span class="dataWrapper-info-list">站点分析</span>-->
+            </div>
+            <div class="dataWrapper-info-list">
+                <span class="dataWrapper-info-header">交通换乘分析</span>
+                <span class="dataWrapper-info-li">公交-地铁换乘</span>
+                <span class="dataWrapper-info-li">公交-自行车换乘</span>
+                <!--<span class="dataWrapper-info-list">站点分析</span>-->
+            </div>
+        </div>
+    </div>
+    <!--交通仿真页面-->
+    <div class="dataWrapper" id="simulate-dataWrapper">
+    </div>
+    <!--数据表达-->
+    <div class="infoWrapper row" style="display: none">
+        <div class="infoWrapper-list col">
+            <span class="infoWrapper-list-header">公交线路数</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+        <div class="infoWrapper-list col">
+            <span class="infoWrapper-list-header">线网长度</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+        <div class="infoWrapper-list col">
+
+            <span class="infoWrapper-list-header">网络复杂度</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+        <div class="infoWrapper-list col">
+            <span class="infoWrapper-list-header">线网重复系数</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+        <div class="infoWrapper-list col">
+            <span class="infoWrapper-list-header">线网平均站间距</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+        <div class="infoWrapper-list col">
+            <span class="infoWrapper-list-header">出行直达率</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+        <div class="infoWrapper-list col">
+            <span class="infoWrapper-list-header">出行换成率</span>
+            <span class="infoWrapper-list-num">796</span>
+            <span class="infoWrapper-list-unit">条</span>
+        </div>
+    </div>
+    <!--图层页面-->
+    <div class="layerWrapper">
+        <span class="layerWrapper-angle">
+            <i class="fa fa-angle-double-up"></i>
+        </span>
+        <div class="layerWrapper-list">
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="stationLayer">
+                <label class="layerWrapper-check-label">
+                    公交站点
+                </label>
+            </div>
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="centerLayer">
+                <label class="layerWrapper-check-label">
+                    城区中心面
+                </label>
+            </div>
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="busRouteLayer">
+                <label class="layerWrapper-check-label">
+                    公交线路
+                </label>
+            </div>
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="busLaneLayer">
+                <label class="layerWrapper-check-label">
+                    公交专用道
+                </label>
+            </div>
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="stopHeatLayer">
+                <label class="layerWrapper-check-label">
+                    热力图
+                </label>
+            </div>
+        </div>
+    </div>
+    <!--地图页面-->
+    <div class="mapWrapper">
+        <div id="map" style="width: 100%; height: 100%;">
+            <!--&lt;!&ndash;<div class="map-edit-group">&ndash;&gt;-->
+            <!--&lt;!&ndash;<span class="map-edit-btn" title="画点" onclick="onEditMapClick('point')">&ndash;&gt;-->
+            <!--&lt;!&ndash;<i class="fa fa-map-marker-alt"></i>&ndash;&gt;-->
+            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+            <!--&lt;!&ndash;<span class="map-edit-btn" title="画线" onclick="onEditMapClick('line')">&ndash;&gt;-->
+            <!--&lt;!&ndash;<i class="fa fa-slash"></i>&ndash;&gt;-->
+            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+            <!--&lt;!&ndash;<span class="map-edit-btn" title="删除所选" onclick="onEditMapClick('trash')">&ndash;&gt;-->
+            <!--&lt;!&ndash;<i class="fa fa-trash-alt"></i>&ndash;&gt;-->
+            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+            <!--&lt;!&ndash;<span class="map-edit-btn" title="撤销上一步操作" onclick="onEditMapClick('undo')">&ndash;&gt;-->
+            <!--&lt;!&ndash;<i class="fa fa-undo-alt"></i>&ndash;&gt;-->
+            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+            <!--&lt;!&ndash;<span class="map-edit-btn" title="重复上一步操作" onclick="onEditMapClick('redo')">&ndash;&gt;-->
+            <!--&lt;!&ndash;<i class="fa fa-redo-alt"></i>&ndash;&gt;-->
+            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        </div>
+    </div>
+    <!--地图加载中-->
+    <div class="loading">
+        <p class="loader">Loading</p>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="JS/config.js"></script>
+<script type="text/javascript" src="JS/wgsToGcj.js"></script>
+<script type="text/javascript" src="JS/initMiniMap.js"></script>
+<script type="text/javascript" src="JS/initMineHtml.js"></script>
+
+<script src="JS/bootstrap.js"></script>
+<script src="//minedata.cn/minemapapi/v2.0.0/minemap.js"></script>
+<script src="//minedata.cn/minemapapi/v2.0.0/plugins/edit/minemap-edit.js"></script>
+
+<!--Esri-->
+<link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
+<script src="http://localhost/arcgis_js_api/library/3.28/3.28/init.js"></script>
+</html>

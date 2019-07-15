@@ -1,9 +1,11 @@
 // mineMap
 // var conf_domainUrl; //内部使用已隐藏
+var conf_domainUrl = 'http://mapsjgt.sz-its.cn';
 var conf_dataDomainUrl = conf_domainUrl;
 var conf_spriteUrl = conf_domainUrl + '/minemapapi/v2.0.0/sprite/sprite';
 var conf_serviceUrl = conf_domainUrl + '/service';
 // var conf_accessToken; //内部使用已隐藏
+var conf_accessToken = 'ab86503d8ec44480aa48083d25c73902';
 // 4744有路况
 // var conf_solution = 4744;
 // 4678无路况
@@ -21,6 +23,8 @@ conf_center_query = './geojsonData/centerPolygon.json';
 conf_buslane_query = './geojsonData/busLane.json';
 // 公交线路数据
 conf_busroute_query = './geojsonData/busRoute.json';
+// 全部公交线路数据
+conf_busroutes_query = './geojsonData/busRoutes.json';
 
 
 // 数据请求   ----esrijson

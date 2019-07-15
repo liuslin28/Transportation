@@ -1,5 +1,6 @@
 var map;
 var edit;
+var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'busRoutesLayer'];
 /**
  * 基本地图加载
  * 地图缩放级别限制
@@ -43,7 +44,7 @@ $(document).ready(function () {
                     addCenter();
                     addBuslane();
                     addBusroute();
-                    stopDensity();
+                    addBusroutes();
                 }
             } else {
                 clearInterval(t);
@@ -56,9 +57,9 @@ $(document).ready(function () {
 
     // 地图缩放
     map.on("move", function (e) {
-        console.log(map['transform'].zoom);
+        // console.log(map['transform'].zoom);
         changeZoom(map['transform'].zoom);
-        console.log("整只兔兔都很不好了");
+        // console.log("整只兔兔都很不好了");
     })
 
 });
@@ -70,7 +71,7 @@ function mapFly() {
         zoom: 11,
         speed: 0.1,
         curve: 1
-    })
+    });
 }
 
 // 切换点坐标图层
@@ -84,6 +85,7 @@ function changeZoom(mapZoom) {
         layerVisibilityToggle("stationLayerL", "none");
     }
 }
+
 //_____________________________________________________
 
 function onEditMapClick(mode) {
@@ -329,6 +331,7 @@ function bufferGPTool() {
         })
     });
 }
+
 //_____________________________________________________
 // 指标计算
 
@@ -411,9 +414,10 @@ function addStation() {
                     'stops': [[5, 2], [18, 4]]
                 },
                 // 'circle-color': "#b2cb94",      //填充圆形的颜色
-                'circle-color': "#6C87AB",      //填充圆形的颜色
+                // 'circle-color': "#6C87AB",      //填充圆形的颜色
+                'circle-color': "#0083DD",      //填充圆形的颜色
                 'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 0.6             //透明度，默认为1
+                'circle-opacity': 1             //透明度，默认为1
             }
         });
         map.addLayer({
@@ -535,9 +539,36 @@ function addBusroute() {
                 "visibility": "none"
             },
             "paint": {
-                // "line-color": "#82B38F",
-                "line-color": "#7FD492",
+                // "line-color": "#7FD492",
+                "line-color": "rgb(73, 193, 179)",
                 "line-opacity": 0.8,
+                "line-width": 2
+            }
+        });
+    });
+}
+// 展示用公交线网图层
+function addBusroutes() {
+    $.when(getJson(conf_busroutes_query)).then(function (data) {
+        console.log(data['features'].length);
+        let gcjData = wgsToGcj(data);
+        map.addSource('busRoutesSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'busRoutesLayer',
+            'type': 'line',
+            'source': 'busRoutesSource',
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round",
+                "visibility": "none"
+            },
+            "paint": {
+                // "line-color": "#7FD492",
+                "line-color": "#00C9B7",
+                "line-opacity": 1,
                 "line-width": 2
             }
         });
@@ -562,4 +593,22 @@ function getJson(url) {
         }, error: function () {
         }
     });
+}
+
+function closeLayer() {
+    layerList.forEach(function (value, index) {
+        layerVisibilityToggle(value, 'none');
+    })
+}
+
+//_____________________________________________________
+function infoStation() {
+    closeLayer();
+    layerVisibilityToggle('stopHeatLayer', 'visible');
+}
+
+function infoBusRoute() {
+    closeLayer();
+    layerVisibilityToggle('busRoutesLayer', 'visible');
+    $(".infoWrapper").show();
 }

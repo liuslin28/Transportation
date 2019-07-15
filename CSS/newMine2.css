@@ -1,0 +1,310 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.wrapper {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/*--------------nav----------------*/
+
+.navWrapper {
+    width: 100%;
+    height: 90px;
+    background-color: rgba(15, 27, 36, 0.5);
+    /*background-image: linear-gradient(to right bottom, #406b8a, #386e86, #337081, #34717b, #387274, #397270, #3c736c, #3f7367, #3e7464, #3f7560, #40755c, #427658);*/
+    position: absolute;
+    z-index: 99;
+}
+
+.navWrapper-title {
+    display: inline-block;
+    width: 100%;
+    height: 90px;
+    /*padding-left: 30px;*/
+    text-align: center;
+    line-height: 90px;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 0.2rem;
+    font-family: "思源黑体 CN Bold";
+
+}
+
+/*-----------nav右侧按钮-------------------*/
+
+.navWrapper-nav {
+    position: absolute;
+    right: 10px;
+    top: 0;
+    z-index: 199;
+    height: 90px;
+    width: 300px;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.navWrapper-nav-li {
+    width: 80px;
+    display: inline-block;
+    text-align: center;
+    border: 1px solid #6C87AB;
+    color: #6C87AB;
+    cursor: pointer;
+}
+
+.navWrapper-nav-li:hover, .navWrapper-nav-li-active {
+    background-color: whitesmoke;
+    color: #6499AC;
+}
+
+.navWrapper-nav-li span {
+    margin: 2px 0;
+    display: block;
+}
+
+.navWrapper-nav-li i {
+    margin-top: 8px;
+    font-size: 2rem;
+}
+
+/*--------------侧边栏----------------*/
+.dataWrapper {
+    width: 400px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    right: 0;
+    z-index: 199;
+    border: none;
+    position: absolute;
+    background-color: rgba(25, 38, 52, 0.8);
+    -moz-box-shadow: 2px 2px 5px #000000;
+    -webkit-box-shadow: 2px 2px 5px #000000;
+    box-shadow: 2px 2px 5px #000000;
+    display: none;
+    /*background-image: linear-gradient(to right top, #406b8a, #287085, #1d747a, #2b766a, #427658);*/
+}
+
+/*-------------交通信息页面 start-----------------*/
+.dataWrapper-info-menu {
+    width: 100%;
+    position: relative;
+    top: 3%; /*偏移*/
+}
+
+.dataWrapper-info-list {
+    width: 100%;
+    margin: 100px auto;
+    text-align: center;
+}
+
+.dataWrapper-info-header {
+    display: block;
+    margin: 20px auto;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+}
+
+.dataWrapper-info-li {
+    display: block;
+    margin: 10px auto;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+    cursor: pointer;
+}
+
+.dataWrapper-info-li:hover {
+    color: #00B6D0;
+}
+
+/*-------------交通信息页面 end-----------------*/
+/*-------------交通仿真页面-----------------*/
+
+/*-------------数据表达-----------------*/
+.infoWrapper {
+    height: 90px;
+    width: 100%;
+    position: absolute;
+    top:90px;
+    left: 0;
+    z-index: 99;
+    text-align: center;
+    background-color: rgba(15, 27, 36, 0.5);
+
+}
+
+.infoWrapper-list {
+    color: white;
+}
+
+.infoWrapper-list-header {
+    display: block;
+    color: white;
+}
+
+.infoWrapper-list-num {
+    display: inline-block;
+    margin-left: 80px;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.infoWrapper-list-unit {
+    margin-left: 10px;
+    /*color: #00B6D0;*/
+
+}
+
+/*-------------图层页面-----------------*/
+.layerWrapper {
+    position: absolute;
+    top: 120px;
+    left: 20px;
+    width: 250px;
+    /*height: 600px;*/
+    background-color: rgba(25, 38, 52, 0.8);
+    -moz-box-shadow: 2px 2px 5px #000000;
+    -webkit-box-shadow: 2px 2px 5px #000000;
+    box-shadow: 2px 2px 5px #000000;
+    z-index: 199;
+    display: none;
+}
+
+.layerWrapper-angle {
+    margin-right: 15px;
+    margin-top: 15px;
+    float: right;
+    color: white;
+    cursor: pointer;
+}
+
+.layerWrapper-list {
+    width: 90%;
+    margin: 30px auto;
+}
+
+.layerWrapper-check {
+    width: 150px;
+    height: 30px;
+    display: block;
+    margin: 15px auto;
+}
+
+.layerWrapper-check-input {
+    margin-right: 20px;
+}
+
+.layerWrapper-check-label {
+    color: white;
+}
+
+/*------------------------------*/
+/*展示临时用*/
+.temp-data {
+    display: none;
+}
+
+/*------------地图页面------------------*/
+.mapWrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border: none;
+}
+
+/*------------地图编辑工具------------*/
+.map-edit-group {
+    position: absolute;
+    z-index: 300;
+    top: 120px;
+    right: 200px;
+    width: 250px;
+    overflow: hidden;
+}
+
+.map-edit-btn {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    color: white;
+    border: 1px solid #ddd;
+    display: inline-block;
+}
+
+.map-edit-btn:hover {
+    background-color: #efefef;
+    color: #111;
+}
+
+/*------------地图加载中------------*/
+
+.loading {
+    position: absolute;
+    left: 40%;
+    top: 50%;
+    width: 300px;
+    height: 90px;
+}
+
+.loader {
+    color: white;
+    font-weight: bold;
+    animation-duration: 2s;
+    animation-name: spread;
+    animation-iteration-count: infinite;
+    transform: translateZ(0);
+    text-transform: uppercase;
+    display: table-cell;
+    vertical-align: middle;
+    font-size: 1.3em;
+    letter-spacing: 6em;
+    text-indent: -100%;
+}
+
+@keyframes spread {
+    from {
+        letter-spacing: 6em;
+        text-indent: -150%;
+    }
+    5% {
+    }
+    50% {
+        text-indent: 50%;
+        letter-spacing: 0.3em;
+    }
+    95% {
+    }
+    to {
+        letter-spacing: 6em;
+        text-indent: 120%;
+    }
+}

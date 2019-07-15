@@ -60,14 +60,22 @@ $('.dataWrapper-list-menu-li').click(function () {
 // 导航栏列表
 // 有bug待改
 $('.navWrapper-nav-li').click(function () {
-    // let _this = this;
     let navId = this.id;
     if (navId === 'layer-click') {
         $('#layer-click').toggleClass("navWrapper-nav-li-active");
     } else {
-        $('#layer-click').siblings('li').removeClass('navWrapper-nav-li-active');
-        $('#'+navId).addClass('navWrapper-nav-li-active');
+        //                 $('#layer-click').siblings('li').removeClass('navWrapper-nav-li-active');
+        //                 $('#'+navId).addClass('navWrapper-nav-li-active');
     }
-    console.log(this.id);
 });
+
+// 点击屏幕，隐藏菜单栏
+$('.mapWrapper').click(function () {
+    $('.dataWrapper').hide();
+});
+
+$('.dataWrapper-info-li').click(function () {
+    $('.dataWrapper').hide();
+});
+
 
