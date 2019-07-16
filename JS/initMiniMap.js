@@ -1,6 +1,7 @@
 var map;
 var edit;
 var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'busRoutesLayer'];
+var networkLength; //各线路长度之和
 /**
  * 基本地图加载
  * 地图缩放级别限制
@@ -40,6 +41,7 @@ $(document).ready(function () {
                     clearInterval(t);
                     $('.loading').hide();
                     mapFly();
+                    networkDistance();
 
                     addCenter();
                     addBuslane();
@@ -152,7 +154,7 @@ function buslaneGPTool() {
         })
     });
 }
-
+// 线网长度
 function busrouteGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
         $.ajax({
@@ -186,10 +188,10 @@ function busrouteGPTool() {
 
                         // 结果图加载
                         function completeCallback(jobInfo) {
-                            // 面积求算
+                            // 长度求算
                             gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                 let lineLength = value.value.features[0].attributes['Shape_Length'];
-                                // 面积
+                                // 长度
                                 console.log(value);
                                 console.log(lineLength);
                             });
@@ -344,7 +346,6 @@ function stopDensity() {
             let stationDensity = stationNum / centerArea;
             console.log(stationDensity);
         })
-
     })
 }
 
@@ -355,6 +356,25 @@ function networkComplex() {
         let networkComplex = (stationLength - 1) / stationLength;
         console.log(networkComplex)
     });
+}
+
+// 线网平均站间距
+function networkDistance() {
+    let busRouteLength = 0;
+    let busRouteStation = 0 ;
+    $.when(getJson(conf_busroute_ex_query)).then(function (data) {
+        // console.log(data)
+        let busRoute = data['features'];
+        // console.log(busRoute)
+        busRoute.forEach(function (value) {
+            console.log(value['properties'])
+            busRouteLength += value['properties'].lineLength;
+            busRouteStation += value['properties'].stationNum;
+        });
+        networkLength = busRouteLength;
+        let networkDistance = busRouteLength/busRouteStation;
+        console.log(networkDistance);
+    })
 }
 
 //_____________________________________________________
@@ -417,7 +437,7 @@ function addStation() {
                 // 'circle-color': "#6C87AB",      //填充圆形的颜色
                 'circle-color': "#0083DD",      //填充圆形的颜色
                 'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 1             //透明度，默认为1
+                'circle-opacity': 0.9            //透明度，默认为1
             }
         });
         map.addLayer({
@@ -515,6 +535,8 @@ function addBuslane() {
             },
             "paint": {
                 "line-color": "#FFD08F",
+                "line-opacity": 0.8,
+
                 // "line-color": "rgba(253, 128, 93,1)",
                 "line-width": 2
             }
@@ -547,10 +569,11 @@ function addBusroute() {
         });
     });
 }
+
 // 展示用公交线网图层
 function addBusroutes() {
     $.when(getJson(conf_busroutes_query)).then(function (data) {
-        console.log(data['features'].length);
+        // console.log(data['features'].length);
         let gcjData = wgsToGcj(data);
         map.addSource('busRoutesSource', {
             'type': 'geojson',
@@ -566,9 +589,9 @@ function addBusroutes() {
                 "visibility": "none"
             },
             "paint": {
-                // "line-color": "#7FD492",
-                "line-color": "#00C9B7",
-                "line-opacity": 1,
+                "line-color": "#00B6D0",
+                // "line-color": "#00C9B7",
+                "line-opacity": 0.9,
                 "line-width": 2
             }
         });
@@ -611,4 +634,6 @@ function infoBusRoute() {
     closeLayer();
     layerVisibilityToggle('busRoutesLayer', 'visible');
     $(".infoWrapper").show();
+    // busrouteGPTool();
+    // networkComplex();
 }
