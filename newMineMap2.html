@@ -51,21 +51,19 @@
         <div class="dataWrapper-info-menu">
             <div class="dataWrapper-info-list">
                 <span class="dataWrapper-info-header">站点分析</span>
-                <span class="dataWrapper-info-li" id="info-station" onclick="infoStation()">站点信息</span>
-                <span class="dataWrapper-info-li">站点覆盖</span>
-                <!--<span class="dataWrapper-info-list">站点分析</span>-->
+                <span class="dataWrapper-info-li" id="info-station">站点信息</span>
+                <span class="dataWrapper-info-li" id="info-cover">站点覆盖</span>
             </div>
             <div class="dataWrapper-info-list">
                 <span class="dataWrapper-info-header">线路分析</span>
-                <span class="dataWrapper-info-li"  onclick="infoBusRoute()">线路信息</span>
-                <span class="dataWrapper-info-li">线网连通性</span>
-                <!--<span class="dataWrapper-info-list">站点分析</span>-->
+                <span class="dataWrapper-info-li" id="info-route">线路信息</span>
+                <span class="dataWrapper-info-li" id="info-buslane">公交专用道</span>
+                <span class="dataWrapper-info-li" id="info-connectivity">线网连通性</span>
             </div>
             <div class="dataWrapper-info-list">
                 <span class="dataWrapper-info-header">交通换乘分析</span>
-                <span class="dataWrapper-info-li">公交-地铁换乘</span>
-                <span class="dataWrapper-info-li">公交-自行车换乘</span>
-                <!--<span class="dataWrapper-info-list">站点分析</span>-->
+                <span class="dataWrapper-info-li" id="info-metro">公交-地铁换乘</span>
+                <span class="dataWrapper-info-li" id="info-bicycle">公交-自行车换乘</span>
             </div>
         </div>
     </div>
@@ -73,42 +71,101 @@
     <div class="dataWrapper" id="simulate-dataWrapper">
     </div>
     <!--数据表达-->
-    <div class="infoWrapper row" style="display: none">
-        <div class="infoWrapper-list col">
-            <span class="infoWrapper-list-header">公交线路数</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
+    <div class="infoWrapper" style="display: none">
+        <!--站点信息-->
+        <div class="infoWrapper-div info-station row" style="height: 100%;width: 100%;display: none;">
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交站点数</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit">个</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交首末站数</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit">个</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交换乘站数</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit">个</span>
+            </div>
         </div>
-        <div class="infoWrapper-list col">
-            <span class="infoWrapper-list-header">线网长度</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
-        </div>
-        <div class="infoWrapper-list col">
 
-            <span class="infoWrapper-list-header">网络复杂度</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
+        <!--站点覆盖-->
+        <div class="infoWrapper-div info-cover row" style="height: 100%;width: 100%;display: none;">
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">覆盖面积</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit">平方千米</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">覆盖率</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit">个</span>
+            </div>
         </div>
-        <div class="infoWrapper-list col">
-            <span class="infoWrapper-list-header">线网重复系数</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
+
+        <!--线路信息-->
+        <div class="infoWrapper-div info-route row" style="height: 100%;width: 100%;display: none;">
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交线路数</span>
+                <span class="infoWrapper-list-num">796</span>
+                <span class="infoWrapper-list-unit">条</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">线网长度</span>
+                <span class="infoWrapper-list-num">60.92</span>
+                <span class="infoWrapper-list-unit">千米</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">线网密度</span>
+                <span class="infoWrapper-list-num">3.72</span>
+                <span class="infoWrapper-list-unit"></span>
+            </div>
+            <div class="infoWrapper-list col">
+
+                <span class="infoWrapper-list-header">网络复杂度</span>
+                <span class="infoWrapper-list-num">0.99987</span>
+                <span class="infoWrapper-list-unit"></span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">线网重复系数</span>
+                <span class="infoWrapper-list-num">3.31</span>
+                <span class="infoWrapper-list-unit"></span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">线网平均站间距</span>
+                <span class="infoWrapper-list-num">1</span>
+                <span class="infoWrapper-list-unit">千米</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">出行直达率</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit"></span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">出行换成率</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit"></span>
+            </div>
         </div>
-        <div class="infoWrapper-list col">
-            <span class="infoWrapper-list-header">线网平均站间距</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
-        </div>
-        <div class="infoWrapper-list col">
-            <span class="infoWrapper-list-header">出行直达率</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
-        </div>
-        <div class="infoWrapper-list col">
-            <span class="infoWrapper-list-header">出行换成率</span>
-            <span class="infoWrapper-list-num">796</span>
-            <span class="infoWrapper-list-unit">条</span>
+        <!--公交专用道-->
+        <div class="infoWrapper-div info-buslane row" style="height: 100%;width: 100%;display: none;">
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交专用道数量</span>
+                <span class="infoWrapper-list-num">3</span>
+                <span class="infoWrapper-list-unit">条</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交专用道长度</span>
+                <span class="infoWrapper-list-num">8.59</span>
+                <span class="infoWrapper-list-unit">千米</span>
+            </div>
+            <div class="infoWrapper-list col">
+                <span class="infoWrapper-list-header">公交专用道设置比率</span>
+                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-unit">%</span>
+            </div>
         </div>
     </div>
     <!--图层页面-->

@@ -4,7 +4,7 @@ $('.layerWrapper-check-input').click(function (e) {
     let inputTarget = e.target;
     let layerName = inputTarget.name;
     let checkValue = inputTarget.checked;
-    var value;
+    let value;
     if (checkValue) {
         value = 'visible';
     } else {
@@ -61,13 +61,42 @@ $('.dataWrapper-list-menu-li').click(function () {
 });
 
 /*------------------------------*/
-// 点击屏幕，隐藏菜单栏
+// 点击屏幕，隐藏右侧菜单栏
 $('.mapWrapper').click(function () {
     $('.dataWrapper').hide();
 });
 
-$('.dataWrapper-info-li').click(function () {
-    $('.dataWrapper').hide();
-});
 
+// 交通信息页面 与 infoWrapper联动
+$('.dataWrapper-info-li').click(function (e) {
+    $('.dataWrapper').hide();
+    let liTarget = e.target;
+    let liId = liTarget.id;
+    console.log(liId);
+    // let wrapperTargert = $('.infoWrapper');
+
+    // infoWrapper显示
+    $('.infoWrapper').show();
+    $('.infoWrapper-div').hide();
+    $('.' + liId).show();
+
+    // 图层显示
+    closeLayer();
+    let showLayer;
+    switch (liId) {
+        case 'info-station':
+            showLayer = 'stopHeatLayer';
+            break;
+        case 'info-route':
+            showLayer = 'busRoutesLayer';
+            break;
+        case 'info-buslane':
+            showLayer = 'busLaneLayer';
+            break;
+        default:
+            showLayer = 'stationLayer';
+            break;
+    }
+    layerVisibilityToggle(showLayer, 'visible');
+});
 
