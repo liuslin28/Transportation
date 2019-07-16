@@ -1,12 +1,13 @@
 // WGS84 => GCJ02
 function wgsToGcj(wgsData) {
     // 获取数据类型
-    geometryData = (wgsData.features)[0].geometry;
-    geoType = geometryData.type;
+    let geometryData = (wgsData.features)[0].geometry;
+    let geoType = geometryData.type;
+    let coordinateData;
     switch (geoType) {
         case "Point":
             coordinateData = wgsData.features;
-            coordinateData = pointWgsGcj(coordinateData);
+            wgsData.features = pointWgsGcj(coordinateData);
             break;
         case "LineString":
             coordinateData = wgsData.features;
@@ -31,11 +32,11 @@ function wgsToGcj(wgsData) {
 }
 
 function pointWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue, index) {
-        coorWGS = (coordinateValue.geometry).coordinates;
+    coordinateData.forEach(function (coordinateValue) {
+        let coorWGS = (coordinateValue.geometry).coordinates;
         const lngWGS = Number(coorWGS[0]);  //经度
         const latWGS = Number(coorWGS[1]);  //纬度
-        var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+        let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
         coorWGS[0] = gcjCoordinate.lng;
         coorWGS[1] = gcjCoordinate.lat;
     });
@@ -43,25 +44,25 @@ function pointWgsGcj(coordinateData) {
 }
 
 function lineWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue, index) {
-        coorWGS = (coordinateValue.geometry).coordinates
+    coordinateData.forEach(function (coordinateValue) {
+        let coorWGS = (coordinateValue.geometry).coordinates;
         coorWGS.forEach(function (currentValue) {
             const lngWGS = Number(currentValue[0]);  //经度
             const latWGS = Number(currentValue[1]);  //纬度
-            var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+            let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
             currentValue[0] = gcjCoordinate.lng;
             currentValue[1] = gcjCoordinate.lat;
         })
-    })
+    });
     return coordinateData;
 }
 
 function polyWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue, index) {
+    coordinateData.forEach(function (coordinateValue) {
         coordinateValue.forEach(function (currentValue) {
             const lngWGS = Number(currentValue[0]);  //经度
             const latWGS = Number(currentValue[1]);  //纬度
-            var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+            let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
             currentValue[0] = gcjCoordinate.lng;
             currentValue[1] = gcjCoordinate.lat;
         })
@@ -70,12 +71,12 @@ function polyWgsGcj(coordinateData) {
 }
 
 function multipolyWgsGcj(coordinateData) {
-    coordinateData.forEach(function (arrayValue, index) {
-        arrayValue.forEach(function (listValue, index) {
-            listValue.forEach(function (currentValue, index) {
+    coordinateData.forEach(function (arrayValue) {
+        arrayValue.forEach(function (listValue) {
+            listValue.forEach(function (currentValue) {
                 const lngWGS = Number(currentValue[0]);  //经度
                 const latWGS = Number(currentValue[1]);  //纬度
-                var gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+                let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
                 currentValue[0] = gcjCoordinate.lng;
                 currentValue[1] = gcjCoordinate.lat;
             })
