@@ -16,11 +16,16 @@ $('.layerWrapper-check-input').click(function (e) {
 /*------------------------------*/
 // 图层列表显示切换
 $('#layer-click').click(function () {
-    $('.layerWrapper').slideToggle()
+    $('.layerWrapper').slideToggle();
+    $('#layer-click').toggleClass("navWrapper-nav-li-active");
+
+
 });
 
 $('.layerWrapper-angle').click(function () {
-    $('.layerWrapper').slideToggle()
+    $('.layerWrapper').slideToggle();
+    $('#layer-click').toggleClass("navWrapper-nav-li-active");
+
 });
 /*------------------------------*/
 // 交通信息列表显示切换
@@ -38,10 +43,10 @@ $('#simulate-click').click(function () {
 // 交通信息页面一级导航
 $('.dataWrapper-menu-li').click(function () {
     let menuListName = $(this).find("a").eq(0).attr('name');
-    $(".dataWrapper-list-menu").each(function(index,domEle) {
+    $(".dataWrapper-list-menu").each(function (index, domEle) {
         $(domEle).hide();
     });
-    $('#'+ menuListName).show();
+    $('#' + menuListName).show();
 });
 
 // 交通信息页面二级导航
@@ -52,23 +57,10 @@ $('.dataWrapper-list-menu-li').click(function () {
 
     let menuListName = $(this).find("a").eq(0).attr('name');
     $(".dataWrapper-content-pane").hide();
-    $('#'+ menuListName).show();
+    $('#' + menuListName).show();
 });
 
 /*------------------------------*/
-// 列表切换样式
-// 导航栏列表
-// 有bug待改
-$('.navWrapper-nav-li').click(function () {
-    let navId = this.id;
-    if (navId === 'layer-click') {
-        $('#layer-click').toggleClass("navWrapper-nav-li-active");
-    } else {
-        //                 $('#layer-click').siblings('li').removeClass('navWrapper-nav-li-active');
-        //                 $('#'+navId).addClass('navWrapper-nav-li-active');
-    }
-});
-
 // 点击屏幕，隐藏菜单栏
 $('.mapWrapper').click(function () {
     $('.dataWrapper').hide();
