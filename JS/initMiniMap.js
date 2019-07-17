@@ -1,15 +1,18 @@
 var map;
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'busRoutesLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'busRoutesLayer', 'coverPolygonLayer'];
 var networkLength; //各线路长度之和
-var networkLengthTemp = 201537.800148/1000; //各线路长度之和(古城区)
+var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
 var busLaneRatio; //公交专用道设置比率
 var busLineLength; //公交线网长度
 var busLineDensity; //公交线网密度
 var networkRepeat; //线网重复系数
-var centerArea; //中央建成区面积
+var centerArea =411.56; //中央建成区面积
 var oldcityArea = 16.373766; //古城区面积
+var coverArea;  //中央建成区站点覆盖面积
+var coverAreaRatio;  //中央建成区站点覆盖比率
+
 /**
  * 基本地图加载
  * 地图缩放级别限制
@@ -48,8 +51,8 @@ $(document).ready(function () {
                     //加载成功后 loading 隐藏 , 加载其它数据
                     clearInterval(t);
                     $('.loading').hide();
+                    map.resize();
                     mapFly();
-                    networkDistance();
 
                     addCenter();
                     addBuslane();
@@ -63,7 +66,7 @@ $(document).ready(function () {
         addStation();
     });
 
-    setTimeout(function (){
+    setTimeout(function () {
         // buslaneGPTool();
         // busrouteGPTool();
     }, 5000);
@@ -127,72 +130,21 @@ function buslaneGPTool() {
             url: "./esrijsonData/esribusLane.json",
             type: "GET",
             success: function (data) {
-                let buslaneData = data;
-                let buslaneFeatureSet = new esri.tasks.FeatureSet(buslaneData);
+                let buslaneFeatureSet = new esri.tasks.FeatureSet(data);
                 buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                 $.ajax({
                     url: "./esrijsonData/esriroadLine.json",
                     type: "GET",
                     success: function (data) {
-                        let roadData = data;
-                        var roadFeatureSet = new esri.tasks.FeatureSet(roadData);
-                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-
-                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
-                        var gpParams = {
-                            "road": roadFeatureSet,
-                            "buslane": buslaneFeatureSet
-                        };
-                        // console.log(gpParams);
-                        gptask.submitJob(gpParams, completeCallback, statusCallback);
-
-                        // 运行状态显示
-                        function statusCallback(jobInfo) {
-                            console.log(jobInfo.jobStatus);
-                        }
-
-                        // 结果图加载
-                        function completeCallback(jobInfo) {
-                            // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
-                                let lineLength = value.value.features[0].attributes['Shape_Length'];
-                                busLaneLength = lineLength;
-                                busLaneRatio = busLaneLength/networkLength;
-                                console.log(busLaneRatio);
-
-                            });
-                        }
-                    }
-                })
-            }
-        })
-    });
-}
-// 线网长度
-function busrouteGPTool() {
-    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
-        $.ajax({
-            url: "./esrijsonData/esribusRoute.json",
-            type: "GET",
-            success: function (data) {
-                let buslineData = data;
-                let buslineFeatureSet = new esri.tasks.FeatureSet(buslineData);
-                buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-                $.ajax({
-                    url: "./esrijsonData/esriroadLine.json",
-                    type: "GET",
-                    success: function (data) {
-                        let roadData = data;
-                        let roadFeatureSet = new esri.tasks.FeatureSet(roadData);
+                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
                         roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
                         let gpParams = {
                             "road": roadFeatureSet,
-                            "buslane": buslineFeatureSet
+                            "buslane": buslaneFeatureSet
                         };
-                        // console.log(gpParams);
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
                         // 运行状态显示
@@ -206,14 +158,61 @@ function busrouteGPTool() {
                             gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                 let lineLength = value.value.features[0].attributes['Shape_Length'];
                                 // 米=>千米
-                                busLineLength = lineLength/1000;
+                                busLaneLength = lineLength / 1000;
+                                busLaneRatio = busLaneLength / networkLength;
+                                console.log(busLaneRatio);
+
+                            });
+                        }
+                    }
+                })
+            }
+        })
+    });
+}
+
+// 线网长度
+function busrouteGPTool() {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+        $.ajax({
+            url: "./esrijsonData/esribusRoute.json",
+            type: "GET",
+            success: function (data) {
+                let buslineFeatureSet = new esri.tasks.FeatureSet(data);
+                buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+                $.ajax({
+                    url: "./esrijsonData/esriroadLine.json",
+                    type: "GET",
+                    success: function (data) {
+                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
+                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        let gpParams = {
+                            "road": roadFeatureSet,
+                            "buslane": buslineFeatureSet
+                        };
+                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                        // 运行状态显示
+                        function statusCallback(jobInfo) {
+                            console.log(jobInfo.jobStatus);
+                        }
+
+                        // 结果图加载
+                        function completeCallback(jobInfo) {
+                            // 长度求算
+                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                                // 米=>千米
+                                busLineLength = lineLength / 1000;
                                 console.log(lineLength);
                                 // 全市为例的计算
                                 // networkRepeat = networkLength/busLineLength;
                                 // busLineDensity = busLineLength/centerArea;
                                 // 古城区为例的计算
-                                networkRepeat = networkLengthTemp/busLineLength;
-                                busLineDensity = busLineLength/oldcityArea;
+                                networkRepeat = networkLengthTemp / busLineLength;
+                                busLineDensity = busLineLength / oldcityArea;
                                 console.log(busLineDensity);
 
                             });
@@ -227,9 +226,9 @@ function busrouteGPTool() {
 
 // 站点覆盖率
 function bufferGPTool() {
-    var pointFeatureSet;
-    var polygonFeatureSet;
-    var aPoint = {
+    let pointFeatureSet;
+    let polygonFeatureSet;
+    let aPoint = {
         "displayFieldName": "",
         "fieldAliases": {
             "FID": "FID"
@@ -249,7 +248,7 @@ function bufferGPTool() {
         "features": []
     };
 
-    var Dis = {
+    let Dis = {
         "distance": 500,
         "units": "esriMeters"
     };
@@ -261,15 +260,15 @@ function bufferGPTool() {
             url: "./geojsonData/stopsPoint.json",
             type: "GET",
             success: function (data) {
-                var pointData = data['features'];
+                let pointData = data['features'];
 
-                var features = [];
-                var i = 0;
+                let features = [];
+                let i = 0;
                 pointData.forEach(function (pointValue) {
                     i += 1;
                     let coordinateValue = (pointValue['geometry'])['coordinates']
-                    var point = new esri.geometry.Point([coordinateValue[0], coordinateValue[1]], new SpatialReference({wkid: 4326}));
-                    var graphic = new Graphic({
+                    let point = new esri.geometry.Point([coordinateValue[0], coordinateValue[1]], new SpatialReference({wkid: 4326}));
+                    let graphic = new Graphic({
                         geometry: point,
                         attributes: {
                             "FID": i
@@ -288,20 +287,18 @@ function bufferGPTool() {
                     url: './esrijsonData/esricenterPolygon.json',
                     type: 'GET',
                     success: function (data) {
-                        centercityfeatures = data;
                         // 设置输入参数（多边形
-                        polygonFeatureSet = new esri.tasks.FeatureSet(centercityfeatures);
+                        polygonFeatureSet = new esri.tasks.FeatureSet(data);
                         polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         // GP服务调用
-                        var gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/coverArea/GPServer/coverArea");
-                        var gpParams = {
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/coverArea/GPServer/coverArea");
+                        let gpParams = {
                             "stops": pointFeatureSet,
                             "Dis1": Dis,
                             "Dis2": Dis,
                             "city1": polygonFeatureSet
                         };
-                        // console.log(gpParams);
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
                         // 运行状态显示
@@ -311,16 +308,19 @@ function bufferGPTool() {
 
                         // 结果图加载
                         function completeCallback(jobInfo) {
-                            gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
-                                areaData = value.value.features[0].attributes['Shape_Area'];
-                                console.log(areaData)
-                            })
                             // 面积求算
-                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                            gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
                                 // 面积
-                                bufferResult = value.value.features;
-                                console.log(bufferResult)
-
+                                areaData = value.value.features[0].attributes['Shape_Area'];
+                                // 米=>千米
+                                coverArea = areaData/(1000 * 1000);
+                                console.log(coverArea);
+                                coverAreaRatio = coverArea/ centerArea;
+                                console.log(coverAreaRatio);
+                            });
+                            // 地图展示
+                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                                let bufferResult = value.value.features;
                                 // 输出格式转换，坐标尚未进行转换
                                 bufferJson = transtoJson(bufferResult);
                                 if (bufferJson) {
@@ -329,7 +329,7 @@ function bufferGPTool() {
                                         'data': bufferJson
                                     });
                                     map.addLayer({
-                                        'id': 'polygonLayer',
+                                        'id': 'coverPolygonLayer',
                                         'type': 'fill',
                                         'source': 'bufferJson',
                                         'layout': {},
@@ -365,12 +365,6 @@ function stopDensity() {
         let stationNum = data['features'].length;
         let stationDensity = stationNum / centerArea;
         console.log(stationDensity);
-
-        // $.when(getJson(conf_center_query)).then(function (data) {
-        //     let centerArea = (data['features'])[0].properties.AREA;
-        //     let stationDensity = stationNum / centerArea;
-        //     console.log(stationDensity);
-        // })
     })
 }
 
@@ -386,24 +380,22 @@ function networkComplex() {
 // 线网平均站间距
 function networkDistance() {
     let busRouteLength = 0;
-    let busRouteStation = 0 ;
+    let busRouteStation = 0;
     $.when(getJson(conf_busline_query)).then(function (data) {
         let busLine = data['features'];
         busLine.forEach(function (value) {
-            // console.log(value['properties'].lineLength);
-            if(value['properties'].lineLength === '') {
-                console.log(value['properties'].lineName);
+            if (value['properties'].lineLength === '') {
+                // console.log(value['properties'].lineName);
             } else {
                 busRouteLength += Number(value['properties'].lineLength);
-
             }
-            if(value['properties'].stationNum) {
+            if (value['properties'].stationNum) {
                 busRouteStation += Number(value['properties'].stationNum);
             }
         });
         networkLength = busRouteLength;
         console.log(networkLength);
-        let networkDistance = busRouteLength/busRouteStation;
+        let networkDistance = busRouteLength / busRouteStation;
         console.log(networkDistance);
     })
 }
@@ -417,7 +409,7 @@ function transtoJson(data) {
         const geoCoordinate = value.geometry['rings'];
         multiPoly.push(geoCoordinate);
     });
-    polygonJson = {
+    let polygonJson = {
         "type": "FeatureCollection",
         "features": [
             {
@@ -434,11 +426,10 @@ function transtoJson(data) {
 }
 
 //_____________________________________________________
-
 // 加载数据
 function addStation() {
     $.when(getJson(conf_station_query)).then(function (data) {
-        console.log(data['features'].length);
+        // console.log(data['features'].length);
         let gcjData = wgsToGcj(data);
         map.addSource('stopsSource', {
             'type': 'geojson',
@@ -529,7 +520,6 @@ function addStation() {
 function addCenter() {
     $.when(getJson(conf_center_query)).then(function (data) {
         let gcjData = wgsToGcj(data);
-        centerArea = (data['features'])[0].properties.AREA;
         map.addSource('centerSource', {
             'type': 'geojson',
             'data': gcjData
@@ -568,8 +558,6 @@ function addBuslane() {
             "paint": {
                 "line-color": "#FFD08F",
                 "line-opacity": 0.8,
-
-                // "line-color": "rgba(253, 128, 93,1)",
                 "line-width": 2
             }
         });
