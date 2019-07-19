@@ -76,17 +76,7 @@
         <div class="infoWrapper-div info-station row" style="height: 100%;width: 100%;display: none;">
             <div class="infoWrapper-list col">
                 <span class="infoWrapper-list-header">公交站点数</span>
-                <span class="infoWrapper-list-num">X</span>
-                <span class="infoWrapper-list-unit">个</span>
-            </div>
-            <div class="infoWrapper-list col">
-                <span class="infoWrapper-list-header">公交首末站数</span>
-                <span class="infoWrapper-list-num">X</span>
-                <span class="infoWrapper-list-unit">个</span>
-            </div>
-            <div class="infoWrapper-list col">
-                <span class="infoWrapper-list-header">公交换乘站数</span>
-                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-num">7842</span>
                 <span class="infoWrapper-list-unit">个</span>
             </div>
         </div>
@@ -95,13 +85,13 @@
         <div class="infoWrapper-div info-cover row" style="height: 100%;width: 100%;display: none;">
             <div class="infoWrapper-list col">
                 <span class="infoWrapper-list-header">覆盖面积</span>
-                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-num">370.99</span>
                 <span class="infoWrapper-list-unit">平方千米</span>
             </div>
             <div class="infoWrapper-list col">
                 <span class="infoWrapper-list-header">覆盖率</span>
-                <span class="infoWrapper-list-num">X</span>
-                <span class="infoWrapper-list-unit">个</span>
+                <span class="infoWrapper-list-num">90.14</span>
+                <span class="infoWrapper-list-unit">%</span>
             </div>
         </div>
 
@@ -135,7 +125,7 @@
             </div>
             <div class="infoWrapper-list col">
                 <span class="infoWrapper-list-header">线网平均站间距</span>
-                <span class="infoWrapper-list-num">1</span>
+                <span class="infoWrapper-list-num">0.64</span>
                 <span class="infoWrapper-list-unit">千米</span>
             </div>
             <div class="infoWrapper-list col">
@@ -163,7 +153,7 @@
             </div>
             <div class="infoWrapper-list col">
                 <span class="infoWrapper-list-header">公交专用道设置比率</span>
-                <span class="infoWrapper-list-num">X</span>
+                <span class="infoWrapper-list-num">14.1</span>
                 <span class="infoWrapper-list-unit">%</span>
             </div>
         </div>
@@ -181,13 +171,7 @@
                 </label>
             </div>
             <div class="layerWrapper-check">
-                <input class="layerWrapper-check-input" type="checkbox" value="" name="centerLayer">
-                <label class="layerWrapper-check-label">
-                    城区中心面
-                </label>
-            </div>
-            <div class="layerWrapper-check">
-                <input class="layerWrapper-check-input" type="checkbox" value="" name="busRouteLayer">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="busRoutesLayer">
                 <label class="layerWrapper-check-label">
                     公交线路
                 </label>
@@ -199,9 +183,21 @@
                 </label>
             </div>
             <div class="layerWrapper-check">
-                <input class="layerWrapper-check-input" type="checkbox" value="" name="stopHeatLayer">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="centerLayer">
                 <label class="layerWrapper-check-label">
-                    热力图
+                    城区中心面
+                </label>
+            </div>
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="busRouteLayer">
+                <label class="layerWrapper-check-label">
+                    古城区公交线路
+                </label>
+            </div>
+            <div class="layerWrapper-check">
+                <input class="layerWrapper-check-input" type="checkbox" value="" name="oldCityLayer">
+                <label class="layerWrapper-check-label">
+                    古城区中心面
                 </label>
             </div>
         </div>
@@ -246,4 +242,7 @@
 <!--Esri-->
 <link rel="stylesheet" href="https://js.arcgis.com/3.28/esri/css/esri.css">
 <script src="http://localhost/arcgis_js_api/library/3.28/3.28/init.js"></script>
+
+<!--turf-->
+<script src="JS/turf.min.js"></script>
 </html>

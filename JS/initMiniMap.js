@@ -1,6 +1,6 @@
 var map;
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'busRoutesLayer', 'coverPolygonLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer','oldCityLayer', 'busRoutesLayer', 'coverPolygonLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -54,10 +54,17 @@ $(document).ready(function () {
                     map.resize();
                     mapFly();
 
-                    addCenter();
-                    addBuslane();
-                    addBusroute();
-                    addBusroutes();
+                    setTimeout(function () {
+
+                        addBuslane();
+                        addBusroute();
+                        addBusroutes();
+                        addCenter();
+                        addOldcity();
+                        addBusrouteSample();
+
+                    }, 5000);
+
                 }
             } else {
                 clearInterval(t);
@@ -76,7 +83,7 @@ $(document).ready(function () {
 
     // 地图缩放
     map.on("move", function () {
-        // console.log(map['transform'].zoom);
+        console.log(map['transform'].zoom);
         changeZoom(map['transform'].zoom);
         // console.log("整只兔兔都很不好了");
     })
@@ -95,7 +102,7 @@ function mapFly() {
 
 // 切换点坐标图层
 function changeZoom(mapZoom) {
-    if (mapZoom > 14) {
+    if (mapZoom > 13) {
         // map.setPitch(0);
         layerVisibilityToggle("stationLayer", "none");
         layerVisibilityToggle("stationLayerL", "visible");
@@ -127,7 +134,8 @@ function onEditRedo(e) {
 function buslaneGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
         $.ajax({
-            url: "./esrijsonData/esribusLane.json",
+            // url: "./esrijsonData/esribusLane.json",
+            url: "./esrijsonData/esribusLaneC.json",
             type: "GET",
             success: function (data) {
                 let buslaneFeatureSet = new esri.tasks.FeatureSet(data);
@@ -160,7 +168,8 @@ function buslaneGPTool() {
                                 // 米=>千米
                                 busLaneLength = lineLength / 1000;
                                 busLaneRatio = busLaneLength / networkLength;
-                                console.log(busLaneRatio);
+                                console.log(busLaneLength);
+                                // console.log(busLaneRatio);
 
                             });
                         }
@@ -456,8 +465,8 @@ function addStation() {
                     'base': 1.5,
                     'stops': [[5, 2], [18, 4]]
                 },
-                'circle-color': "#6C87AB",      //填充圆形的颜色
-                // 'circle-color': "#0083DD",      //填充圆形的颜色
+                // 'circle-color': "#6C87AB",      //填充圆形的颜色
+                'circle-color': "#0083DD",      //填充圆形的颜色
                 'circle-blur': 0.1,              //模糊程度，默认0
                 'circle-opacity': 0.6           //透明度，默认为1
             }
@@ -566,7 +575,9 @@ function addBuslane() {
 
 function addBusroute() {
     $.when(getJson(conf_busroute_query)).then(function (data) {
+        console.log(data)
         let gcjData = wgsToGcj(data);
+        console.log(gcjData)
         map.addSource('busRouteSource', {
             'type': 'geojson',
             'data': gcjData
@@ -581,13 +592,36 @@ function addBusroute() {
                 "visibility": "none"
             },
             "paint": {
-                // "line-color": "#7FD492",
-                "line-color": "rgb(73, 193, 179)",
+                "line-color": "#7FD492",
+                // "line-color": "rgb(73, 193, 179)",
                 "line-opacity": 0.8,
                 "line-width": 2
             }
         });
     });
+}
+
+// 古城区面
+function addOldcity() {
+    $.when(getJson(conf_oldcity_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        map.addSource('oldCitySource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'oldCityLayer',
+            'type': 'fill',
+            'source': 'oldCitySource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'fill-color': '#79ada9',
+                'fill-opacity': 0.4
+            }
+        });
+    })
 }
 
 // 展示用公交线网图层
@@ -617,6 +651,35 @@ function addBusroutes() {
         });
     });
 }
+
+// 测试用公交线路图层
+function addBusrouteSample() {
+    $.when(getJson(conf_busline_ex_query)).then(function (data) {
+        // console.log(data['features'].length);
+        let gcjData = wgsToGcj(data);
+        map.addSource('busRouteSampleSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'busSampleLayer',
+            'type': 'line',
+            'source': 'busRouteSampleSource',
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round",
+                "visibility": "none"
+            },
+            "paint": {
+                "line-color": "#00B6D0",
+                // "line-color": "#00C9B7",
+                "line-opacity": 0.9,
+                "line-width": 2
+            }
+        });
+    });
+}
+
 
 /*------------------------------*/
 

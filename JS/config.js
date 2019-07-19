@@ -17,20 +17,24 @@ var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution;
 conf_station_query = './geojsonData/stopsPoint.json';
 // 中心城区面数据
 conf_center_query = './geojsonData/centerPolygon.json';
+// 古城区面数据
+conf_oldcity_query = './geojsonData/oldCity.json';
 // 公交专用道数据
 conf_buslane_query = './geojsonData/busLane.json';
-// 公交线路数据
+// 公交线路数据（目前为古城区数据,计算专用）
 conf_busroute_query = './geojsonData/busRoute.json';
-// 全部公交线路数据
+// 全部公交线路数据(串线后数据，展示用)
 conf_busroutes_query = './geojsonData/busRoutes.json';
-// 公交样例线路数据
-conf_busroute_ex_query = './geojsonData/busExample.json';
+// 公交线路数据
+conf_busline_query = './geojsonData/busLine.json';
+// 公交线路数据(样例）routeSample
+conf_busline_ex_query = './geojsonData/routeSample.json';
 
 
 // 数据请求   ----esrijson
 // 公交专用道数据
 conf_esri_buslane_query = './esrijsonData/esribusLane.json';
-// 公交线路数据
+// 公交线路数据（目前为古城区数据,计算专用）
 conf_esri_busroute_query = './esrijsonData/esribusRoute.json';
 // 道路中心线数据
 conf_esri_roadline_query = './esrijsonData/esriroadLine.json';
