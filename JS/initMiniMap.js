@@ -1,6 +1,6 @@
 var map;
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer','oldCityLayer', 'busRoutesLayer', 'coverPolygonLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverPolygonLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -8,7 +8,7 @@ var busLaneRatio; //公交专用道设置比率
 var busLineLength; //公交线网长度
 var busLineDensity; //公交线网密度
 var networkRepeat; //线网重复系数
-var centerArea =411.56; //中央建成区面积
+var centerArea = 411.56; //中央建成区面积
 var oldcityArea = 16.373766; //古城区面积
 var coverArea;  //中央建成区站点覆盖面积
 var coverAreaRatio;  //中央建成区站点覆盖比率
@@ -27,7 +27,6 @@ $(document).ready(function () {
     minemap.solution = conf_solution;
     map = new minemap.Map({
         container: 'map',
-        // 4745
         style: conf_style, /*底图样式*/
         center: conf_centerPoint, /*地图中心点*/
         zoom: 11, /*地图默认缩放等级*/
@@ -74,6 +73,10 @@ $(document).ready(function () {
     });
 
     setTimeout(function () {
+        // stopDensity();
+        // networkComplex();
+        // networkDistance();
+        // nonlinear();
         // buslaneGPTool();
         // busrouteGPTool();
     }, 5000);
@@ -83,7 +86,7 @@ $(document).ready(function () {
 
     // 地图缩放
     map.on("move", function () {
-        console.log(map['transform'].zoom);
+        // console.log(map['transform'].zoom);
         changeZoom(map['transform'].zoom);
         // console.log("整只兔兔都很不好了");
     })
@@ -322,9 +325,9 @@ function bufferGPTool() {
                                 // 面积
                                 areaData = value.value.features[0].attributes['Shape_Area'];
                                 // 米=>千米
-                                coverArea = areaData/(1000 * 1000);
+                                coverArea = areaData / (1000 * 1000);
                                 console.log(coverArea);
-                                coverAreaRatio = coverArea/ centerArea;
+                                coverAreaRatio = coverArea / centerArea;
                                 console.log(coverAreaRatio);
                             });
                             // 地图展示
@@ -391,8 +394,8 @@ function networkDistance() {
     let busRouteLength = 0;
     let busRouteStation = 0;
     $.when(getJson(conf_busline_query)).then(function (data) {
-        let busLine = data['features'];
-        busLine.forEach(function (value) {
+        let busRoute = data['features'];
+        busRoute.forEach(function (value) {
             if (value['properties'].lineLength === '') {
                 // console.log(value['properties'].lineName);
             } else {
@@ -407,6 +410,25 @@ function networkDistance() {
         let networkDistance = busRouteLength / busRouteStation;
         console.log(networkDistance);
     })
+}
+
+// 非直线系数，引用turf计算
+function nonlinear() {
+    $.when(getJson(conf_busline_ex_query)).then(function (data) {
+        let busRoute = data['features'];
+        let busRouteLength = busRoute[0].properties.lineLength;
+        let busCoordinate = busRoute[0].geometry.coordinates;
+        console.log(busRouteLength);
+        console.log(busCoordinate[0]);
+        console.log(busCoordinate[busCoordinate.length - 1]);
+
+        let coordinateFrom = turf.point(busCoordinate[0]);
+        let coordinateTo = turf.point(busCoordinate[busCoordinate.length - 1]);
+        let options = {units: 'kilometers'};
+        let busRouteDistance = turf.distance(coordinateFrom, coordinateTo, options);
+        let nonlinear = busRouteLength / busRouteDistance;
+        console.log(nonlinear);
+    });
 }
 
 //_____________________________________________________
@@ -466,7 +488,7 @@ function addStation() {
                     'stops': [[5, 2], [18, 4]]
                 },
                 // 'circle-color': "#6C87AB",      //填充圆形的颜色
-                'circle-color': "#0083DD",      //填充圆形的颜色
+                'circle-color': "#00A2D9",      //填充圆形的颜色
                 'circle-blur': 0.1,              //模糊程度，默认0
                 'circle-opacity': 0.6           //透明度，默认为1
             }
@@ -565,8 +587,8 @@ function addBuslane() {
                 "visibility": "none"
             },
             "paint": {
-                "line-color": "#FFD08F",
-                "line-opacity": 0.8,
+                "line-color": "#F9F871",
+                "line-opacity": 1,
                 "line-width": 2
             }
         });
@@ -575,9 +597,7 @@ function addBuslane() {
 
 function addBusroute() {
     $.when(getJson(conf_busroute_query)).then(function (data) {
-        console.log(data)
         let gcjData = wgsToGcj(data);
-        console.log(gcjData)
         map.addSource('busRouteSource', {
             'type': 'geojson',
             'data': gcjData
@@ -592,9 +612,8 @@ function addBusroute() {
                 "visibility": "none"
             },
             "paint": {
-                "line-color": "#7FD492",
-                // "line-color": "rgb(73, 193, 179)",
-                "line-opacity": 0.8,
+                "line-color": "#7BE99E",
+                "line-opacity": 1,
                 "line-width": 2
             }
         });
@@ -644,8 +663,7 @@ function addBusroutes() {
             },
             "paint": {
                 "line-color": "#00B6D0",
-                // "line-color": "#00C9B7",
-                "line-opacity": 0.9,
+                "line-opacity": 1,
                 "line-width": 2
             }
         });
@@ -701,6 +719,7 @@ function getJson(url) {
     });
 }
 
+// 关闭图层
 function closeLayer() {
     layerList.forEach(function (value) {
         layerVisibilityToggle(value, 'none');
