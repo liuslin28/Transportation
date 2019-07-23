@@ -87,12 +87,7 @@ $(document).ready(function () {
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
 
-    // 地图缩放
-    map.on("move", function () {
-        changeZoom(map.getZoom());
-        // console.log("整只兔兔都很不好了");
-    })
-
+    changeStopLayer('true');
 });
 
 // 地图飞入动画
@@ -106,14 +101,24 @@ function mapFly() {
 }
 
 // 切换点坐标图层
-function changeZoom(mapZoom) {
+function changeZoom() {
+    let mapZoom = map.getZoom();
+    console.log(mapZoom);
     if (mapZoom > 13) {
-        // map.setPitch(0);
         layerVisibilityToggle("stationLayer", "none");
         layerVisibilityToggle("stationLayerL", "visible");
     } else {
         layerVisibilityToggle("stationLayer", "visible");
         layerVisibilityToggle("stationLayerL", "none");
+    }
+}
+
+function changeStopLayer(layerChange) {
+    if(layerChange === 'true' ) {
+        // 地图缩放,改变站点图层显示
+        map.on("move",changeZoom);
+    } else {
+        map.off("move",changeZoom);
     }
 }
 

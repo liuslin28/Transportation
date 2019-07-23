@@ -18,14 +18,11 @@ $('.layerWrapper-check-input').click(function (e) {
 $('#layer-click').click(function () {
     $('.layerWrapper').slideToggle();
     $('#layer-click').toggleClass("navWrapper-nav-li-active");
-
-
 });
 
 $('.layerWrapper-angle').click(function () {
     $('.layerWrapper').slideToggle();
     $('#layer-click').toggleClass("navWrapper-nav-li-active");
-
 });
 /*------------------------------*/
 // 交通信息列表显示切换
@@ -80,12 +77,25 @@ $('.dataWrapper-info-li').click(function (e) {
     $('.infoWrapper-div').hide();
     $('.' + liId).show();
 
-    // 图层显示
+    // 服务操作
+    switch (liId) {
+        case 'info-connectivity':
+            // bufferGPTool();
+            break;
+        default:
+            break;
+    }
+
+        // 图层显示
     closeLayer();
+
     let showLayer;
     switch (liId) {
         case 'info-station':
             showLayer = 'stopHeatLayer';
+            break;
+        case 'info-cover':
+            showLayer = 'coverCenterLayer';
             break;
         case 'info-route':
             showLayer = 'busRoutesLayer';
@@ -98,5 +108,6 @@ $('.dataWrapper-info-li').click(function (e) {
             break;
     }
     layerVisibilityToggle(showLayer, 'visible');
+    changeStopLayer('false');
 });
 
