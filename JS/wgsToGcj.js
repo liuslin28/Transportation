@@ -1,88 +1,119 @@
 // WGS84 => GCJ02
 function wgsToGcj(wgsData) {
-    // 获取数据类型
-    let geometryData = (wgsData.features)[0].geometry;
-    let geoType = geometryData.type;
-    let coordinateData;
-    switch (geoType) {
-        case "Point":
-            coordinateData = wgsData.features;
-            wgsData.features = pointWgsGcj(coordinateData);
-            break;
-        case "LineString":
-            coordinateData = wgsData.features;
-            coordinateData = lineWgsGcj(coordinateData);
-            wgsData.features = coordinateData;
-            break;
-        case "Polygon":
-            coordinateData = geometryData.coordinates;
-            coordinateData = polyWgsGcj(coordinateData);
-            ((wgsData.features)[0].geometry).coordinates = coordinateData;
-            break;
-        case "MultiPolygon":
-            coordinateData = geometryData.coordinates;
-            coordinateData = multipolyWgsGcj(coordinateData);
-            ((wgsData.features)[0].geometry).coordinates = coordinateData;
-            break;
-        default:
-            console.log("error");
-            break;
-    }
-    return wgsData;
+    let wgsType = wgsData.type;
+    let wgsFeatrueData = wgsData.features;
+    let gcjFeatureData = [];
+    wgsFeatrueData.forEach(function (value) {
+        geoType = value.geometry.type;
+        geoData = value.geometry.coordinates;
+
+        let gcjData;
+        switch (geoType) {
+            case "Point":
+                gcjData = pointWgsGcj(geoData);
+                break;
+            case "MultiPoint":
+                gcjData = multipointWgsGcj(geoData);
+                break;
+            case "LineString":
+                gcjData = lineWgsGcj(geoData);
+                break;
+            case "MultiLineString":
+                gcjData = multilineWgsGcj(geoData);
+                break;
+            case "Polygon":
+                gcjData = polyWgsGcj(geoData);
+                break;
+            case "MultiPolygon":
+                gcjData = multipolyWgsGcj(geoData);
+                break;
+            default:
+                console.log("error");
+                break;
+        }
+        value.geometry.coordinates = geoData
+        gcjFeatureData.push(value);
+    });
+
+    let gcjData = {
+        "type": "",
+        "features": []
+    };
+    gcjData.type = wgsType;
+    gcjData.features = gcjFeatureData;
+    return gcjData;
 }
 
-function pointWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue) {
-        let coorWGS = (coordinateValue.geometry).coordinates;
-        const lngWGS = Number(coorWGS[0]);  //经度
-        const latWGS = Number(coorWGS[1]);  //纬度
+function pointWgsGcj(geoData) {
+    const lngWGS = Number(geoData[0]);  //经度
+    const latWGS = Number(geoData[1]);  //纬度
+    let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+    geoData[0] = gcjCoordinate.lng;
+    geoData[1] = gcjCoordinate.lat;
+    return geoData;
+}
+
+function multipointWgsGcj(geoData) {
+    geoData.forEach(function (value) {
+        const lngWGS = Number(value[0]);  //经度
+        const latWGS = Number(value[1]);  //纬度
         let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-        coorWGS[0] = gcjCoordinate.lng;
-        coorWGS[1] = gcjCoordinate.lat;
+        value[0] = gcjCoordinate.lng;
+        value[1] = gcjCoordinate.lat;
     });
-    return coordinateData;
+    return geoData;
 }
 
-function lineWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue) {
-        let coorWGS = (coordinateValue.geometry).coordinates;
-        coorWGS.forEach(function (currentValue) {
-            const lngWGS = Number(currentValue[0]);  //经度
-            const latWGS = Number(currentValue[1]);  //纬度
+function lineWgsGcj(geoData) {
+    geoData.forEach(function (value) {
+        const lngWGS = Number(value[0]);  //经度
+        const latWGS = Number(value[1]);  //纬度
+        let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
+        value[0] = gcjCoordinate.lng;
+        value[1] = gcjCoordinate.lat;
+    });
+    return geoData;
+}
+
+function multilineWgsGcj(geoData) {
+    geoData.forEach(function (coordinateValue) {
+        coordinateValue.forEach(function (value) {
+            const lngWGS = Number(value[0]);  //经度
+            const latWGS = Number(value[1]);  //纬度
             let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-            currentValue[0] = gcjCoordinate.lng;
-            currentValue[1] = gcjCoordinate.lat;
+            value[0] = gcjCoordinate.lng;
+            value[1] = gcjCoordinate.lat;
         })
     });
-    return coordinateData;
+    return geoData;
 }
 
-function polyWgsGcj(coordinateData) {
-    coordinateData.forEach(function (coordinateValue) {
-        coordinateValue.forEach(function (currentValue) {
-            const lngWGS = Number(currentValue[0]);  //经度
-            const latWGS = Number(currentValue[1]);  //纬度
+function polyWgsGcj(geoData) {
+    geoData.forEach(function (coordinateValue) {
+        coordinateValue.forEach(function (value) {
+            const lngWGS = Number(value[0]);  //经度
+            const latWGS = Number(value[1]);  //纬度
             let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-            currentValue[0] = gcjCoordinate.lng;
-            currentValue[1] = gcjCoordinate.lat;
+            value[0] = gcjCoordinate.lng;
+            value[1] = gcjCoordinate.lat;
         })
     });
-    return coordinateData;
+    return geoData;
 }
 
-function multipolyWgsGcj(coordinateData) {
-    coordinateData.forEach(function (arrayValue) {
+function multipolyWgsGcj(geoData) {
+    geoData.forEach(function (arrayValue) {
         arrayValue.forEach(function (listValue) {
-            listValue.forEach(function (currentValue) {
-                const lngWGS = Number(currentValue[0]);  //经度
-                const latWGS = Number(currentValue[1]);  //纬度
+            listValue.forEach(function (value) {
+                const lngWGS = Number(value[0]);  //经度
+                const latWGS = Number(value[1]);  //纬度
                 let gcjCoordinate = transformFromWGSToGCJ(lngWGS, latWGS);
-                currentValue[0] = gcjCoordinate.lng;
-                currentValue[1] = gcjCoordinate.lat;
+                value[0] = gcjCoordinate.lng;
+                value[1] = gcjCoordinate.lat;
             })
 
         })
     });
-    return coordinateData;
+    return geoData;
 }
 //_____________________________________________________
