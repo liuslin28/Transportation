@@ -43,6 +43,8 @@ conf_uncover_center_query = './geojsonData/cover/centercity_E_unP.json';
 conf_esri_buslane_query = './esrijsonData/esribusLane.json';
 // 公交线路数据（目前为古城区数据,计算专用）
 conf_esri_busroute_query = './esrijsonData/esribusRoute.json';
+// 公交线路数据（样例数据）
+conf_esri_routesample_query = './esrijsonData/esrirouteSample.json';
 // 道路中心线数据
 conf_esri_roadline_query = './esrijsonData/esriroadLine.json';
 // 中心城区面数据

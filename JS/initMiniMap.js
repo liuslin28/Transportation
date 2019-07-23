@@ -237,6 +237,52 @@ function busrouteGPTool() {
     });
 }
 
+// 公交线路通过公交专用道的长度
+function routeGPTool() {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+        $.ajax({
+            url: "./esrijsonData/esrirouteSample.json",
+            type: "GET",
+            success: function (data) {
+                let buslineFeatureSet = new esri.tasks.FeatureSet(data);
+                buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+                $.ajax({
+                    url: "./esrijsonData/esribusLane.json",
+                    type: "GET",
+                    success: function (data) {
+                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
+                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        let gpParams = {
+                            "road": roadFeatureSet,
+                            "buslane": buslineFeatureSet
+                        };
+                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                        // 运行状态显示
+                        function statusCallback(jobInfo) {
+                            console.log(jobInfo.jobStatus);
+                        }
+
+                        // 结果图加载
+                        function completeCallback(jobInfo) {
+                            // 长度求算
+                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                                // 米=>千米,保留2位小数
+                                lineLength = (lineLength / 1000).toFixed(2);
+                                console.log(lineLength);
+
+                            });
+                        }
+                    }
+                })
+            }
+        })
+    });
+}
+
 // 站点覆盖率
 function bufferGPTool() {
     let pointFeatureSet;
@@ -662,7 +708,6 @@ function addOldcity() {
 function addCoverCenter() {
     $.when(getJson(conf_cover_center_query)).then(function (data) {
         let gcjData = wgsToGcj(data);
-        console.log(gcjData);
         map.addSource('coverCenterSource', {
             'type': 'geojson',
             'data': gcjData
@@ -686,7 +731,6 @@ function addCoverCenter() {
 function addunCoverCenter() {
     $.when(getJson(conf_uncover_center_query)).then(function (data) {
         let gcjData = wgsToGcj(data);
-        console.log(gcjData);
         map.addSource('uncoverCenterSource', {
             'type': 'geojson',
             'data': gcjData
@@ -709,7 +753,6 @@ function addunCoverCenter() {
 // 展示用公交线网图层
 function addBusroutes() {
     $.when(getJson(conf_busroutes_query)).then(function (data) {
-        // console.log(data['features'].length);
         let gcjData = wgsToGcj(data);
         map.addSource('busRoutesSource', {
             'type': 'geojson',
@@ -736,7 +779,6 @@ function addBusroutes() {
 // 测试用公交线路图层（自行处理的样例数据）
 function addBusrouteSample() {
     $.when(getJson(conf_busline_ex_query)).then(function (data) {
-        // console.log(data['features'].length);
         let gcjData = wgsToGcj(data);
         map.addSource('busRouteSampleSource', {
             'type': 'geojson',
