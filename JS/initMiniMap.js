@@ -1,6 +1,6 @@
 var map;
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverPolygonLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer','uncoverCenterLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -54,6 +54,9 @@ $(document).ready(function () {
                     mapFly();
 
                     setTimeout(function () {
+                        addCoverCenter();
+                        addunCoverCenter();
+                        addSuzhoucity();
 
                         addBuslane();
                         addBusroute();
@@ -86,8 +89,7 @@ $(document).ready(function () {
 
     // 地图缩放
     map.on("move", function () {
-        // console.log(map['transform'].zoom);
-        changeZoom(map['transform'].zoom);
+        changeZoom(map.getZoom());
         // console.log("整只兔兔都很不好了");
     })
 
@@ -128,7 +130,7 @@ function onEditUndo(e) {
 }
 
 function onEditRedo(e) {
-    e.record
+    e.record;
 }
 
 //_____________________________________________________
@@ -137,7 +139,6 @@ function onEditRedo(e) {
 function buslaneGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
         $.ajax({
-            // url: "./esrijsonData/esribusLane.json",
             url: "./esrijsonData/esribusLaneC.json",
             type: "GET",
             success: function (data) {
@@ -336,20 +337,8 @@ function bufferGPTool() {
                                 // 输出格式转换，坐标尚未进行转换
                                 bufferJson = transtoJson(bufferResult);
                                 if (bufferJson) {
-                                    map.addSource('bufferJson', {
-                                        'type': 'geojson',
-                                        'data': bufferJson
-                                    });
-                                    map.addLayer({
-                                        'id': 'coverPolygonLayer',
-                                        'type': 'fill',
-                                        'source': 'bufferJson',
-                                        'layout': {},
-                                        'paint': {
-                                            'fill-color': '#83dcf2',
-                                            'fill-opacity': 0.2
-                                        }
-                                    });
+                                    // 切换数据源
+                                    map.getSource('coverCenterSource').setData(bufferJson);
                                 } else {
                                     console.log("buffer结果加载出错了");
                                 }
@@ -458,9 +447,9 @@ function transtoJson(data) {
 
 //_____________________________________________________
 // 加载数据
+// 站点数据
 function addStation() {
     $.when(getJson(conf_station_query)).then(function (data) {
-        // console.log(data['features'].length);
         let gcjData = wgsToGcj(data);
         map.addSource('stopsSource', {
             'type': 'geojson',
@@ -548,6 +537,7 @@ function addStation() {
     })
 }
 
+// 中心城区面
 function addCenter() {
     $.when(getJson(conf_center_query)).then(function (data) {
         let gcjData = wgsToGcj(data);
@@ -570,6 +560,7 @@ function addCenter() {
     })
 }
 
+// 公交专用道
 function addBuslane() {
     $.when(getJson(conf_buslane_query)).then(function (data) {
         let gcjData = wgsToGcj(data);
@@ -595,6 +586,7 @@ function addBuslane() {
     });
 }
 
+// 古城区公交线路
 function addBusroute() {
     $.when(getJson(conf_busroute_query)).then(function (data) {
         let gcjData = wgsToGcj(data);
@@ -620,6 +612,29 @@ function addBusroute() {
     });
 }
 
+// 苏州市城区面
+function addSuzhoucity() {
+    $.when(getJson(conf_district_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        map.addSource('citySource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'cityLayer',
+            'type': 'fill',
+            'source': 'citySource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'fill-color': '#8cb58c',
+                'fill-opacity': 0.4
+            }
+        });
+    })
+}
+
 // 古城区面
 function addOldcity() {
     $.when(getJson(conf_oldcity_query)).then(function (data) {
@@ -632,6 +647,54 @@ function addOldcity() {
             'id': 'oldCityLayer',
             'type': 'fill',
             'source': 'oldCitySource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'fill-color': '#79ada9',
+                'fill-opacity': 0.4
+            }
+        });
+    })
+}
+
+// 中心城区面，站点覆盖
+function addCoverCenter() {
+    $.when(getJson(conf_cover_center_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        console.log(gcjData);
+        map.addSource('coverCenterSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'coverCenterLayer',
+            'type': 'fill',
+            'source': 'coverCenterSource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'fill-color': '#79ada9',
+                'fill-opacity': 0.4
+            }
+        });
+    })
+}
+
+// 中心城区面，站点未覆盖情况
+function addunCoverCenter() {
+    $.when(getJson(conf_uncover_center_query)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        console.log(gcjData);
+        map.addSource('uncoverCenterSource', {
+            'type': 'geojson',
+            'data': gcjData
+        });
+        map.addLayer({
+            'id': 'uncoverCenterLayer',
+            'type': 'fill',
+            'source': 'uncoverCenterSource',
             'layout': {
                 "visibility": "none"
             },
@@ -670,7 +733,7 @@ function addBusroutes() {
     });
 }
 
-// 测试用公交线路图层
+// 测试用公交线路图层（自行处理的样例数据）
 function addBusrouteSample() {
     $.when(getJson(conf_busline_ex_query)).then(function (data) {
         // console.log(data['features'].length);
@@ -698,9 +761,7 @@ function addBusrouteSample() {
     });
 }
 
-
 /*------------------------------*/
-
 // 图层显示切换
 function layerVisibilityToggle(layerName, checkValue) {
     map.setLayoutProperty(layerName, 'visibility', checkValue);

@@ -15,6 +15,8 @@ var conf_style = conf_serviceUrl + '/solu/style/id/' + conf_solution;
 // 数据请求   ----geojson
 // 站点数据
 conf_station_query = './geojsonData/stopsPoint.json';
+// 苏州城区面数据
+conf_district_query = './geojsonData/suzhouDistrict.json';
 // 中心城区面数据
 conf_center_query = './geojsonData/centerPolygon.json';
 // 古城区面数据
@@ -30,6 +32,11 @@ conf_busline_query = './geojsonData/busLine.json';
 // 公交线路数据(样例）routeSample
 conf_busline_ex_query = './geojsonData/routeSample.json';
 
+// 数据请求   ----geojson ---buffer
+// 中心城区站点覆盖区
+conf_cover_center_query = './geojsonData/cover/centercity_C_unP.json';
+// 中心城区站点未覆盖区
+conf_uncover_center_query = './geojsonData/cover/centercity_E_unP.json';
 
 // 数据请求   ----esrijson
 // 公交专用道数据
