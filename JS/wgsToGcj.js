@@ -1,16 +1,104 @@
-// WGS84 => GCJ02
 /*
-{
-    "type": "FeatureCollection",
-    "features": []
-}*/
+    进行坐标转换（WGS84 => GCJ02）,可以适配geojson中的特征集合(点、多点、线、多线、面、多面)
+
+    引入
+    <script src="./wgsToGcj.js"></script>
+
+    使用
+    需要引用  wgs2mars.min.js
+    let result  = wgsToGcj(input);
+
+    API
+    wgsToGcj(input)
+
+    参数
+    input: GeoJSON(特征集合)
+    ________________________________________________________________
+    {
+        "type": "FeatureCollection",
+        "features":
+        [
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+                "properties": {"prop0": "value0"}
+            },
+
+            {
+                "type": "Feature",
+                "geometry": {"type": "MultiPoint", "coordinates": [ [100.0, 0.0], [101.0, 1.0] ],
+                "properties": {"prop0": "value0"}
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                     "type": "LineString",
+                     "coordinates": [
+                            [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+                     ]
+                },
+                "properties": {
+                    "prop0": "value0",
+                    "prop1": 0.0
+                }
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                     "type": "MultiLineString",
+                     "coordinates":  [
+                            [ [100.0, 0.0], [101.0, 1.0] ],
+                            [ [102.0, 2.0], [103.0, 3.0] ]
+                     ]
+                },
+                "properties": {
+                    "prop0": "value0",
+                    "prop1": 0.0
+                }
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                     "type": "Polygon",
+                     "coordinates": [
+                       [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
+                         [100.0, 1.0], [100.0, 0.0] ]
+                       ]
+                 },
+                "properties": {
+                     "prop0": "value0",
+                     "prop1": {"this": "that"}
+                 }
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                     "type": "MultiPolygon",
+                     "coordinates":  [
+                            [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],
+                            [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+                            [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
+                       ]
+                 },
+                "properties": {
+                     "prop0": "value0",
+                     "prop1": {"this": "that"}
+                 }
+            }
+        ]
+   }
+    ________________________________________________________________
+
+    返回值
+    GeoJSON
+*/
 
 function wgsToGcj(wgsData) {
     let wgsFeatrueData = wgsData.features;
     let gcjFeatureData = [];
     wgsFeatrueData.forEach(function (value) {
-        geoType = value.geometry.type;
-        geoData = value.geometry.coordinates;
+        let geoType = value.geometry.type;
+        let geoData = value.geometry.coordinates;
 
         let gcjData;
         switch (geoType) {
@@ -115,9 +203,7 @@ function multipolyWgsGcj(geoData) {
                 value[0] = gcjCoordinate.lng;
                 value[1] = gcjCoordinate.lat;
             })
-
         })
     });
     return geoData;
 }
-//_____________________________________________________
