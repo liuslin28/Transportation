@@ -1,6 +1,11 @@
 // WGS84 => GCJ02
+/*
+{
+    "type": "FeatureCollection",
+    "features": []
+}*/
+
 function wgsToGcj(wgsData) {
-    let wgsType = wgsData.type;
     let wgsFeatrueData = wgsData.features;
     let gcjFeatureData = [];
     wgsFeatrueData.forEach(function (value) {
@@ -31,15 +36,14 @@ function wgsToGcj(wgsData) {
                 console.log("error");
                 break;
         }
-        value.geometry.coordinates = geoData
+        value.geometry.coordinates = geoData;
         gcjFeatureData.push(value);
     });
 
     let gcjData = {
-        "type": "",
+        "type": "FeatureCollection",
         "features": []
     };
-    gcjData.type = wgsType;
     gcjData.features = gcjFeatureData;
     return gcjData;
 }
