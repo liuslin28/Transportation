@@ -10,13 +10,11 @@
 
     <link rel="stylesheet" href="CSS/bootstrap.css">
     <script src="JS/jquery.js"></script>
-    <!--<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"-->
-    <!--integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"-->
-    <!--crossorigin="anonymous"></script>-->
 
     <!--Font Awesome图标-->
     <link rel="stylesheet" href="CSS/font-awesome.css">
     <link rel="stylesheet" href="CSS/newMine2.css">
+    <link rel="stylesheet" href="CSS/newMineMap2.css">
 
 </head>
 <body>
@@ -36,7 +34,6 @@
                     <i class="fa fa fa-list-alt"></i>
                     <span>交通信息</span>
                 </li>
-                <!--<li class="navWrapper-nav-li" onclick="bufferGPTool()">-->
                 <li class="navWrapper-nav-li" id="simulate-click">
                     <i class="fa fa-bus"></i>
                     <span>交通仿真</span>
@@ -60,7 +57,7 @@
             </div>
             <div class="dataWrapper-info-list">
                 <span class="dataWrapper-info-header">交通换乘分析</span>
-                <span class="dataWrapper-info-li" id="info-metro">公交-地铁换乘</span>
+                <span class="dataWrapper-info-li" id="info-metro" onclick="routeGPTool()">公交-地铁换乘</span>
                 <span class="dataWrapper-info-li" id="info-bicycle">公交-自行车换乘</span>
             </div>
         </div>

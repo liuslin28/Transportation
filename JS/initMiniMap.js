@@ -1,4 +1,4 @@
-var map;
+var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
 var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer','uncoverCenterLayer'];
 var networkLength; //各线路长度之和
@@ -12,6 +12,7 @@ var centerArea = 411.56; //中央建成区面积
 var oldcityArea = 16.373766; //古城区面积
 var coverArea;  //中央建成区站点覆盖面积
 var coverAreaRatio;  //中央建成区站点覆盖比率
+var pointApertureColors = ['red','blue','orange','green']; //目前只提供地图上点击点（ICON）展示的四色光晕
 
 /**
  * 基本地图加载
@@ -32,7 +33,14 @@ $(document).ready(function () {
         zoom: 11, /*地图默认缩放等级*/
         pitch: 90, /*地图俯仰角度*/
         maxZoom: 17, /*地图最大缩放等级*/
-        minZoom: 3  /*地图最小缩放等级*/
+        minZoom: 3 , /*地图最小缩放等级*/
+        trackResize: true, /*地图会自动匹配浏览器窗口大小*/
+        logoControl:false  /*logo控件是否显示，不加该参数时默认显示*/
+    });
+
+    popup = new minemap.Popup({
+        closeButton: true,
+        closeOnClick: false
     });
 
     edit = new minemap.edit.init(map, {
@@ -88,7 +96,49 @@ $(document).ready(function () {
     map.on("edit.redo", onEditRedo);
 
     changeStopLayer('true');
+    mapPopup()
 });
+
+function mapPopup() {
+    map.on('click', function (e) {
+        // 点击地图，同步清除marker
+        if(marker){
+            map.removeMarkers();
+        }
+
+        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL']});
+        if (!features.length) {
+            popup.remove();
+            return;
+        }
+        /**
+         * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
+         */
+        let feature = features[0];
+        let layerId = feature.layer.id;
+
+        switch(layerId) {
+            case 'stationLayer':
+                getDynamicIcon(feature,pointApertureColors[1]);
+                popup.setLngLat(feature.geometry.coordinates)
+                    .setHTML("<span class='popup-stoptype'>"+feature.properties.stopType+"</span>"+"<span style='margin-right: 5px;'>"+ feature.properties.stopName +"</span>")
+                    .addTo(map);
+                pointCenterFly(feature.geometry.coordinates);
+                break;
+            case 'stationLayerL':
+                getDynamicIcon(feature,pointApertureColors[1]);
+                popup.setLngLat(e.lngLat)
+                    .setHTML("<span class='popup-stoptype'>"+feature.properties.stopType+"</span>"+"<span style='margin-right: 5px;'>"+ feature.properties.stopName +"</span>")
+                    .addTo(map);
+                pointCenterFly(feature.geometry.coordinates);
+                break;
+            default:
+                break;
+        }
+    });
+}
+
+//_____________________________________________________
 
 // 地图飞入动画
 function mapFly() {
@@ -100,10 +150,27 @@ function mapFly() {
     });
 }
 
+// 站点坐标移至地图中心
+function pointCenterFly(coordinates) {
+    let mapZoom = map.getZoom();
+    if (mapZoom > 13) {
+        map.flyTo({
+            center: coordinates,
+            zoom: mapZoom
+        })
+    } else {
+        map.flyTo({
+            center: coordinates,
+            zoom: 13
+        })
+    }
+}
+
+//_____________________________________________________
+
 // 切换点坐标图层
 function changeZoom() {
     let mapZoom = map.getZoom();
-    console.log(mapZoom);
     if (mapZoom > 13) {
         layerVisibilityToggle("stationLayer", "none");
         layerVisibilityToggle("stationLayerL", "visible");
@@ -116,9 +183,9 @@ function changeZoom() {
 function changeStopLayer(layerChange) {
     if(layerChange === 'true' ) {
         // 地图缩放,改变站点图层显示
-        map.on("move",changeZoom);
+        map.on("zoomend",changeZoom);
     } else {
-        map.off("move",changeZoom);
+        map.off("zoomend",changeZoom);
     }
 }
 
@@ -135,7 +202,7 @@ function onEditUndo(e) {
 }
 
 function onEditRedo(e) {
-    e.record;
+    e.record
 }
 
 //_____________________________________________________
@@ -830,6 +897,36 @@ function getJson(url) {
 // 关闭图层
 function closeLayer() {
     layerList.forEach(function (value) {
-        layerVisibilityToggle(value, 'none');
-    })
+        if(map.getLayer(value)){
+            layerVisibilityToggle(value, 'none');
+        }
+    });
+    if(popup){
+        popup.remove();
+    }
+    if(marker){
+        map.removeMarkers();
+    }
+}
+
+//marker光晕，目前只提供地图上点击点（ICON）展示的四色光晕[red,blue,orange,green]
+function getDynamicIcon(feature,color){
+    map.removeMarkers();
+    let el = document.createElement('div');
+    el.style.zIndex = 120;
+    let p = document.createElement('div');
+    p.className = 'ring-point-marker';
+    let p1 = document.createElement('div');
+    p1.className = color+'-ring-point-inner1';
+    let p2 = document.createElement('div');
+    p2.className = color+'-ring-point-inner2';
+    let p3 = document.createElement('div');
+    p3.className = color+'-ring-point-inner3';
+    p.appendChild(p1);
+    p.appendChild(p2);
+    p.appendChild(p3);
+    el.appendChild(p);
+    marker = new minemap.Marker(el, {offset: [-30, -30]})
+        .setLngLat(feature.geometry.coordinates)
+        .addTo(map);
 }
