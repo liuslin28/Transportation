@@ -87,9 +87,10 @@ $(document).ready(function () {
         // stopDensity();
         // networkComplex();
         // networkDistance();
-        // nonlinear();
+        // nonLinear();
         // buslaneGPTool();
         // busrouteGPTool();
+        stationDistance();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -520,11 +521,11 @@ function networkDistance() {
 }
 
 // 非直线系数，引用turf计算
-function nonlinear() {
+function nonLinear() {
     $.when(getJson(conf_busline_ex_query)).then(function (data) {
-        let busRoute = data['features'];
-        let busRouteLength = busRoute[0].properties.lineLength;
-        let busCoordinate = busRoute[0].geometry.coordinates;
+        let busData = data['features'];
+        let busRouteLength = busData[0].properties.lineLength;
+        let busCoordinate = busData[0].geometry.coordinates;
         console.log(busRouteLength);
         console.log(busCoordinate[0]);
         console.log(busCoordinate[busCoordinate.length - 1]);
@@ -537,6 +538,29 @@ function nonlinear() {
         console.log(nonlinear);
     });
 }
+
+// 站间距，引用turf计算
+function stationDistance() {
+    $.when(getJson(conf_busline_ex_query)).then(function (data) {
+        let busData = data['features'];
+        let busStationList = busData[0].geometry.coordinates;
+        let busRoute = busData[0].properties.route;
+        let busRouteTurf = turf.lineString(busRoute);
+        let stationDistanceList = [];
+
+        for(let i=0; i< busStationList.length-1; i++) {
+            let startCoordinate = busStationList[i];
+            let endCoordinate = busStationList[i+1];
+            let start = turf.point(startCoordinate);
+            let stop = turf.point(endCoordinate);
+            let sliced = turf.lineSlice(start, stop, busRouteTurf);
+            let length = turf.length(sliced, {units: 'kilometers'}).toFixed(2);
+            stationDistanceList.push(Number(length));
+        }
+        console.log(stationDistanceList)
+    });
+}
+
 
 //_____________________________________________________
 
