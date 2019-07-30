@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>样式更改</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="CSS/bootstrap.css">
+    <script src="JS/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="JS/bootstrap.js"></script>
+
+    <!--arcgis for js js已本地化，css未本地化-->
+    <!--<link rel="stylesheet" type="text/css" href="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/esri/css/main.css">-->
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/4.11/esri/themes/light/main.css">
+    <script type="text/javascript"
+            src="http://localhost/arcgis_js_v411_sdk/arcgis_js_api/library/4.11/init.js"></script>
+    <!--Font Awesome图标-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+
+        }
+
+        .wrapper {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        /*------------------------------*/
+
+        .navWrapper {
+            width: 100%;
+            height: 100px;
+            background-color: rgba(24, 55, 69, 0.8);
+            position: absolute;
+            z-index: 99;
+        }
+
+        .navWrapper-title {
+            width: 100%;
+            height: 75px;
+            text-align: center;
+            line-height: 75px;
+            color: white;
+            font-size: larger;
+            font-weight: bold;
+            font-family: "思源黑体 CN ExtraLight";
+            /*margin-top: 50px;*/
+        }
+
+        /*------------------------------*/
+
+        .dataWrapper {
+            width: 25%;
+            height: 100%;
+            /*display: inline-block;*/
+            margin: 0;
+            padding: 0;
+            top: 110px;
+            left: 10px;;
+            z-index: 99;
+            border: none;
+            position: absolute;
+            background-color: rgba(24, 55, 69, 0.8)
+        }
+
+
+        /*------------------------------*/
+
+        .dataWrapper-menu {
+            width: 100%;
+            height: 80px;
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+            font-family: "思源黑体 CN ExtraLight";
+        }
+
+        .dataWrapper-menu-first {
+            width: 100%;
+            height: 40px;
+        }
+
+        .dataWrapper-menu-first span {
+            margin: 0 30px;
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .dataWrapper-menu-second {
+            width: 100%;
+            height: 40px;
+        }
+
+        .dataWrapper-menu-second span {
+            margin: 0 20px;
+            height: 40px;
+            line-height: 40px;
+        }
+
+
+        /*------------------------------*/
+
+        .mapWrapper {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*display: inline-block;*/
+            margin: 0;
+            border: none;
+        }
+
+        .footer {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+    <div class="navWrapper">
+        <div class="navWrapper-title">
+            <span>公交仿真系统</span>
+        </div>
+    </div>
+    <div class="dataWrapper">
+
+        <div class="dataWrapper-menu">
+            <div class="dataWrapper-menu-first">
+                <span>站点分析</span>
+                <span>线路分析</span>
+                <span>可达性分析</span>
+            </div>
+            <div class="dataWrapper-menu-second">
+                <div>
+                    <span>站点覆盖分析</span>
+                    <span>客流集散点分析</span>
+                </div>
+
+            </div>
+        </div>
+        <div class="dataWrapper-list">
+        </div>
+        <div class="dataWrapper-card"></div>
+    </div>
+    <div class="mapWrapper">
+        <div id="viewDiv" style="width: 100%; height: 100%;"></div>
+    </div>
+    <div class="footer">
+        xxx公司
+    </div>
+</div>
+</body>
+
+<script type="text/javascript" src="JS/initHtml.js"></script>
+<script type="text/javascript" src="JS/initMap.js"></script>
+</html>
