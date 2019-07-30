@@ -25,6 +25,18 @@ $('.layerWrapper-angle').click(function () {
     $('#layer-click').toggleClass("navWrapper-nav-li-active");
 });
 /*------------------------------*/
+// navWrapper-nav 导航栏
+// 主页
+$('#home-click').click(function () {
+    $('#simulate-dataWrapper').hide();
+    $('#info-dataWrapper').hide();
+    $('.infoWrapper').hide();
+    closeLayer();
+    layerVisibilityToggle("stationLayer", 'visible');
+    layerVisibilityToggle("terminalLayer", 'visible');
+    changeStopLayer('true');
+});
+
 // 交通信息列表显示切换
 $('#info-click').click(function () {
     $('#simulate-dataWrapper').hide();
