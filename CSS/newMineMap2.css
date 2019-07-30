@@ -198,20 +198,53 @@
 }
 
 
+/*popup*/
 .minemap-popup-content {
     padding: 5px 10px;
+    max-width: 280px;
 }
 
-.popup-stoptype {
+.popup-station-type {
     display: inline-block;
     margin-right: 7px;
     padding: 3px 7px;
     border-radius: 5px;
     border: 2px solid #fff;
     background-color: #007bffc9;
-    /*background-color: #f01b48;*/
     color: #fff;
     font-weight: 700;
     box-shadow: 0 0 5px rgba(0,0,0,0.15);
     flex-shrink: 0;
+}
+
+.popup-station-header {
+    margin-left: 10px;
+    margin-right: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.popup-station-count {
+    display: block;
+    font-size: .8em;
+    font-weight: 400;
+    margin: 5px 0 0;
+    padding: 0;
+    color: #999;
+}
+
+.popup-station-list {
+    display: inline-block;
+    padding: 3px 7px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    background-color: #95cf29;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 0 5px rgba(0,0,0,0.15);
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
 }

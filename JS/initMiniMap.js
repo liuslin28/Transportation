@@ -90,7 +90,7 @@ $(document).ready(function () {
         // nonLinear();
         // buslaneGPTool();
         // busrouteGPTool();
-        stationDistance();
+        // stationDistance();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -117,19 +117,33 @@ function mapPopup() {
          */
         let feature = features[0];
         let layerId = feature.layer.id;
+        let stationLine = feature.properties.stopLine;
+        let stationHtml = [];
+        let lengthHtml;
+        if (stationLine) {
+            let stationList = stationLine.split(',');
+            let stationLineCount = stationList.length;
+            lengthHtml = "<span class='popup-station-count'>" + "途径站点线路" + stationLineCount + "条"+"</span>";
+            let stationDiv;
+            stationList.forEach(function (value) {
+                stationDiv = "<span class='popup-station-list'>" + value + "</span>";
+                stationHtml += stationDiv;
+            });
+        }
+        let stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"+ lengthHtml + stationHtml;
 
         switch(layerId) {
             case 'stationLayer':
                 getDynamicIcon(feature,pointApertureColors[1]);
                 popup.setLngLat(feature.geometry.coordinates)
-                    .setHTML("<span class='popup-stoptype'>"+feature.properties.stopType+"</span>"+"<span style='margin-right: 5px;'>"+ feature.properties.stopName +"</span>")
+                    .setHTML(stationInfoHtml)
                     .addTo(map);
                 pointCenterFly(feature.geometry.coordinates);
                 break;
             case 'stationLayerL':
                 getDynamicIcon(feature,pointApertureColors[1]);
                 popup.setLngLat(e.lngLat)
-                    .setHTML("<span class='popup-stoptype'>"+feature.properties.stopType+"</span>"+"<span style='margin-right: 5px;'>"+ feature.properties.stopName +"</span>")
+                    .setHTML(stationInfoHtml)
                     .addTo(map);
                 pointCenterFly(feature.geometry.coordinates);
                 break;
@@ -643,7 +657,7 @@ function addStation() {
                 "icon-image": "bus-15" //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
                 //"icon-size":1.5
             },
-            filter: ["in", "stopType", "首末站"]
+            filter: ["in", "stopType", "枢纽站"]
         });
 
         // 热力图
