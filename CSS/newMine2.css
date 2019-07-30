@@ -106,7 +106,7 @@ ul {
 .dataWrapper-info-menu {
     width: 100%;
     position: relative;
-    top: 3%; /*偏移*/
+    /*top: 3%; !*偏移*!*/
 }
 
 .dataWrapper-info-list {
@@ -180,7 +180,7 @@ ul {
 /*-------------图层页面-----------------*/
 .layerWrapper {
     position: absolute;
-    top: 120px;
+    top: 200px;
     left: 20px;
     width: 250px;
     /*height: 600px;*/
