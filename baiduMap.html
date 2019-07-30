@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <style type="text/css">
+        body, html, #map {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+    </style>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=2.0&ak=qsXQQQZiLczRbTGZiri5GrNVOjA3hGYC"></script>
+    <script type="text/javascript" src="JS/jquery.js"></script>
+    <title>地图展示</title>
+</head>
+<body>
+<div id="map"></div>
+<div style="position: absolute; top: 50px; left: 50px;">
+    <button id="covertData" style="margin: 20px;">数据转换</button>
+    <button id="showLine1" style="margin: 20px;">线路1显示</button>
+    <button id="showLine2" style="margin: 20px;">线路2显示</button>
+    <button id="showLine3" style="margin: 20px;">线路3显示</button>
+    <button id="showLine4" style="margin: 20px;">线路4显示</button>
+    <!--<button id="upData" style="margin: 20px;">数据上传</button>-->
+</div>
+<div></div>
+</body>
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var map = new BMap.Map("map");    // 创建Map实例
+    map.centerAndZoom(new BMap.Point(120.591682, 31.305976), 14);  // 初始化地图,设置中心点坐标和地图级别
+    //添加地图类型控件
+    map.addControl(new BMap.MapTypeControl({
+        mapTypes: [
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+        ]
+    }));
+    map.setCurrentCity("苏州");          // 设置地图显示的城市 此项是必须设置的
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+    var points = [
+        new BMap.Point(120.608315, 31.334017),
+        new BMap.Point(120.613640, 31.326363),
+        new BMap.Point(120.615646, 31.321928),
+        new BMap.Point(120.616249, 31.317656),
+        new BMap.Point(120.616707, 31.314644),
+        new BMap.Point(120.618011, 31.309029),
+        new BMap.Point(120.629234, 31.282684),
+        new BMap.Point(120.667485, 31.308857),
+        new BMap.Point(120.709167, 31.321350)
+    ];
+
+
+    translateCallback = function (data) {
+        if (data.status === 0) {
+            for (var i = 0; i < data.points.length; i++) {
+                map.addOverlay(new BMap.Marker(data.points[i]));
+                map.setCenter(data.points[i]);
+            }
+        }
+    };
+
+    $("#covertData").click(function () {
+        var pDataList = [];
+        var convertor = new BMap.Convertor();
+
+        $.ajax({
+            url: 'geojsonData/busLineC.json',
+            type: 'GET',
+            success: function (data) {
+                var busLine = data["features"];
+               busLine.forEach(function (lineValue, i) {
+                   pointData = (lineValue["geometry"])["coordinates"];
+                   var pLine = [];
+                   pointData.forEach(function (pointValue) {
+                       // coordData = parseFloat(pointValue[0]) + ',' + parseFloat(pointValue[1]);
+                       // transData = {
+                       //     "ak": "bZRekhf49RVaQRdg43RvTH3GsHLfcZMc",
+                       //     "coords": coordData,
+                       //     "from": 1,
+                       //     "to": 5
+                       // }
+                       // $.ajax({
+                       //     url: 'http://api.map.baidu.com/geoconv/v1/',
+                       //     type: 'GET',
+                       //     dataType: 'jsonp',
+                       //     data: transData,
+                       //     success: function (data) {
+                       //         if(data.status === 0) {
+                       //
+                       //         }
+                       //     }
+                       // })
+                       var tempList = []
+                       pPoint = new BMap.Point(parseFloat(pointValue[0]),parseFloat(pointValue[1]));
+                       pLine.push(pPoint);
+                       tempList.push(pPoint);
+                       convertor.translate(tempList, 1, 5, translateCallback)
+
+                   })
+                   console.log(pLine);
+
+                   pDataList.push(pLine);
+               })
+            }
+        })
+
+    });
+
+    $("#showLine1").click(function () {
+        var pts = [
+            new BMap.Point(120.61892987959597, 31.338138753606906),
+            new BMap.Point(120.6242680912785, 31.330411418198466),
+            new BMap.Point(120.6262787004492, 31.325943631726197),
+            new BMap.Point(120.62688002408754, 31.321659311889114),
+            new BMap.Point(120.62733728802276, 31.318638201467838),
+            new BMap.Point(120.62864248114063, 31.31299857095808),
+            new BMap.Point(120.63992392236098, 31.28644509985007),
+            new BMap.Point(120.67830832303818, 31.31246161308294),
+            new BMap.Point(120.71991795730779, 31.325672835652764)
+        ];
+
+        var polyline;
+        var options = {
+            onSearchComplete: function (results) {
+                if (driving.getStatus() === BMAP_STATUS_SUCCESS) {
+                    var plan = results.getPlan(0);
+                    var route = plan.getRoute(0);
+                    var points = route.getPath();
+                    polyline = new BMap.Polyline(points);
+                    map.addOverlay(polyline);
+                }
+            }
+        }
+        var driving = new BMap.DrivingRoute(map, options);
+
+        i = 0;
+
+        function playLine(i) {
+            if (i === 0) {
+                let marker = new BMap.Marker(pts[i]);
+                map.addOverlay(marker);
+                i++;
+                setTimeout(function () {
+                    playLine(i)
+                }, 2000)
+            } else {
+                if (i < pts.length) {
+                    driving.search(pts[i - 1], pts[i]);
+                    map.addOverlay(polyline);
+                    let marker = new BMap.Marker(pts[i]);
+                    map.addOverlay(marker);
+                    i++;
+                    setTimeout(function () {
+                        playLine(i);
+                    }, 2000)
+                }
+            }
+        }
+        playLine(i);
+
+    })
+
+    $("#showLine2").click(function () {
+        var pointList = [
+            new BMap.Point(120.61892987959597, 31.338138753606906),
+            new BMap.Point(120.6242680912785, 31.330411418198466),
+            new BMap.Point(120.6262787004492, 31.325943631726197),
+            new BMap.Point(120.62688002408754, 31.321659311889114),
+            new BMap.Point(120.62733728802276, 31.318638201467838),
+            new BMap.Point(120.62864248114063, 31.31299857095808),
+            new BMap.Point(120.63992392236098, 31.28644509985007),
+            new BMap.Point(120.67830832303818, 31.31246161308294),
+            new BMap.Point(120.71991795730779, 31.325672835652764)
+        ]
+        var poingtListLength = pointList.length;
+        waypoints = pointList.slice(1,poingtListLength-1);
+        var driving2 = new BMap.DrivingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+        driving2.search(pointList[0], pointList[poingtListLength-1],{ waypoints:waypoints});//waypoints表示途经点
+    })
+
+    // 中间途径点
+    $("#showLine3").click(function () {
+        var colorArr = ["blue","red","yellow","green"];
+        $.ajax({
+            url: 'geojsonData/busLineC.json',
+            type: 'GET',
+            success: function (data) {
+
+                var busLine = data["features"];
+                busLine.forEach(function (lineValue, i) {
+                    pointData = (lineValue["geometry"])["coordinates"];
+
+                    for (let i= 0; i<Math.ceil(pointData.length/10); i++) {
+                        console.log("i"+i+";");
+
+                        // 设置颜色
+                        var polylineColorN = Math.floor(Math.random() * colorArr.length + 1)-1;
+                        var polylineColor = colorArr[polylineColorN];
+
+                        var pointDataList = [];
+
+                        // 设置循环次数，如果未处理数据长度大于11，取11
+                        var jMaxNum = pointData.length - i * 10;
+                        if (jMaxNum > 11 ) {
+                            jMaxNum = 11;
+                        } else {
+                            jMaxNum = jMaxNum * 1;
+                        }
+                        j = 0;
+
+                        for(let j = 0; j < jMaxNum; j++) {
+                            pointDataT = parseFloat((pointData[i*10 +j])[1]) + ',' + parseFloat((pointData[i*10 +j])[0]);
+                            pointDataList.push(pointDataT);
+                        }
+                        waypointsList = {};
+                        for (let j = 1; j < pointDataList.length ;j ++) {
+                            if (j === 1) {
+                                waypointsList = pointDataList[j];
+                            } else {
+                                waypointsList = waypointsList + "|" + pointDataList[j];
+                            }
+                        }
+                        console.log(pointDataList);
+                        pointDataFirsLan = pointDataList[0];
+                        pointDataLasLan = pointDataList[pointDataList.length-1];
+                        drivingData = {
+                            "ak": "bZRekhf49RVaQRdg43RvTH3GsHLfcZMc",
+                            "origin": pointDataFirsLan,
+                            "destination": pointDataLasLan,
+                            "waypoints": waypointsList,
+                            "coord_type": "wgs84"
+                        }
+                        console.log(drivingData);
+                        $.ajax({
+                            url: 'http://api.map.baidu.com/direction/v2/driving',
+                            type: 'GET',
+                            dataType: 'jsonp',
+                            data: drivingData,
+                            success: function (data) {
+                                if(data.status === 0) {
+                                    var route = (data.result).routes;
+                                    var step = (route[0]).steps;
+                                    step.forEach(function (value,i) {
+
+                                        var polyPoint = (value.path).split(";");
+                                        var polyList = [];
+                                        polyPoint.forEach(function (polyvalue,i) {
+                                            var polyPointValue = polyvalue.split(",")
+                                            pPoint = new BMap.Point(parseFloat(polyPointValue[0]),parseFloat(polyPointValue[1]));
+                                            polyList.push(pPoint)
+                                        })
+
+                                        var polyline = new BMap.Polyline(polyList, {strokeColor:polylineColor, strokeWeight:4});
+                                        map.addOverlay(polyline);
+                                    })
+                                }
+                                console.log(data.status);
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    })
+
+    // 逐段计算
+    $("#showLine4").click(function () {
+        var colorArr = ["blue","red","yellow","green"];
+        $.ajax({
+            url: 'geojsonData/busLineC.json',
+            type: 'GET',
+            success: function (data) {
+
+                var busLine = data["features"];
+                busLine.forEach(function (lineValue, i) {
+                    pointData = (lineValue["geometry"])["coordinates"];
+                    var num = 0;
+                    pointDataL = pointData.length-1;
+                    // 设置颜色
+                    var polylineColorN = Math.floor(Math.random() * colorArr.length + 1)-1;
+                    var polylineColor = colorArr[polylineColorN];
+                    pointData.forEach(function (linePointValue) {
+                        if(num < pointDataL) {
+                            pointDataFirsLan = parseFloat((pointData[num])[1]) + ',' + parseFloat((pointData[num])[0]);
+                            pointDataLasLan = parseFloat((pointData[num+1])[1]) + ',' + parseFloat((pointData[num+1])[0]);
+                            num++;
+
+                            drivingData = {
+                                "ak": "bZRekhf49RVaQRdg43RvTH3GsHLfcZMc",
+                                "origin": pointDataFirsLan,
+                                "destination": pointDataLasLan,
+                                "coord_type": "wgs84",
+                                "tactics": 3
+                            }
+
+                            $.ajax({
+                                url: 'http://api.map.baidu.com/direction/v2/driving',
+                                type: 'GET',
+                                dataType: 'jsonp',
+                                data: drivingData,
+                                success: function (data) {
+                                    if(data.status === 0) {
+                                        var route = (data.result).routes;
+                                        var step = (route[0]).steps;
+
+                                        step.forEach(function (value,i) {
+
+                                            var polyPoint = (value.path).split(";");
+                                            var polyList = [];
+
+                                            polyPoint.forEach(function (polyvalue,i) {
+                                                // console.log(polyvalue);
+                                                var polyPointValue = polyvalue.split(",")
+                                                pPoint = new BMap.Point(parseFloat(polyPointValue[0]),parseFloat(polyPointValue[1]));
+                                                polyList.push(pPoint)
+                                            })
+
+                                            var polyline = new BMap.Polyline(polyList, {strokeColor:polylineColor, strokeWeight:4});
+                                            map.addOverlay(polyline);
+                                        })
+                                    }
+                                    // console.log(data.status);
+                                }
+                            })
+                        } else {
+                            map.addOverlay(new BMap.Marker((pointData[num])[1]),parseFloat((pointData[num])[0]));
+                        }
+                    })
+
+
+                })
+            }
+        })
+    })
+
+    // 上传数据到管理平台
+    $("#upData").click(function () {
+        $.ajax({
+            url: 'geojsonData/tracePoint.json',
+            type: 'GET',
+            success: function (data) {
+                var tracePoint = data["point"];
+                console.log(tracePoint);
+
+                var tracePList = {
+                    "ak": "Oc6VYxzX1X5HisLjZ5232sXjynIMlIW9",
+                    "service_id": 213493,
+                    "point_list": tracePoint
+                }
+                console.log(tracePList);
+                $.ajax({
+                    url: 'http://yingyan.baidu.com/api/v3/track/addpoints',
+                    type: 'POST',
+                    dataType: 'jsonp',
+                    data: tracePList,
+                    success: function (data) {
+                        console.log(data);
+                    }
+                })
+            }
+        })
+    })
+
+
+</script>
