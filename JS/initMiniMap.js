@@ -1,3 +1,4 @@
+
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
 var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer','uncoverCenterLayer'];
@@ -69,7 +70,7 @@ $(document).ready(function () {
                         addBuslane();
                         addBusroute();
                         addBusroutes();
-                        addCenter();
+                        // addCenter();
                         addOldcity();
                         addBusrouteSample();
 
@@ -90,7 +91,7 @@ $(document).ready(function () {
         // nonLinear();
         // buslaneGPTool();
         // busrouteGPTool();
-        // stationDistance();
+        stationDistance();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -107,7 +108,7 @@ function mapPopup() {
             map.removeMarkers();
         }
 
-        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL']});
+        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
         if (!features.length) {
             popup.remove();
             return;
@@ -120,6 +121,7 @@ function mapPopup() {
         let stationLine = feature.properties.stopLine;
         let stationHtml = [];
         let lengthHtml;
+        let stationInfoHtml;
         if (stationLine) {
             let stationList = stationLine.split(',');
             let stationLineCount = stationList.length;
@@ -129,8 +131,11 @@ function mapPopup() {
                 stationDiv = "<span class='popup-station-list'>" + value + "</span>";
                 stationHtml += stationDiv;
             });
+            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"+ lengthHtml + stationHtml;
+
+        } else {
+            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"  + "<span class='popup-station-count'>" + "暂无信息" + "</span>";
         }
-        let stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"+ lengthHtml + stationHtml;
 
         switch(layerId) {
             case 'stationLayer':
@@ -141,6 +146,13 @@ function mapPopup() {
                 pointCenterFly(feature.geometry.coordinates);
                 break;
             case 'stationLayerL':
+                getDynamicIcon(feature,pointApertureColors[1]);
+                popup.setLngLat(e.lngLat)
+                    .setHTML(stationInfoHtml)
+                    .addTo(map);
+                pointCenterFly(feature.geometry.coordinates);
+                break;
+            case 'terminalLayer':
                 getDynamicIcon(feature,pointApertureColors[1]);
                 popup.setLngLat(e.lngLat)
                     .setHTML(stationInfoHtml)
@@ -568,7 +580,7 @@ function stationDistance() {
             let start = turf.point(startCoordinate);
             let stop = turf.point(endCoordinate);
             let sliced = turf.lineSlice(start, stop, busRouteTurf);
-            let length = turf.length(sliced, {units: 'kilometers'}).toFixed(2);
+            let length = turf.length(sliced, {units: 'kilometers'}).toFixed(3);
             stationDistanceList.push(Number(length));
         }
         console.log(stationDistanceList)
@@ -643,7 +655,7 @@ function addStation() {
             "type": "symbol",
             "source": 'stopsSource',
             "layout": {
-                "icon-image": "bus-15", //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
+                "icon-image": "metro-1-230100-18", //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
                 //"icon-size":1.5
                 "visibility": "none"
             }
