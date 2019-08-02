@@ -108,7 +108,8 @@ function mapPopup() {
             map.removeMarkers();
         }
 
-        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
+        // let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
+        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL','stationLayerCL','stationLayerDL','terminalLayer']});
         if (!features.length) {
             popup.remove();
             return;
@@ -137,31 +138,37 @@ function mapPopup() {
             stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"  + "<span class='popup-station-count'>" + "暂无信息" + "</span>";
         }
 
-        switch(layerId) {
-            case 'stationLayer':
-                getDynamicIcon(feature,pointApertureColors[1]);
-                popup.setLngLat(feature.geometry.coordinates)
-                    .setHTML(stationInfoHtml)
-                    .addTo(map);
-                pointCenterFly(feature.geometry.coordinates);
-                break;
-            case 'stationLayerL':
-                getDynamicIcon(feature,pointApertureColors[1]);
-                popup.setLngLat(e.lngLat)
-                    .setHTML(stationInfoHtml)
-                    .addTo(map);
-                pointCenterFly(feature.geometry.coordinates);
-                break;
-            case 'terminalLayer':
-                getDynamicIcon(feature,pointApertureColors[1]);
-                popup.setLngLat(e.lngLat)
-                    .setHTML(stationInfoHtml)
-                    .addTo(map);
-                pointCenterFly(feature.geometry.coordinates);
-                break;
-            default:
-                break;
-        }
+        getDynamicIcon(feature,pointApertureColors[1]);
+        popup.setLngLat(e.lngLat)
+            .setHTML(stationInfoHtml)
+            .addTo(map);
+        pointCenterFly(feature.geometry.coordinates);
+
+        // switch(layerId) {
+        //     case 'stationLayer':
+        //         getDynamicIcon(feature,pointApertureColors[1]);
+        //         popup.setLngLat(feature.geometry.coordinates)
+        //             .setHTML(stationInfoHtml)
+        //             .addTo(map);
+        //         pointCenterFly(feature.geometry.coordinates);
+        //         break;
+        //     case 'stationLayerL':
+        //         getDynamicIcon(feature,pointApertureColors[1]);
+        //         popup.setLngLat(e.lngLat)
+        //             .setHTML(stationInfoHtml)
+        //             .addTo(map);
+        //         pointCenterFly(feature.geometry.coordinates);
+        //         break;
+        //     case 'terminalLayer':
+        //         getDynamicIcon(feature,pointApertureColors[1]);
+        //         popup.setLngLat(e.lngLat)
+        //             .setHTML(stationInfoHtml)
+        //             .addTo(map);
+        //         pointCenterFly(feature.geometry.coordinates);
+        //         break;
+        //     default:
+        //         break;
+        // }
     });
 }
 
@@ -199,11 +206,23 @@ function pointCenterFly(coordinates) {
 function changeZoom() {
     let mapZoom = map.getZoom();
     if (mapZoom > 13) {
-        layerVisibilityToggle("stationLayer", "none");
-        layerVisibilityToggle("stationLayerL", "visible");
+        // layerVisibilityToggle("stationLayer", "none");
+        layerVisibilityToggle("stationLayerB", "none");
+        layerVisibilityToggle("stationLayerC", "none");
+        layerVisibilityToggle("stationLayerD", "none");
+        // layerVisibilityToggle("stationLayerL", "visible");
+        layerVisibilityToggle("stationLayerBL", "visible");
+        layerVisibilityToggle("stationLayerCL", "visible");
+        layerVisibilityToggle("stationLayerDL", "visible");
     } else {
-        layerVisibilityToggle("stationLayer", "visible");
-        layerVisibilityToggle("stationLayerL", "none");
+        // layerVisibilityToggle("stationLayer", "visible");
+        layerVisibilityToggle("stationLayerB", "visible");
+        layerVisibilityToggle("stationLayerC", "visible");
+        layerVisibilityToggle("stationLayerD", "visible");
+        // layerVisibilityToggle("stationLayerL", "none");
+        layerVisibilityToggle("stationLayerBL", "none");
+        layerVisibilityToggle("stationLayerCL", "none");
+        layerVisibilityToggle("stationLayerDL", "none");
     }
 }
 
@@ -623,8 +642,46 @@ function addStation() {
             'type': 'geojson',
             'data': gcjData
         });
+
         map.addLayer({
             'id': 'stationLayer',
+            'type': 'circle',
+            'source': 'stopsSource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'circle-radius': {
+                    'base': 1.5,
+                    'stops': [[5, 2], [18, 4]]
+                },
+                'circle-color': "#00A2D9",      //填充圆形的颜色
+                'circle-blur': 0.1,              //模糊程度，默认0
+                'circle-opacity': 0.6           //透明度，默认为1
+            },
+            filter: ["in", "stopType", "一般停靠站"]
+        });
+        map.addLayer({
+            'id': 'stationLayerA',
+            'type': 'circle',
+            'source': 'stopsSource',
+            'layout': {
+                "visibility": "none"
+            },
+            'paint': {
+                'circle-radius': {
+                    'base': 1.5,
+                    'stops': [[5, 2], [18, 4]]
+                },
+                'circle-color': "rgb(226, 83, 101)",      //填充圆形的颜色 红色
+                'circle-blur': 0.1,              //模糊程度，默认0
+                'circle-opacity': 0.6           //透明度，默认为1
+            },
+            filter: ["in", "stopType", "首末站"]
+
+        });
+        map.addLayer({
+            'id': 'stationLayerB',
             'type': 'circle',
             'source': 'stopsSource',
             'layout': {
@@ -632,44 +689,120 @@ function addStation() {
             },
             'paint': {
                 'circle-radius': {
-                    /**
-                     * base:圆的半径随zoom级别变化的剧烈程度，
-                     *      1：        近似于直线线
-                     *      <1:        曲线开口向下
-                     *      >1 && <1.9 曲线开口向上
-                     * stops：[minzoom,minPixel],[maxzoom,maxPixel]
-                     *        对应：最小zoom时的半径pixel像素大小，最大时的半径像素大小
-                     * 其他中间zoom级别，根据base规定的线性（1）或曲线曲率，半径大小会相应变化
-                     */
                     'base': 1.5,
                     'stops': [[5, 2], [18, 4]]
                 },
-                // 'circle-color': "#6C87AB",      //填充圆形的颜色
                 'circle-color': "#00A2D9",      //填充圆形的颜色
+                // 'circle-color': "rgb(21, 117, 168)",      //填充圆形的颜色  蓝色
                 'circle-blur': 0.1,              //模糊程度，默认0
                 'circle-opacity': 0.6           //透明度，默认为1
-            }
+            },
+            filter: ["in", "stopType", "一般停靠站"]
         });
         map.addLayer({
-            "id": "stationLayerL",
-            "type": "symbol",
-            "source": 'stopsSource',
-            "layout": {
-                "icon-image": "metro-1-230100-18", //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
-                //"icon-size":1.5
-                "visibility": "none"
-            }
+            'id': 'stationLayerC',
+            'type': 'circle',
+            'source': 'stopsSource',
+            'layout': {
+                "visibility": "visible"
+            },
+            'paint': {
+                'circle-radius': {
+                    'base': 1.5,
+                    'stops': [[5, 2], [18, 4]]
+                },
+                'circle-color': "#E2AF32",      //填充圆形的颜色 黄色
+                'circle-blur': 0.1,              //模糊程度，默认0
+                'circle-opacity': 0.6           //透明度，默认为1
+            },
+            filter: ["in", "stopType", "换乘站"]
 
         });
         map.addLayer({
-            "id": "terminalLayer",
-            "type": "symbol",
-            "source": 'stopsSource',
-            "layout": {
-                "icon-image": "bus-15" //circle-red-11(圆点图)  bus-15(公交图)   metro-1-230100-18(换乘图)
-                //"icon-size":1.5
+            'id': 'stationLayerD',
+            'type': 'circle',
+            'source': 'stopsSource',
+            'layout': {
+                "visibility": "visible"
             },
-            filter: ["in", "stopType", "枢纽站"]
+            'paint': {
+                'circle-radius': {
+                    'base': 1.5,
+                    'stops': [[5, 2], [18, 4]]
+                },
+                'circle-color': "#7E5887",      //填充圆形的颜色 紫色
+                'circle-blur': 0.1,              //模糊程度，默认0
+                'circle-opacity': 0.6           //透明度，默认为1
+            },
+            filter: ["in", "stopType", "枢纽站","集散站"]
+
+        });
+
+        map.loadImage('./CSS/svg/bus-stationA.png', function(error, image) {
+            if (error) throw error;
+            map.addImage('terminal-icon', image);
+            map.addLayer({
+                "id": "terminalLayer",
+                "type": "symbol",
+                "source": 'stopsSource',
+                "layout": {
+                    "icon-image": "terminal-icon",
+                    "icon-size":0.5
+                },
+                filter: ["in", "stopType", "首末站"]
+            });
+        });
+
+        map.loadImage('./CSS/svg/bus-stationB.png', function(error, image) {
+            if (error) throw error;
+            map.addImage('staion-iconB', image);
+            map.addLayer({
+                // "id": "stationLayerL",
+                "id": "stationLayerBL",
+                "type": "symbol",
+                "source": 'stopsSource',
+                "layout": {
+                    "icon-image": "staion-iconB",
+                    "icon-size":0.5,
+                    "visibility": "none"
+                },
+                // filter: ["in", "stopType", "一般停靠站", "换乘站", "枢纽站","集散站"]
+                filter: ["in", "stopType", "一般停靠站"]
+            });
+        });
+
+        map.loadImage('./CSS/svg/bus-stationC.png', function(error, image) {
+            if (error) throw error;
+            map.addImage('staion-iconC', image);
+            map.addLayer({
+                // "id": "stationLayerL",
+                "id": "stationLayerCL",
+                "type": "symbol",
+                "source": 'stopsSource',
+                "layout": {
+                    "icon-image": "staion-iconC",
+                    "icon-size":0.5,
+                    "visibility": "none"
+                },
+                filter: ["in", "stopType", "换乘站"]
+            });
+        });
+
+        map.loadImage('./CSS/svg/bus-stationD.png', function(error, image) {
+            if (error) throw error;
+            map.addImage('staion-iconD', image);
+            map.addLayer({
+                // "id": "stationLayerL",
+                "id": "stationLayerDL",
+                "type": "symbol",
+                "source": 'stopsSource',
+                "layout": {
+                    "icon-image": "staion-iconD",
+                    "icon-size":0.5,
+                    "visibility": "none"
+                },
+                filter: ["in", "stopType", "枢纽站","集散站"]
+            });
         });
 
         // 热力图
@@ -681,24 +814,18 @@ function addStation() {
                 "visibility": "none"
             },
             "paint": {
-                // 一个热力图数据点的模糊范围，单位是像素，默认值30；要求：值大于等于1，可根据zoom level进行插值设置
                 "heatmap-radius": 30,
-                //一个热力图单个数据点的热力程度，默认值为1；要求：值大于等于0，支持使用property中某个的热力值
                 "heatmap-weight": {
                     "property": "mag",
                     "stops": [[0, 0], [10, 1]]
                 },
-                // 用于统一控制热力值的强度，默认值1；要求：值大于等于0，可根据zoom level进行插值设置
                 "heatmap-intensity": 0.2,
-                // 表示热力图颜色阶梯，阶梯的值域范围为0-1，默认值为["interpolate",["linear"],["heatmap-density"],0,"rgba(0, 0, 255, 0)",0.1,"royalblue",0.3,"cyan",0.5,"lime",0.7,"yellow",1,"red"]
                 "heatmap-color": [
                     "interpolate",
                     ["linear"],
                     ["heatmap-density"],
-                    // 0, "#101114", 0.1, "rgb(116, 116, 166)", 0.3, "rgb(105, 141, 171)", 0.5, "rgb(99, 196, 161)", 0.7, "rgb(125, 210, 146)", 1, "rgb(254, 237, 95)"
                     0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
                 ],
-                // 表示热力图的不透明度，默认值1；值域范围0-1，可根据zoom level进行插值设置
                 "heatmap-opacity": 0.7
             }
         });
