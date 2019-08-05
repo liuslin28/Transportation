@@ -1,7 +1,7 @@
 
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer','uncoverCenterLayer'];
+var layerList = ['stationLayer', 'stationLayerL','stationLayerB','stationLayerC','stationLayerD','stationLayerBL','stationLayerCL','stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer','uncoverCenterLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -71,7 +71,7 @@ $(document).ready(function () {
                         addBuslane();
                         addBusroute();
                         addBusroutes();
-                        // addCenter();
+                        addCenter();
                         addOldcity();
                         addBusrouteSample();
 
