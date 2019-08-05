@@ -59,6 +59,7 @@ $(document).ready(function () {
                     //加载成功后 loading 隐藏 , 加载其它数据
                     clearInterval(t);
                     $('.loading').hide();
+                    $('.legendWrapper').show();
                     map.resize();
                     mapFly();
 

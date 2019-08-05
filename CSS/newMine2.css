@@ -146,7 +146,7 @@ ul {
     height: 90px;
     width: 100%;
     position: absolute;
-    top:90px;
+    top: 90px;
     left: 0;
     z-index: 99;
     text-align: center;
@@ -220,10 +220,85 @@ ul {
     color: white;
 }
 
-/*------------------------------*/
-/*展示临时用*/
-.temp-data {
+/*-------------图例页面-----------------*/
+.legendWrapper {
+    width: 250px;
+    height: 160px;
+    left: 20px;
+    bottom: 20px;
+    position: absolute;
+    background-color: rgba(25, 38, 52, 0.8);
+    -moz-box-shadow: 2px 2px 5px #000000;
+    -webkit-box-shadow: 2px 2px 5px #000000;
+    box-shadow: 2px 2px 5px #000000;
+    z-index: 199;
     display: none;
+}
+
+.legendWrapper-title {
+    color: white;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    margin: 3px 0;
+}
+
+.legendWrapper-list {
+    color: white;
+    height: 30px;
+    line-height: 30px;
+    width: 180px;
+    margin: 0 auto;
+}
+
+.legendWrapper-list span {
+    width: 100px;
+    margin-left: 25px;
+    font-size: small;
+}
+
+.legend-circleA {
+    width: 10px;
+    height: 10px;
+    margin: auto 5px;
+    border-radius: 50%;
+    background: #E25365;
+    display: inline-block;
+}
+
+.legend-circleB {
+    width: 10px;
+    height: 10px;
+    margin: auto 5px;
+    border-radius: 50%;
+    background: #00A2D9;
+    display: inline-block;
+}
+
+.legend-circleC {
+    width: 10px;
+    height: 10px;
+    margin: auto 5px;
+    border-radius: 50%;
+    background: #E2AF32;
+    display: inline-block;
+}
+
+.legend-circleD {
+    width: 10px;
+    height: 10px;
+    margin: auto 5px;
+    border-radius: 50%;
+    background: #7E5887;
+    display: inline-block;
+}
+
+.legend-icon {
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    margin: auto 10px;
 }
 
 /*------------地图页面------------------*/

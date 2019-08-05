@@ -31,6 +31,7 @@ $('#home-click').click(function () {
     $('#simulate-dataWrapper').hide();
     $('#info-dataWrapper').hide();
     $('.infoWrapper').hide();
+    $('.legendWrapper').show();
     closeLayer();
     layerVisibilityToggle("stationLayer", 'visible');
     layerVisibilityToggle("terminalLayer", 'visible');
@@ -98,8 +99,11 @@ $('.dataWrapper-info-li').click(function (e) {
             break;
     }
 
-        // 图层显示
+    // 关闭其他图层
     closeLayer();
+    // 关闭图例
+    $('.legendWrapper').hide();
+    // 图层显示
 
     let showLayer;
     switch (liId) {
@@ -122,4 +126,9 @@ $('.dataWrapper-info-li').click(function (e) {
     layerVisibilityToggle(showLayer, 'visible');
     changeStopLayer('false');
 });
+/*------------------------------*/
 
+
+$('.popup-station-list').click(function (e) {
+   console.log(e)
+});
