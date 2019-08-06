@@ -87,10 +87,10 @@ $(document).ready(function () {
         // stopDensity();
         // networkComplex();
         // networkDistance();
-        // nonLinear();
+        nonLinear();
         // buslaneGPTool();
         // busrouteGPTool();
-        // stationDistance();
+        stationDistance();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -568,11 +568,8 @@ function networkDistance() {
 function nonLinear() {
     $.when(getJson(conf_busline_ex_query)).then(function (data) {
         let busData = data['features'];
-        let busRouteLength = busData[0].properties.lineLength;
+        let busRouteLength = busData[0].geometry.properties.lineLength;
         let busCoordinate = busData[0].geometry.coordinates;
-        console.log(busRouteLength);
-        console.log(busCoordinate[0]);
-        console.log(busCoordinate[busCoordinate.length - 1]);
 
         let coordinateFrom = turf.point(busCoordinate[0]);
         let coordinateTo = turf.point(busCoordinate[busCoordinate.length - 1]);
@@ -587,8 +584,8 @@ function nonLinear() {
 function stationDistance() {
     $.when(getJson(conf_busline_ex_query)).then(function (data) {
         let busData = data['features'];
-        let busStationList = busData[0].geometry.coordinates;
-        let busRoute = busData[0].properties.route;
+        let busStationList = busData[0].geometry.properties.station;
+        let busRoute = busData[0].geometry.coordinates;
         let busRouteTurf = turf.lineString(busRoute);
         let stationDistanceList = [];
 
@@ -1112,7 +1109,7 @@ function listenStationInfo() {
         let busLineName = inputTarget.innerText;
         console.log(busLineName)
 // 测试用公交线路图层（自行处理的样例数据）
-        $.when(getJson('geojsonData/routeSample2.json')).then(function (data) {
+        $.when(getJson(conf_busline_ex_query)).then(function (data) {
             let gcjData = wgsToGcj(data);
             setBoundry(gcjData);
 
