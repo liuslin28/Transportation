@@ -1,7 +1,6 @@
-
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
-var layerList = ['stationLayer', 'stationLayerL','stationLayerB','stationLayerC','stationLayerD','stationLayerBL','stationLayerCL','stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer','uncoverCenterLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer', 'uncoverCenterLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -13,7 +12,7 @@ var centerArea = 411.56; //中央建成区面积
 var oldcityArea = 16.373766; //古城区面积
 var coverArea;  //中央建成区站点覆盖面积
 var coverAreaRatio;  //中央建成区站点覆盖比率
-var pointApertureColors = ['red','blue','orange','green']; //目前只提供地图上点击点（ICON）展示的四色光晕
+var pointApertureColors = ['red', 'blue', 'orange', 'green']; //目前只提供地图上点击点（ICON）展示的四色光晕
 
 /**
  * 基本地图加载
@@ -34,9 +33,9 @@ $(document).ready(function () {
         zoom: 11, /*地图默认缩放等级*/
         pitch: 90, /*地图俯仰角度*/
         maxZoom: 17, /*地图最大缩放等级*/
-        minZoom: 3 , /*地图最小缩放等级*/
+        minZoom: 3, /*地图最小缩放等级*/
         trackResize: true, /*地图会自动匹配浏览器窗口大小*/
-        logoControl:false  /*logo控件是否显示，不加该参数时默认显示*/
+        logoControl: false  /*logo控件是否显示，不加该参数时默认显示*/
     });
 
     popup = new minemap.Popup({
@@ -73,7 +72,6 @@ $(document).ready(function () {
                         addBusroutes();
                         addCenter();
                         addOldcity();
-                        addBusrouteSample();
 
                     }, 5000);
 
@@ -92,7 +90,7 @@ $(document).ready(function () {
         // nonLinear();
         // buslaneGPTool();
         // busrouteGPTool();
-        stationDistance();
+        // stationDistance();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -105,12 +103,12 @@ $(document).ready(function () {
 function mapPopup() {
     map.on('click', function (e) {
         // 点击地图，同步清除marker
-        if(marker){
+        if (marker) {
             map.removeMarkers();
         }
 
         // let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
-        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL','stationLayerCL','stationLayerDL','terminalLayer']});
+        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
         if (!features.length) {
             popup.remove();
             return;
@@ -127,24 +125,24 @@ function mapPopup() {
         if (stationLine) {
             let stationList = stationLine.split(',');
             let stationLineCount = stationList.length;
-            lengthHtml = "<span class='popup-station-count'>" + "途径站点线路" + stationLineCount + "条"+"</span>";
+            lengthHtml = "<span class='popup-station-count'>" + "途径站点线路" + stationLineCount + "条" + "</span>";
             let stationDiv;
             stationList.forEach(function (value) {
                 stationDiv = "<span class='popup-station-list'>" + value + "</span>";
                 stationHtml += stationDiv;
             });
-            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"+ lengthHtml + stationHtml;
+            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + lengthHtml + stationHtml;
 
         } else {
-            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>"  + "<span class='popup-station-count'>" + "暂无信息" + "</span>";
+            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + "<span class='popup-station-count'>" + "暂无信息" + "</span>";
         }
 
-        getDynamicIcon(feature,pointApertureColors[1]);
+        getDynamicIcon(feature, pointApertureColors[1]);
         popup.setLngLat(e.lngLat)
             .setHTML(stationInfoHtml)
             .addTo(map);
         pointCenterFly(feature.geometry.coordinates);
-
+        listenStationInfo();
         // switch(layerId) {
         //     case 'stationLayer':
         //         getDynamicIcon(feature,pointApertureColors[1]);
@@ -228,11 +226,11 @@ function changeZoom() {
 }
 
 function changeStopLayer(layerChange) {
-    if(layerChange === 'true' ) {
+    if (layerChange === 'true') {
         // 地图缩放,改变站点图层显示
-        map.on("zoomend",changeZoom);
+        map.on("zoomend", changeZoom);
     } else {
-        map.off("zoomend",changeZoom);
+        map.off("zoomend", changeZoom);
     }
 }
 
@@ -594,9 +592,9 @@ function stationDistance() {
         let busRouteTurf = turf.lineString(busRoute);
         let stationDistanceList = [];
 
-        for(let i=0; i< busStationList.length-1; i++) {
+        for (let i = 0; i < busStationList.length - 1; i++) {
             let startCoordinate = busStationList[i];
-            let endCoordinate = busStationList[i+1];
+            let endCoordinate = busStationList[i + 1];
             let start = turf.point(startCoordinate);
             let stop = turf.point(endCoordinate);
             let sliced = turf.lineSlice(start, stop, busRouteTurf);
@@ -735,11 +733,11 @@ function addStation() {
                 'circle-blur': 0.1,              //模糊程度，默认0
                 'circle-opacity': 0.6           //透明度，默认为1
             },
-            filter: ["in", "stopType", "枢纽站","集散站"]
+            filter: ["in", "stopType", "枢纽站", "集散站"]
 
         });
 
-        map.loadImage('./CSS/svg/bus-stationA.png', function(error, image) {
+        map.loadImage('./CSS/svg/bus-stationA.png', function (error, image) {
             if (error) throw error;
             map.addImage('terminal-icon', image);
             map.addLayer({
@@ -748,13 +746,13 @@ function addStation() {
                 "source": 'stopsSource',
                 "layout": {
                     "icon-image": "terminal-icon",
-                    "icon-size":0.5
+                    "icon-size": 0.5
                 },
                 filter: ["in", "stopType", "首末站"]
             });
         });
 
-        map.loadImage('./CSS/svg/bus-stationB.png', function(error, image) {
+        map.loadImage('./CSS/svg/bus-stationB.png', function (error, image) {
             if (error) throw error;
             map.addImage('staion-iconB', image);
             map.addLayer({
@@ -764,7 +762,7 @@ function addStation() {
                 "source": 'stopsSource',
                 "layout": {
                     "icon-image": "staion-iconB",
-                    "icon-size":0.5,
+                    "icon-size": 0.5,
                     "visibility": "none"
                 },
                 // filter: ["in", "stopType", "一般停靠站", "换乘站", "枢纽站","集散站"]
@@ -772,7 +770,7 @@ function addStation() {
             });
         });
 
-        map.loadImage('./CSS/svg/bus-stationC.png', function(error, image) {
+        map.loadImage('./CSS/svg/bus-stationC.png', function (error, image) {
             if (error) throw error;
             map.addImage('staion-iconC', image);
             map.addLayer({
@@ -782,14 +780,14 @@ function addStation() {
                 "source": 'stopsSource',
                 "layout": {
                     "icon-image": "staion-iconC",
-                    "icon-size":0.5,
+                    "icon-size": 0.5,
                     "visibility": "none"
                 },
                 filter: ["in", "stopType", "换乘站"]
             });
         });
 
-        map.loadImage('./CSS/svg/bus-stationD.png', function(error, image) {
+        map.loadImage('./CSS/svg/bus-stationD.png', function (error, image) {
             if (error) throw error;
             map.addImage('staion-iconD', image);
             map.addLayer({
@@ -799,10 +797,10 @@ function addStation() {
                 "source": 'stopsSource',
                 "layout": {
                     "icon-image": "staion-iconD",
-                    "icon-size":0.5,
+                    "icon-size": 0.5,
                     "visibility": "none"
                 },
-                filter: ["in", "stopType", "枢纽站","集散站"]
+                filter: ["in", "stopType", "枢纽站", "集散站"]
             });
         });
 
@@ -1026,37 +1024,13 @@ function addBusroutes() {
     });
 }
 
-// 测试用公交线路图层（自行处理的样例数据）
-function addBusrouteSample() {
-    $.when(getJson(conf_busline_ex_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('busRouteSampleSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'busSampleLayer',
-            'type': 'line',
-            'source': 'busRouteSampleSource',
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round",
-                "visibility": "none"
-            },
-            "paint": {
-                "line-color": "#00B6D0",
-                // "line-color": "#00C9B7",
-                "line-opacity": 0.9,
-                "line-width": 2
-            }
-        });
-    });
-}
-
 /*------------------------------*/
 // 图层显示切换
 function layerVisibilityToggle(layerName, checkValue) {
-    map.setLayoutProperty(layerName, 'visibility', checkValue);
+    if (map.getLayer(layerName)) {
+        map.setLayoutProperty(layerName, 'visibility', checkValue);
+    } else {
+    }
 }
 
 //得到Json数据
@@ -1075,31 +1049,31 @@ function getJson(url) {
 // 关闭图层
 function closeLayer() {
     layerList.forEach(function (value) {
-        if(map.getLayer(value)){
+        if (map.getLayer(value)) {
             layerVisibilityToggle(value, 'none');
         }
     });
-    if(popup){
+    if (popup) {
         popup.remove();
     }
-    if(marker){
+    if (marker) {
         map.removeMarkers();
     }
 }
 
 //marker光晕，目前只提供地图上点击点（ICON）展示的四色光晕[red,blue,orange,green]
-function getDynamicIcon(feature,color){
+function getDynamicIcon(feature, color) {
     map.removeMarkers();
     let el = document.createElement('div');
     el.style.zIndex = 120;
     let p = document.createElement('div');
     p.className = 'ring-point-marker';
     let p1 = document.createElement('div');
-    p1.className = color+'-ring-point-inner1';
+    p1.className = color + '-ring-point-inner1';
     let p2 = document.createElement('div');
-    p2.className = color+'-ring-point-inner2';
+    p2.className = color + '-ring-point-inner2';
     let p3 = document.createElement('div');
-    p3.className = color+'-ring-point-inner3';
+    p3.className = color + '-ring-point-inner3';
     p.appendChild(p1);
     p.appendChild(p2);
     p.appendChild(p3);
@@ -1107,4 +1081,65 @@ function getDynamicIcon(feature,color){
     marker = new minemap.Marker(el, {offset: [-30, -30]})
         .setLngLat(feature.geometry.coordinates)
         .addTo(map);
+}
+
+
+// 缩放至要素所在区域
+function setBoundry(data) {
+    map.setPitch(0);
+    let bbox = turf.bbox(data);
+    let minX = bbox[0];
+    let minY = bbox[1];
+    let maxX = bbox[2];
+    let maxY = bbox[3];
+
+    let arr = [[minX-0.01, minY-0.01], [maxX+0.01, maxY+0.01]];
+    map.fitBounds(minemap.LngLatBounds.convert(arr));
+}
+
+
+// 监听popup的弹出框
+function listenStationInfo() {
+    $('.popup-station-list').on('click', function (e) {
+        // 关闭其他图层
+        closeLayer();
+        changeStopLayer('false');
+
+        // 关闭图例
+        $('.legendWrapper').hide();
+
+        let inputTarget = e.target;
+        let busLineName = inputTarget.innerText;
+        console.log(busLineName)
+// 测试用公交线路图层（自行处理的样例数据）
+        $.when(getJson('geojsonData/routeSample2.json')).then(function (data) {
+            let gcjData = wgsToGcj(data);
+            setBoundry(gcjData);
+
+            if (map.getLayer("busSampleLayer")) {
+                map.getSource("busRouteSampleSource").setData(gcjData);
+            } else {
+                map.addSource('busRouteSampleSource', {
+                    'type': 'geojson',
+                    'data': gcjData
+                });
+                map.addLayer({
+                    'id': 'busSampleLayer',
+                    'type': 'line',
+                    'source': 'busRouteSampleSource',
+                    "layout": {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    "paint": {
+                        "line-color": "#00B6D0",
+                        "line-opacity": 0.9,
+                        "line-width": 2
+                    }
+                });
+            }
+
+        });
+
+    });
 }
