@@ -171,6 +171,69 @@ function mapPopup() {
     });
 }
 
+// 监听popup的弹出框
+function listenStationInfo() {
+    $('.popup-station-list').on('click', function (e) {
+        // 关闭其他图层
+        closeLayer();
+        changeStopLayer('false');
+
+        // 关闭图例
+        $('.legendWrapper').hide();
+
+        let inputTarget = e.target;
+        let busLineName = inputTarget.innerText;
+        console.log(busLineName)
+// 测试用公交线路图层（自行处理的样例数据）
+        $.when(getJson(conf_busline_ex_query)).then(function (data) {
+            let gcjData = wgsToGcj(data);
+            setBoundry(gcjData);
+
+            if (map.getLayer("busSingleRouteLayer")) {
+                map.getSource("busSingleRouteSource").setData(gcjData);
+                layerVisibilityToggle('busSingleRouteLayer', 'visible');
+                layerVisibilityToggle('busSingleRouteLayer2', 'visible');
+            } else {
+                map.addSource('busSingleRouteSource', {
+                    'type': 'geojson',
+                    'data': gcjData
+                });
+                map.addLayer({
+                    'id': 'busSingleRouteLayer',
+                    'type': 'line',
+                    'source': 'busSingleRouteSource',
+                    "layout": {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    "paint": {
+                        "line-color": "#00A2D9",
+                        "line-opacity": 1,
+                        "line-width": 2
+                    }
+                });
+                map.loadImage('./CSS/svg/bus-stationE.png', function (error, image) {
+                    if (error) throw error;
+                    map.addImage('route-station', image);
+                    map.addLayer({
+                        "id": "busSingleRouteLayer2",
+                        "type": "symbol",
+                        "source": 'busSingleRouteSource',
+                        "layout": {
+                            "icon-image": "route-station",
+                            "icon-size": 0.5,
+                            "visibility": "visible"
+                        }
+                    });
+                });
+            }
+
+        });
+
+    });
+}
+
+
 //_____________________________________________________
 
 // 地图飞入动画
@@ -1100,64 +1163,3 @@ function setBoundry(data) {
 }
 
 
-// 监听popup的弹出框
-function listenStationInfo() {
-    $('.popup-station-list').on('click', function (e) {
-        // 关闭其他图层
-        closeLayer();
-        changeStopLayer('false');
-
-        // 关闭图例
-        $('.legendWrapper').hide();
-
-        let inputTarget = e.target;
-        let busLineName = inputTarget.innerText;
-        console.log(busLineName)
-// 测试用公交线路图层（自行处理的样例数据）
-        $.when(getJson(conf_busline_ex_query)).then(function (data) {
-            let gcjData = wgsToGcj(data);
-            setBoundry(gcjData);
-
-            if (map.getLayer("busSingleRouteLayer")) {
-                map.getSource("busSingleRouteSource").setData(gcjData);
-                layerVisibilityToggle('busSingleRouteLayer', 'visible');
-                layerVisibilityToggle('busSingleRouteLayer2', 'visible');
-            } else {
-                map.addSource('busSingleRouteSource', {
-                    'type': 'geojson',
-                    'data': gcjData
-                });
-                map.addLayer({
-                    'id': 'busSingleRouteLayer',
-                    'type': 'line',
-                    'source': 'busSingleRouteSource',
-                    "layout": {
-                        "line-join": "round",
-                        "line-cap": "round"
-                    },
-                    "paint": {
-                        "line-color": "#00A2D9",
-                        "line-opacity": 1,
-                        "line-width": 2
-                    }
-                });
-                map.loadImage('./CSS/svg/bus-stationE.png', function (error, image) {
-                    if (error) throw error;
-                    map.addImage('route-station', image);
-                    map.addLayer({
-                        "id": "busSingleRouteLayer2",
-                        "type": "symbol",
-                        "source": 'busSingleRouteSource',
-                        "layout": {
-                            "icon-image": "route-station",
-                            "icon-size": 0.5,
-                            "visibility": "visible"
-                        }
-                    });
-                });
-            }
-
-        });
-
-    });
-}
