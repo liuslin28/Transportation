@@ -1,6 +1,6 @@
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'coverCenterLayer', 'uncoverCenterLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'busSingleRouteLayer', 'busSingleRouteLayer2','coverCenterLayer', 'uncoverCenterLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -87,17 +87,17 @@ $(document).ready(function () {
         // stopDensity();
         // networkComplex();
         // networkDistance();
-        nonLinear();
+        // nonLinear();
         // buslaneGPTool();
         // busrouteGPTool();
-        stationDistance();
+        // stationDistance();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
 
     changeStopLayer('true');
-    mapPopup()
+    mapPopup();
 });
 
 function mapPopup() {
@@ -134,7 +134,7 @@ function mapPopup() {
             stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + lengthHtml + stationHtml;
 
         } else {
-            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + "<span class='popup-station-count'>" + "暂无信息" + "</span>";
+            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + "<span class='popup-station-count'>" + "暂无线路信息" + "</span>";
         }
 
         getDynamicIcon(feature, pointApertureColors[1]);
@@ -1013,7 +1013,8 @@ function addBusroutes() {
                 "visibility": "none"
             },
             "paint": {
-                "line-color": "#00B6D0",
+                "line-color": "#00A2D9",
+                // "line-color": "#00B6D0",
                 "line-opacity": 1,
                 "line-width": 2
             }
@@ -1089,9 +1090,13 @@ function setBoundry(data) {
     let minY = bbox[1];
     let maxX = bbox[2];
     let maxY = bbox[3];
-
-    let arr = [[minX-0.01, minY-0.01], [maxX+0.01, maxY+0.01]];
+    let center = turf.center(data);
+    let centerPoint = turf.getCoord(center);
+    let arr = [[minX - 0.015, minY - 0.015], [maxX + 0.015, maxY + 0.015]];
     map.fitBounds(minemap.LngLatBounds.convert(arr));
+    map.flyTo({
+        center: [centerPoint[0]+0.015, centerPoint[1]]
+    })
 }
 
 
@@ -1113,26 +1118,42 @@ function listenStationInfo() {
             let gcjData = wgsToGcj(data);
             setBoundry(gcjData);
 
-            if (map.getLayer("busSampleLayer")) {
-                map.getSource("busRouteSampleSource").setData(gcjData);
+            if (map.getLayer("busSingleRouteLayer")) {
+                map.getSource("busSingleRouteSource").setData(gcjData);
+                layerVisibilityToggle('busSingleRouteLayer', 'visible');
+                layerVisibilityToggle('busSingleRouteLayer2', 'visible');
             } else {
-                map.addSource('busRouteSampleSource', {
+                map.addSource('busSingleRouteSource', {
                     'type': 'geojson',
                     'data': gcjData
                 });
                 map.addLayer({
-                    'id': 'busSampleLayer',
+                    'id': 'busSingleRouteLayer',
                     'type': 'line',
-                    'source': 'busRouteSampleSource',
+                    'source': 'busSingleRouteSource',
                     "layout": {
                         "line-join": "round",
                         "line-cap": "round"
                     },
                     "paint": {
-                        "line-color": "#00B6D0",
-                        "line-opacity": 0.9,
+                        "line-color": "#00A2D9",
+                        "line-opacity": 1,
                         "line-width": 2
                     }
+                });
+                map.loadImage('./CSS/svg/bus-stationE.png', function (error, image) {
+                    if (error) throw error;
+                    map.addImage('route-station', image);
+                    map.addLayer({
+                        "id": "busSingleRouteLayer2",
+                        "type": "symbol",
+                        "source": 'busSingleRouteSource',
+                        "layout": {
+                            "icon-image": "route-station",
+                            "icon-size": 0.5,
+                            "visibility": "visible"
+                        }
+                    });
                 });
             }
 
