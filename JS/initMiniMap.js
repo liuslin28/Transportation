@@ -183,7 +183,7 @@ function listenStationInfo() {
 
         let inputTarget = e.target;
         let busLineName = inputTarget.innerText;
-        console.log(busLineName)
+        console.log(busLineName);
         // 测试用公交线路图层（自行处理的样例数据）
         $.when(getJson(conf_busline_ex_query)).then(function (data) {
             routeInfoHtml(data);
@@ -1068,6 +1068,7 @@ function getDynamicIcon(feature, color) {
 // 缩放至要素所在区域
 function setBoundry(data) {
     map.setPitch(0);
+    map.setZoom(13);
     let bbox = turf.bbox(data);
     let minX = bbox[0];
     let minY = bbox[1];
