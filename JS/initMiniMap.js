@@ -184,8 +184,9 @@ function listenStationInfo() {
         let inputTarget = e.target;
         let busLineName = inputTarget.innerText;
         console.log(busLineName)
-// 测试用公交线路图层（自行处理的样例数据）
+        // 测试用公交线路图层（自行处理的样例数据）
         $.when(getJson(conf_busline_ex_query)).then(function (data) {
+            routeInfoHtml(data);
             let gcjData = wgsToGcj(data);
             setBoundry(gcjData);
 
@@ -583,87 +584,6 @@ function bufferGPTool() {
     });
 }
 
-//_____________________________________________________
-// 指标计算
-
-// 站点密度
-function stopDensity() {
-    $.when(getJson(conf_station_query)).then(function (data) {
-        let stationNum = data['features'].length;
-        let stationDensity = stationNum / centerArea;
-        console.log(stationDensity);
-    })
-}
-
-// 网络复杂度
-function networkComplex() {
-    $.when(getJson(conf_station_query)).then(function (data) {
-        let stationLength = data['features'].length;
-        let networkComplex = (stationLength - 1) / stationLength;
-        console.log(networkComplex)
-    });
-}
-
-// 线网平均站间距
-function networkDistance() {
-    let busRouteLength = 0;
-    let busRouteStation = 0;
-    $.when(getJson(conf_busline_query)).then(function (data) {
-        let busRoute = data['features'];
-        busRoute.forEach(function (value) {
-            if (value['properties'].lineLength === '') {
-                // console.log(value['properties'].lineName);
-            } else {
-                busRouteLength += Number(value['properties'].lineLength);
-            }
-            if (value['properties'].stationNum) {
-                busRouteStation += Number(value['properties'].stationNum);
-            }
-        });
-        networkLength = busRouteLength;
-        console.log(networkLength);
-        let networkDistance = busRouteLength / busRouteStation;
-        console.log(networkDistance);
-    })
-}
-
-// 非直线系数，引用turf计算
-function nonLinear() {
-    $.when(getJson(conf_busline_ex_query)).then(function (data) {
-        let busData = data['features'];
-        let busRouteLength = busData[0].geometry.properties.lineLength;
-        let busCoordinate = busData[0].geometry.coordinates;
-
-        let coordinateFrom = turf.point(busCoordinate[0]);
-        let coordinateTo = turf.point(busCoordinate[busCoordinate.length - 1]);
-        let options = {units: 'kilometers'};
-        let busRouteDistance = turf.distance(coordinateFrom, coordinateTo, options);
-        let nonlinear = busRouteLength / busRouteDistance;
-        console.log(nonlinear);
-    });
-}
-
-// 站间距，引用turf计算
-function stationDistance() {
-    $.when(getJson(conf_busline_ex_query)).then(function (data) {
-        let busData = data['features'];
-        let busStationList = busData[0].geometry.properties.station;
-        let busRoute = busData[0].geometry.coordinates;
-        let busRouteTurf = turf.lineString(busRoute);
-        let stationDistanceList = [];
-
-        for (let i = 0; i < busStationList.length - 1; i++) {
-            let startCoordinate = busStationList[i];
-            let endCoordinate = busStationList[i + 1];
-            let start = turf.point(startCoordinate);
-            let stop = turf.point(endCoordinate);
-            let sliced = turf.lineSlice(start, stop, busRouteTurf);
-            let length = turf.length(sliced, {units: 'kilometers'}).toFixed(3);
-            stationDistanceList.push(Number(length));
-        }
-        console.log(stationDistanceList)
-    });
-}
 
 
 //_____________________________________________________
@@ -1158,7 +1078,7 @@ function setBoundry(data) {
     let arr = [[minX - 0.015, minY - 0.015], [maxX + 0.015, maxY + 0.015]];
     map.fitBounds(minemap.LngLatBounds.convert(arr));
     map.flyTo({
-        center: [centerPoint[0]+0.015, centerPoint[1]]
+        center: [centerPoint[0]+0.01, centerPoint[1]]
     })
 }
 

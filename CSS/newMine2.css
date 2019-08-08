@@ -91,7 +91,7 @@ ul {
     padding: 0;
     top: 0;
     right: 0;
-    z-index: 199;
+    z-index: 299;
     border: none;
     position: absolute;
     background-color: rgba(25, 38, 52, 0.8);
@@ -182,7 +182,7 @@ ul {
     position: absolute;
     top: 200px;
     left: 20px;
-    width: 250px;
+    width: 220px;
     /*height: 600px;*/
     background-color: rgba(25, 38, 52, 0.8);
     -moz-box-shadow: 2px 2px 5px #000000;
@@ -222,7 +222,7 @@ ul {
 
 /*-------------图例页面-----------------*/
 .legendWrapper {
-    width: 250px;
+    width: 220px;
     height: 160px;
     left: 20px;
     bottom: 20px;

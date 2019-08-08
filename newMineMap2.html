@@ -98,7 +98,7 @@
         <div class="infoWrapper-div info-route row" style="height: 100%;width: 100%;display: none;">
             <div class="infoWrapper-list col">
                 <span class="infoWrapper-list-header">公交线路数</span>
-                <span class="infoWrapper-list-num">796</span>
+                <span class="infoWrapper-list-num">399</span>
                 <span class="infoWrapper-list-unit">条</span>
             </div>
             <div class="infoWrapper-list col">
@@ -223,6 +223,7 @@
             <!--&lt;!&ndash;</div>&ndash;&gt;-->
         </div>
     </div>
+    <!--图例-->
     <div class="legendWrapper">
         <div class="legendWrapper-title">图例
         </div>
@@ -249,10 +250,46 @@
             </li>
         </ul>
     </div>
-    <!--地图加载中-->
+    <!--地图加载动画-->
     <div class="loading">
         <p class="loader">Loading</p>
     </div>
+
+    <div class="routeInfoWrapper">
+        <div class="routeInfoWrapper-title">
+        </div>
+        <div class="routeInfoWrapper-basic">
+        </div>
+        <div class="routeInfoWrapper-index">
+            <ul>
+                <li class="routeInfoWrapper-index-list">
+                    <span>平均站间距</span>
+                    <span id="index-distance"></span>
+                    <span>km</span>
+                </li>
+                <li class="routeInfoWrapper-index-list">
+                    <span>超最大阈值比例</span>
+                    <span id="index-maxDis"></span>
+                    <span>%</span>
+                </li>
+                <li class="routeInfoWrapper-index-list">
+                    <span>低最小阈值比例</span>
+                    <span id="index-minDis"></span>
+                    <span>%</span>
+                </li>
+                <li class="routeInfoWrapper-index-list">
+                    <span>非直线系数</span>
+                    <span id="index-nonLinear"></span>
+                </li>
+                <li class="routeInfoWrapper-index-list">
+                    <span>途径公交专用道长度</span>
+                    <span id="index-E">X</span>
+                    <span>km</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
 </div>
 </body>
 
@@ -264,6 +301,8 @@
 <script type="text/javascript" src="JS/config.js"></script>
 <script type="text/javascript" src="JS/mapConfig.js"></script>
 <script type="text/javascript" src="JS/wgsToGcj.js"></script>
+<script type="text/javascript" src="JS/indexCalc.js"></script>
+<script type="text/javascript" src="JS/routeInfoHtml.js"></script>
 <script type="text/javascript" src="JS/initMiniMap.js"></script>
 <script type="text/javascript" src="JS/initMineHtml.js"></script>
 

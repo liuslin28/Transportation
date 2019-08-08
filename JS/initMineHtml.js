@@ -1,4 +1,3 @@
-/*------------------------------*/
 // 图层显示切换
 $('.layerWrapper-check-input').click(function (e) {
     let inputTarget = e.target;
@@ -31,7 +30,10 @@ $('#home-click').click(function () {
     $('#simulate-dataWrapper').hide();
     $('#info-dataWrapper').hide();
     $('.infoWrapper').hide();
+    // 展示图例展示栏
     $('.legendWrapper').show();
+    // 隐藏线路信息展示栏
+    $('.routeInfoWrapper').hide();
     closeLayer();
     layerVisibilityToggle("stationLayer", 'visible');
     layerVisibilityToggle("terminalLayer", 'visible');
@@ -50,26 +52,6 @@ $('#simulate-click').click(function () {
     $('#simulate-dataWrapper').slideToggle();
 });
 
-// 交通信息页面一级导航
-$('.dataWrapper-menu-li').click(function () {
-    let menuListName = $(this).find("a").eq(0).attr('name');
-    $(".dataWrapper-list-menu").each(function (index, domEle) {
-        $(domEle).hide();
-    });
-    $('#' + menuListName).show();
-});
-
-// 交通信息页面二级导航
-$('.dataWrapper-list-menu-li').click(function () {
-    // 修改样式
-    $(this).siblings('li').removeClass('dataWrapper-list-menu-li-active');
-    $(this).addClass('dataWrapper-list-menu-li-active');
-
-    let menuListName = $(this).find("a").eq(0).attr('name');
-    $(".dataWrapper-content-pane").hide();
-    $('#' + menuListName).show();
-});
-
 /*------------------------------*/
 // 点击屏幕，隐藏右侧菜单栏
 $('.mapWrapper').click(function () {
@@ -80,6 +62,8 @@ $('.mapWrapper').click(function () {
 // 交通信息页面 与 infoWrapper联动
 $('.dataWrapper-info-li').click(function (e) {
     $('.dataWrapper').hide();
+    // 隐藏线路信息展示栏
+    $('.routeInfoWrapper').hide();
     let liTarget = e.target;
     let liId = liTarget.id;
     console.log(liId);
@@ -125,10 +109,4 @@ $('.dataWrapper-info-li').click(function (e) {
     }
     layerVisibilityToggle(showLayer, 'visible');
     changeStopLayer('false');
-});
-/*------------------------------*/
-
-
-$('.popup-station-list').click(function (e) {
-   console.log(e)
 });
