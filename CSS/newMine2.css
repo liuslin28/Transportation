@@ -23,7 +23,6 @@ ul {
     width: 100%;
     height: 90px;
     background-color: rgba(15, 27, 36, 0.5);
-    /*background-image: linear-gradient(to right bottom, #406b8a, #386e86, #337081, #34717b, #387274, #397270, #3c736c, #3f7367, #3e7464, #3f7560, #40755c, #427658);*/
     position: absolute;
     z-index: 99;
 }
@@ -32,7 +31,6 @@ ul {
     display: inline-block;
     width: 100%;
     height: 90px;
-    /*padding-left: 30px;*/
     text-align: center;
     line-height: 90px;
     color: white;
@@ -47,11 +45,10 @@ ul {
 
 .navWrapper-nav {
     position: absolute;
-    right: 10px;
+    right: 16px;
     top: 0;
     z-index: 199;
     height: 90px;
-    width: 350px;
     display: -webkit-flex;
     display: flex;
     align-items: center;
