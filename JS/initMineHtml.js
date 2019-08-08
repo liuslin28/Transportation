@@ -27,8 +27,8 @@ $('.layerWrapper-angle').click(function () {
 // navWrapper-nav 导航栏
 // 主页
 $('#home-click').click(function () {
-    $('#simulate-dataWrapper').hide();
-    $('#info-dataWrapper').hide();
+    $('#simulate-menuWrapper').hide();
+    $('#info-menuWrapper').hide();
     $('.infoWrapper').hide();
     // 展示图例展示栏
     $('.legendWrapper').show();
@@ -44,26 +44,26 @@ $('#home-click').click(function () {
 
 // 交通信息列表显示切换
 $('#info-click').click(function () {
-    $('#simulate-dataWrapper').hide();
-    $('#info-dataWrapper').slideToggle();
+    $('#simulate-menuWrapper').hide();
+    $('#info-menuWrapper').slideToggle();
 });
 
 // 交通仿真列表显示切换
 $('#simulate-click').click(function () {
-    $('#info-dataWrapper').hide();
-    $('#simulate-dataWrapper').slideToggle();
+    $('#info-menuWrapper').hide();
+    $('#simulate-menuWrapper').slideToggle();
 });
 
 /*------------------------------*/
 // 点击屏幕，隐藏右侧菜单栏
 $('.mapWrapper').click(function () {
-    $('.dataWrapper').hide();
+    $('.menuWrapper').hide();
 });
 
 
 // 交通信息页面 与 infoWrapper联动
-$('.dataWrapper-info-li').click(function (e) {
-    $('.dataWrapper').hide();
+$('.menuWrapper-info-li').click(function (e) {
+    $('.menuWrapper').hide();
     // 隐藏线路信息展示栏
     $('.routeInfoWrapper').hide();
     let liTarget = e.target;

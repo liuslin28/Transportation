@@ -84,7 +84,7 @@ ul {
 }
 
 /*--------------侧边栏----------------*/
-.dataWrapper {
+.menuWrapper {
     width: 400px;
     height: 100%;
     margin: 0;
@@ -103,19 +103,19 @@ ul {
 }
 
 /*-------------交通信息页面 start-----------------*/
-.dataWrapper-info-menu {
+.menuWrapper-info-menu {
     width: 100%;
     position: relative;
     /*top: 3%; !*偏移*!*/
 }
 
-.dataWrapper-info-list {
+.menuWrapper-info-list {
     width: 100%;
     margin: 100px auto;
     text-align: center;
 }
 
-.dataWrapper-info-header {
+.menuWrapper-info-header {
     display: block;
     margin: 20px auto;
     color: white;
@@ -124,7 +124,7 @@ ul {
     letter-spacing: 0.1rem;
 }
 
-.dataWrapper-info-li {
+.menuWrapper-info-li {
     display: block;
     margin: 10px auto;
     color: white;
@@ -134,7 +134,7 @@ ul {
     cursor: pointer;
 }
 
-.dataWrapper-info-li:hover {
+.menuWrapper-info-li:hover {
     color: #00B6D0;
 }
 
