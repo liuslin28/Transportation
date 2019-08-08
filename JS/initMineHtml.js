@@ -35,9 +35,11 @@ $('#home-click').click(function () {
     // 隐藏线路信息展示栏
     $('.routeInfoWrapper').hide();
     closeLayer();
-    layerVisibilityToggle("stationLayer", 'visible');
+    layerVisibilityToggle("stationLayerB", 'visible');
+    layerVisibilityToggle("stationLayerC", 'visible');
+    layerVisibilityToggle("stationLayerD", 'visible');
     layerVisibilityToggle("terminalLayer", 'visible');
-    changeStopLayer('true');
+    changeStationLayer('true');
 });
 
 // 交通信息列表显示切换
@@ -89,7 +91,7 @@ $('.dataWrapper-info-li').click(function (e) {
     $('.legendWrapper').hide();
     // 图层显示
 
-    let showLayer;
+    let showLayer = null;
     switch (liId) {
         case 'info-station':
             showLayer = 'stopHeatLayer';
@@ -104,9 +106,10 @@ $('.dataWrapper-info-li').click(function (e) {
             showLayer = 'busLaneLayer';
             break;
         default:
-            showLayer = 'stationLayer';
             break;
     }
-    layerVisibilityToggle(showLayer, 'visible');
-    changeStopLayer('false');
+    if(showLayer) {
+        layerVisibilityToggle(showLayer, 'visible');
+    }
+    changeStationLayer('false');
 });

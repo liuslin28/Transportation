@@ -96,7 +96,7 @@ $(document).ready(function () {
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
 
-    changeStopLayer('true');
+    changeStationLayer('true');
     mapPopup();
 });
 
@@ -176,7 +176,7 @@ function listenStationInfo() {
     $('.popup-station-list').on('click', function (e) {
         // 关闭其他图层
         closeLayer();
-        changeStopLayer('false');
+        changeStationLayer('false');
 
         // 关闭图例
         $('.legendWrapper').hide();
@@ -289,7 +289,7 @@ function changeZoom() {
     }
 }
 
-function changeStopLayer(layerChange) {
+function changeStationLayer(layerChange) {
     if (layerChange === 'true') {
         // 地图缩放,改变站点图层显示
         map.on("zoomend", changeZoom);
