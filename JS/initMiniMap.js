@@ -709,7 +709,8 @@ function addStation() {
                     'base': 1.5,
                     'stops': [[5, 2], [18, 4]]
                 },
-                'circle-color': "#7E5887",      //填充圆形的颜色 紫色
+                // 'circle-color': "#7E5887",      //填充圆形的颜色 紫色
+                'circle-color': "#25a982",      //填充圆形的颜色 绿色
                 'circle-blur': 0.1,              //模糊程度，默认0
                 'circle-opacity': 0.6           //透明度，默认为1
             },
@@ -767,7 +768,7 @@ function addStation() {
             });
         });
 
-        map.loadImage('./CSS/svg/bus-stationD.png', function (error, image) {
+        map.loadImage('./CSS/svg/bus-stationF.png', function (error, image) {
             if (error) throw error;
             map.addImage('staion-iconD', image);
             map.addLayer({

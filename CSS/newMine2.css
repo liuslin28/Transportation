@@ -299,7 +299,8 @@ label {
     height: 10px;
     margin-left: 16px;
     border-radius: 50%;
-    background: #7E5887;
+    /*background: #7E5887;*/
+    background: #25a982;
     display: inline-block;
 }
 
