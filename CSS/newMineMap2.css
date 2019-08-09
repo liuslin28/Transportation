@@ -266,6 +266,13 @@
     display: none;
 }
 
+.routeInfoWrapper-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
 .routeInfoWrapper-title {
     display: block;
     height: 30px;
