@@ -89,6 +89,7 @@ $(document).ready(function () {
         // networkDistance();
         // nonLinear();
         // buslaneGPTool();
+        // bufferGPTool();
         // busrouteGPTool();
         // stationDistance();
     }, 5000);
@@ -333,10 +334,10 @@ function buslaneGPTool() {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
                         roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
                         let gpParams = {
                             "road": roadFeatureSet,
-                            "buslane": buslaneFeatureSet
+                            "line": buslaneFeatureSet
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
@@ -381,10 +382,10 @@ function busrouteGPTool() {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
                         roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
                         let gpParams = {
                             "road": roadFeatureSet,
-                            "buslane": buslineFeatureSet
+                            "line": buslineFeatureSet
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
@@ -434,10 +435,10 @@ function routeGPTool() {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
                         roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/routeBuslane");
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
                         let gpParams = {
                             "road": roadFeatureSet,
-                            "buslane": buslineFeatureSet
+                            "line": buslineFeatureSet
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
@@ -462,7 +463,7 @@ function routeGPTool() {
             }
         })
     });
-}
+// }
 
 // 站点覆盖率
 function bufferGPTool() {
@@ -672,7 +673,6 @@ function addStation() {
                     'stops': [[5, 2], [18, 4]]
                 },
                 'circle-color': "#00A2D9",      //填充圆形的颜色
-                // 'circle-color': "rgb(21, 117, 168)",      //填充圆形的颜色  蓝色
                 'circle-blur': 0.1,              //模糊程度，默认0
                 'circle-opacity': 0.6           //透明度，默认为1
             },
@@ -737,7 +737,6 @@ function addStation() {
             if (error) throw error;
             map.addImage('staion-iconB', image);
             map.addLayer({
-                // "id": "stationLayerL",
                 "id": "stationLayerBL",
                 "type": "symbol",
                 "source": 'stopsSource',
@@ -755,7 +754,6 @@ function addStation() {
             if (error) throw error;
             map.addImage('staion-iconC', image);
             map.addLayer({
-                // "id": "stationLayerL",
                 "id": "stationLayerCL",
                 "type": "symbol",
                 "source": 'stopsSource',
