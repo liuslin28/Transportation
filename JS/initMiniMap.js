@@ -1,6 +1,6 @@
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'busSingleRouteLayer', 'busSingleRouteLayer2','coverCenterLayer', 'uncoverCenterLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'busSingleRouteLayer', 'busSingleStationLayer', 'coverCenterLayer', 'uncoverCenterLayer'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -185,56 +185,9 @@ function listenStationInfo() {
         let inputTarget = e.target;
         let busLineName = inputTarget.innerText;
         console.log(busLineName);
-        // 测试用公交线路图层（自行处理的样例数据）
-        $.when(getJson(conf_busline_ex_query)).then(function (data) {
-            routeInfoHtml(data);
-            let gcjData = wgsToGcj(data);
-            setBoundry(gcjData);
-
-            if (map.getLayer("busSingleRouteLayer")) {
-                map.getSource("busSingleRouteSource").setData(gcjData);
-                layerVisibilityToggle('busSingleRouteLayer', 'visible');
-                layerVisibilityToggle('busSingleRouteLayer2', 'visible');
-            } else {
-                map.addSource('busSingleRouteSource', {
-                    'type': 'geojson',
-                    'data': gcjData
-                });
-                map.addLayer({
-                    'id': 'busSingleRouteLayer',
-                    'type': 'line',
-                    'source': 'busSingleRouteSource',
-                    "layout": {
-                        "line-join": "round",
-                        "line-cap": "round"
-                    },
-                    "paint": {
-                        "line-color": "#00A2D9",
-                        "line-opacity": 1,
-                        "line-width": 2
-                    }
-                });
-                map.loadImage('./CSS/svg/bus-stationE.png', function (error, image) {
-                    if (error) throw error;
-                    map.addImage('route-station', image);
-                    map.addLayer({
-                        "id": "busSingleRouteLayer2",
-                        "type": "symbol",
-                        "source": 'busSingleRouteSource',
-                        "layout": {
-                            "icon-image": "route-station",
-                            "icon-size": 0.5,
-                            "visibility": "visible"
-                        }
-                    });
-                });
-            }
-
-        });
-
+        addSingleRoute(busLineName);
     });
 }
-
 
 //_____________________________________________________
 
@@ -463,7 +416,7 @@ function routeGPTool() {
             }
         })
     });
-// }
+}
 
 // 站点覆盖率
 function bufferGPTool() {
@@ -584,7 +537,6 @@ function bufferGPTool() {
         })
     });
 }
-
 
 
 //_____________________________________________________
@@ -1004,6 +956,79 @@ function addBusroutes() {
     });
 }
 
+// 请求公交线路数据，站点数据
+function addSingleRoute(busLineName) {
+    let routeUrl;
+    let stationUrl;
+
+    if(busLineName === "40") {
+        routeUrl = './geojsonData/routeSample/40.json';
+        stationUrl = './geojsonData/routeSample/40Station.json'
+    } else {
+        routeUrl = './geojsonData/routeSample/1.json';
+        stationUrl = './geojsonData/routeSample/1Station.json'
+    }
+
+    // 测试用公交线路图层（自行处理的样例数据）
+    $.when(getJson(routeUrl)).then(function (data) {
+        routeInfoHtml(data);
+        let gcjData = wgsToGcj(data);
+        setBoundry(gcjData);
+
+        if (map.getLayer("busSingleRouteLayer")) {
+            map.getSource("busSingleRouteSource").setData(gcjData);
+            layerVisibilityToggle('busSingleRouteLayer', 'visible');
+        } else {
+            map.addSource('busSingleRouteSource', {
+                'type': 'geojson',
+                'data': gcjData
+            });
+            map.addLayer({
+                'id': 'busSingleRouteLayer',
+                'type': 'line',
+                'source': 'busSingleRouteSource',
+                "layout": {
+                    "line-join": "round",
+                    "line-cap": "round"
+                },
+                "paint": {
+                    "line-color": "#00A2D9",
+                    "line-opacity": 1,
+                    "line-width": 2
+                }
+            });
+        }
+
+    });
+
+    $.when(getJson(stationUrl)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        if (map.getLayer("busSingleStationLayer")) {
+            map.getSource("busSingleStationSource").setData(gcjData);
+            layerVisibilityToggle('busSingleStationLayer', 'visible');
+        } else {
+            map.addSource('busSingleStationSource', {
+                'type': 'geojson',
+                'data': gcjData
+            });
+            map.loadImage('./CSS/svg/bus-stationE.png', function (error, image) {
+                if (error) throw error;
+                map.addImage('route-station', image);
+                map.addLayer({
+                    "id": "busSingleStationLayer",
+                    "type": "symbol",
+                    "source": 'busSingleStationSource',
+                    "layout": {
+                        "icon-image": "route-station",
+                        "icon-size": 0.5,
+                        "visibility": "visible"
+                    }
+                });
+            });
+        }
+    });
+}
+
 /*------------------------------*/
 // 图层显示切换
 function layerVisibilityToggle(layerName, checkValue) {
@@ -1078,7 +1103,7 @@ function setBoundry(data) {
     let arr = [[minX - 0.015, minY - 0.015], [maxX + 0.015, maxY + 0.015]];
     map.fitBounds(minemap.LngLatBounds.convert(arr));
     map.flyTo({
-        center: [centerPoint[0]+0.01, centerPoint[1]]
+        center: [centerPoint[0] + 0.01, centerPoint[1]]
     })
 }
 
