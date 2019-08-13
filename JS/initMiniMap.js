@@ -40,7 +40,8 @@ $(document).ready(function () {
 
     popup = new minemap.Popup({
         closeButton: true,
-        closeOnClick: false
+        closeOnClick: false,
+        offset: [0, 0]
     });
 
     edit = new minemap.edit.init(map, {
@@ -118,6 +119,7 @@ function mapPopup() {
          * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
          */
         let feature = features[0];
+        let popupLatLng = [Number(feature.geometry.coordinates[0]),Number(feature.geometry.coordinates[1])];
         let layerId = feature.layer.id;
         let stationLine = feature.properties.stopLine;
         let stationHtml = [];
@@ -139,7 +141,7 @@ function mapPopup() {
         }
 
         getDynamicIcon(feature, pointApertureColors[1]);
-        popup.setLngLat(e.lngLat)
+        popup.setLngLat(popupLatLng)
             .setHTML(stationInfoHtml)
             .addTo(map);
         pointCenterFly(feature.geometry.coordinates);
