@@ -93,6 +93,7 @@ $(document).ready(function () {
         // bufferGPTool();
         // busrouteGPTool();
         // stationDistance();
+        roadFrequencyGPTool();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -245,7 +246,7 @@ function buslaneGPTool() {
                 buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                 $.ajax({
-                    url: "./esrijsonData/esriroadLine.json",
+                    url: "./esrijsonData/esriroadC.json",
                     type: "GET",
                     success: function (data) {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
@@ -293,7 +294,7 @@ function busrouteGPTool() {
                 let buslineFeatureSet = new esri.tasks.FeatureSet(data);
                 buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
                 $.ajax({
-                    url: "./esrijsonData/esriroadLine.json",
+                    url: "./esrijsonData/esriroadC.json",
                     type: "GET",
                     success: function (data) {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
@@ -373,6 +374,49 @@ function routeGPTool() {
                                 lineLength = (lineLength / 1000).toFixed(2);
                                 console.log(lineLength);
 
+                            });
+                        }
+                    }
+                })
+            }
+        })
+    });
+}
+
+// 路段重复系数
+function roadFrequencyGPTool() {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+        $.ajax({
+            url: "./esrijsonData/esribusRoute.json",
+            type: "GET",
+            success: function (data) {
+                let buslineFeatureSet = new esri.tasks.FeatureSet(data);
+                buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+                $.ajax({
+                    url: "./esrijsonData/esriroadC.json",
+                    type: "GET",
+                    success: function (data) {
+                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
+                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/roadFrequency/GPServer/roadFrequency");
+                        let gpParams = {
+                            "road": roadFeatureSet,
+                            "routes": buslineFeatureSet
+                        };
+                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+                        // 运行状态显示
+                        function statusCallback(jobInfo) {
+                            console.log(jobInfo.jobStatus);
+                        }
+
+                        // 结果图加载
+                        function completeCallback(jobInfo) {
+                            // 长度求算
+                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                                let frequencyResult = value.value.features;
+                                console.log(frequencyResult)
                             });
                         }
                     }
