@@ -393,3 +393,138 @@ label {
         text-indent: 120%;
     }
 }
+
+/*------------地图站点信息页面------------*/
+.minemap-popup-anchor-bottom .minemap-popup-tip{
+    border-top-color: #e9ecef;
+}
+.minemap-popup-content {
+    padding: 8px;
+    max-width: 280px;
+    background: #e9ecef;
+}
+
+.popup-station-type {
+    display: inline-block;
+    margin-right: 4px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid #fff;
+    background-color: #007bffc9;
+    color: #fff;
+    font-weight: 700;
+    /*box-shadow: 0 0 5px rgba(0,0,0,0.15);*/
+    flex-shrink: 0;
+}
+
+.popup-station-header {
+    margin-left: 8px;
+    margin-right: 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.popup-station-count {
+    display: block;
+    font-size: .6rem;
+    font-weight: 400;
+    margin: 5px 0 0;
+    padding: 0;
+    color: #4c4c4c;
+}
+
+.popup-station-list {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 0 2px 0 0;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #95cf29;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/*------------地图线路信息页面------------*/
+.routeInfoWrapper {
+    /*width: 300px;*/
+    /*height: 600px;*/
+    right: 20px;
+    top: calc((100% - 300px)/2);
+    position: absolute;
+    background-color: rgba(25, 38, 52, 0.8);
+    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
+    z-index: 199;
+    color: white;
+    display: none;
+}
+
+.routeInfoWrapper-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.routeInfoWrapper-title {
+    display: block;
+    height: 24px;
+    line-height: 24px;
+    width: 100%;
+    text-align: center;
+    margin: 16px auto;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.routeInfoWrapper-basic {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #999;
+    margin: 8px 16px;
+    text-align: center;
+}
+
+.routeInfoWrapper-basic span:nth-child(1) {
+    display: block;
+}
+
+.routeInfoWrapper-basic span:nth-child(2) {
+    margin: auto 8px;
+}
+
+.routeInfoWrapper-index {
+    margin: 16px;
+}
+
+.routeInfoWrapper-index-list {
+    margin: 8px auto;
+    width: 200px;
+}
+
+.routeInfoWrapper-index-list span {
+    display: inline-block;
+}
+
+.routeInfoWrapper-index-list  span:nth-child(1) {
+    font-size: 0.8rem;
+    font-weight: bold;
+    width: 120px;
+}
+
+.routeInfoWrapper-index-list  span:nth-child(2) {
+    text-align: center;
+    width: 50px;
+    font-size: 1.2rem;
+}
+
+.routeInfoWrapper-index-list  span:nth-child(3) {
+    width: 20px;
+    font-size:  0.8rem;
+}

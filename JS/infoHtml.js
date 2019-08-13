@@ -1,3 +1,29 @@
+// 站点信息
+function stationInfoHtml(data) {
+    let layerId = data.layer.id;
+    let stationLine = data.properties.stopLine;
+    let stationHtml = [];
+    let lengthHtml;
+    let stationInfoHtml;
+    if (stationLine) {
+        let stationList = stationLine.split(',');
+        let stationLineCount = stationList.length;
+        lengthHtml = "<span class='popup-station-count'>" + "途径站点线路" + stationLineCount + "条" + "</span>";
+        let stationDiv;
+        stationList.forEach(function (value) {
+            stationDiv = "<span class='popup-station-list'>" + value + "</span>";
+            stationHtml += stationDiv;
+        });
+        stationInfoHtml = "<span class='popup-station-type'>" + data.properties.stopType + "</span>" + "<span class='popup-station-header'>" + data.properties.stopName + "</span>" + lengthHtml + stationHtml;
+
+    } else {
+        stationInfoHtml = "<span class='popup-station-type'>" + data.properties.stopType + "</span>" + "<span class='popup-station-header'>" + data.properties.stopName + "</span>" + "<span class='popup-station-count'>" + "暂无线路信息" + "</span>";
+    }
+    return stationInfoHtml;
+}
+
+
+// 线路信息
 function routeInfoHtml(data) {
     let dataProperty = (data.features)[0].geometry.properties;
     let basicHtml;

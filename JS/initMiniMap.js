@@ -120,57 +120,14 @@ function mapPopup() {
          */
         let feature = features[0];
         let popupLatLng = [Number(feature.geometry.coordinates[0]),Number(feature.geometry.coordinates[1])];
-        let layerId = feature.layer.id;
-        let stationLine = feature.properties.stopLine;
-        let stationHtml = [];
-        let lengthHtml;
-        let stationInfoHtml;
-        if (stationLine) {
-            let stationList = stationLine.split(',');
-            let stationLineCount = stationList.length;
-            lengthHtml = "<span class='popup-station-count'>" + "途径站点线路" + stationLineCount + "条" + "</span>";
-            let stationDiv;
-            stationList.forEach(function (value) {
-                stationDiv = "<span class='popup-station-list'>" + value + "</span>";
-                stationHtml += stationDiv;
-            });
-            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + lengthHtml + stationHtml;
-
-        } else {
-            stationInfoHtml = "<span class='popup-station-type'>" + feature.properties.stopType + "</span>" + "<span class='popup-station-header'>" + feature.properties.stopName + "</span>" + "<span class='popup-station-count'>" + "暂无线路信息" + "</span>";
-        }
+        let stationPopup = stationInfoHtml(feature);
 
         getDynamicIcon(feature, pointApertureColors[1]);
         popup.setLngLat(popupLatLng)
-            .setHTML(stationInfoHtml)
+            .setHTML(stationPopup)
             .addTo(map);
         pointCenterFly(feature.geometry.coordinates);
         listenStationInfo();
-        // switch(layerId) {
-        //     case 'stationLayer':
-        //         getDynamicIcon(feature,pointApertureColors[1]);
-        //         popup.setLngLat(feature.geometry.coordinates)
-        //             .setHTML(stationInfoHtml)
-        //             .addTo(map);
-        //         pointCenterFly(feature.geometry.coordinates);
-        //         break;
-        //     case 'stationLayerL':
-        //         getDynamicIcon(feature,pointApertureColors[1]);
-        //         popup.setLngLat(e.lngLat)
-        //             .setHTML(stationInfoHtml)
-        //             .addTo(map);
-        //         pointCenterFly(feature.geometry.coordinates);
-        //         break;
-        //     case 'terminalLayer':
-        //         getDynamicIcon(feature,pointApertureColors[1]);
-        //         popup.setLngLat(e.lngLat)
-        //             .setHTML(stationInfoHtml)
-        //             .addTo(map);
-        //         pointCenterFly(feature.geometry.coordinates);
-        //         break;
-        //     default:
-        //         break;
-        // }
     });
 }
 
