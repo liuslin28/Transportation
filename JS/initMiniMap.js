@@ -172,7 +172,7 @@ function mapPopup() {
     });
 }
 
-// 监听popup的弹出框
+// 监听popup弹出框的click事件
 function listenStationInfo() {
     $('.popup-station-list').on('click', function (e) {
         // 关闭其他图层
@@ -186,6 +186,11 @@ function listenStationInfo() {
         let busLineName = inputTarget.innerText;
         console.log(busLineName);
         addSingleRoute(busLineName);
+    });
+    $('.minemap-popup-close-button').on('click',function () {
+        if (marker) {
+            map.removeMarkers();
+        }
     });
 }
 
@@ -961,7 +966,7 @@ function addSingleRoute(busLineName) {
     let routeUrl;
     let stationUrl;
 
-    if(busLineName === "40") {
+    if (busLineName === "40") {
         routeUrl = './geojsonData/routeSample/40.json';
         stationUrl = './geojsonData/routeSample/40Station.json'
     } else {
@@ -1030,6 +1035,7 @@ function addSingleRoute(busLineName) {
 }
 
 /*------------------------------*/
+
 // 图层显示切换
 function layerVisibilityToggle(layerName, checkValue) {
     if (map.getLayer(layerName)) {
