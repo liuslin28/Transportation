@@ -1,6 +1,6 @@
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'busSingleRouteLayer', 'busSingleStationLayer', 'coverCenterLayer', 'uncoverCenterLayer'];
+var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'busSingleRouteLayer', 'busSingleStationLayer', 'coverCenterLayer', 'uncoverCenterLayer', 'roadFrequencyLayer0', 'roadFrequencyLayer1' ,'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -93,7 +93,6 @@ $(document).ready(function () {
         // bufferGPTool();
         // busrouteGPTool();
         // stationDistance();
-        roadFrequencyGPTool();
     }, 5000);
 
     map.on("edit.undo", onEditUndo);
@@ -246,11 +245,11 @@ function buslaneGPTool() {
                 buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                 $.ajax({
-                    url: "./esrijsonData/esriroadC.json",
+                    url: "./esrijsonData/esriroadOldcityUnp.json",
                     type: "GET",
                     success: function (data) {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
-                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+                        buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
                         let gpParams = {
@@ -267,14 +266,13 @@ function buslaneGPTool() {
                         // 结果图加载
                         function completeCallback(jobInfo) {
                             // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
-                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
+                                let lineLength = (value.value.features)[0].attributes.SUM_leg;
                                 // 米=>千米
-                                busLaneLength = lineLength / 1000;
+                                busLaneLength = (lineLength / 1000).toFixed(2);
                                 busLaneRatio = busLaneLength / networkLength;
                                 console.log(busLaneLength);
                                 // console.log(busLaneRatio);
-
                             });
                         }
                     }
@@ -288,17 +286,16 @@ function buslaneGPTool() {
 function busrouteGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
         $.ajax({
-            url: "./esrijsonData/esribusRoute.json",
+            url: "./esrijsonData/esriroutesOldcityUnp.json",
             type: "GET",
             success: function (data) {
                 let buslineFeatureSet = new esri.tasks.FeatureSet(data);
                 buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
                 $.ajax({
-                    url: "./esrijsonData/esriroadC.json",
+                    url: "./esrijsonData/esriroadOldcityUnp.json",
                     type: "GET",
                     success: function (data) {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
-                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
                         let gpParams = {
@@ -315,11 +312,11 @@ function busrouteGPTool() {
                         // 结果图加载
                         function completeCallback(jobInfo) {
                             // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
-                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
+                                let lineLength = (value.value.features)[0].attributes.SUM_leg;
                                 // 米=>千米
-                                busLineLength = lineLength / 1000;
-                                console.log(lineLength);
+                                busLineLength = (lineLength / 1000).toFixed(2);
+                                console.log(busLineLength);
                                 // 全市为例的计算
                                 // networkRepeat = networkLength/busLineLength;
                                 // busLineDensity = busLineLength/centerArea;
@@ -327,7 +324,6 @@ function busrouteGPTool() {
                                 networkRepeat = networkLengthTemp / busLineLength;
                                 busLineDensity = busLineLength / oldcityArea;
                                 console.log(busLineDensity);
-
                             });
                         }
                     }
@@ -368,8 +364,8 @@ function routeGPTool() {
                         // 结果图加载
                         function completeCallback(jobInfo) {
                             // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
-                                let lineLength = value.value.features[0].attributes['Shape_Length'];
+                            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
+                                let lineLength = (value.value.features)[0].attributes.SUM_leg;
                                 // 米=>千米,保留2位小数
                                 lineLength = (lineLength / 1000).toFixed(2);
                                 console.log(lineLength);
@@ -387,21 +383,21 @@ function routeGPTool() {
 function roadFrequencyGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
         $.ajax({
-            url: "./esrijsonData/esribusRoute.json",
+            url: "./esrijsonData/esriroutesOldcityUnp.json",
             type: "GET",
             success: function (data) {
                 let buslineFeatureSet = new esri.tasks.FeatureSet(data);
                 buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
                 $.ajax({
-                    url: "./esrijsonData/esriroadC.json",
+                    url: "./esrijsonData/esriroadOldcityP.json",
                     type: "GET",
                     success: function (data) {
                         let roadFeatureSet = new esri.tasks.FeatureSet(data);
-                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
                         let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/roadFrequency/GPServer/roadFrequency");
                         let gpParams = {
                             "road": roadFeatureSet,
+                            "road2": roadFeatureSet,
                             "routes": buslineFeatureSet
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
@@ -416,7 +412,97 @@ function roadFrequencyGPTool() {
                             // 长度求算
                             gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                 let frequencyResult = value.value.features;
-                                console.log(frequencyResult)
+                                let frequencyJson = transLineJson(frequencyResult);
+                                let gcjData = wgsToGcj(frequencyJson);
+                                map.addSource('roadFrequencySource', {
+                                    'type': 'geojson',
+                                    'data': gcjData
+                                });
+                                map.addLayer({
+                                    'id': 'roadFrequencyLayer0',
+                                    'type': 'line',
+                                    'source': 'roadFrequencySource',
+                                    "layout": {
+                                        "line-join": "round",
+                                        "line-cap": "round"
+                                    },
+                                    "paint": {
+                                        "line-color": "#474747",
+                                        // "line-color": "#7E5887",
+                                        "line-opacity": 1,
+                                        "line-width": 2.5
+                                    },
+                                    filter:["==","FREQUENCY",0]
+
+                                });
+                                map.addLayer({
+                                    'id': 'roadFrequencyLayer1',
+                                    'type': 'line',
+                                    'source': 'roadFrequencySource',
+                                    "layout": {
+                                        "line-join": "round",
+                                        "line-cap": "round"
+                                    },
+                                    "paint": {
+                                        // "line-color": "#6C5B7B",
+                                        "line-color": "#1575A8",
+                                        "line-opacity": 1,
+                                        "line-width": 2
+                                    },
+                                    filter:["all", [">","FREQUENCY",0], ["<=","FREQUENCY",1]]
+
+                                });
+                                map.addLayer({
+                                    'id': 'roadFrequencyLayer2',
+                                    'type': 'line',
+                                    'source': 'roadFrequencySource',
+                                    "layout": {
+                                        "line-join": "round",
+                                        "line-cap": "round"
+                                    },
+                                    "paint": {
+                                        // "line-color": "#C06C84",
+                                        "line-color": "#25A982",
+                                        "line-opacity": 1,
+                                        "line-width": 2
+                                    },
+                                    filter:["all", [">","FREQUENCY",1], ["<=","FREQUENCY",2]]
+
+                                });
+                                map.addLayer({
+                                    'id': 'roadFrequencyLayer3',
+                                    'type': 'line',
+                                    'source': 'roadFrequencySource',
+                                    "layout": {
+                                        "line-join": "round",
+                                        "line-cap": "round"
+                                    },
+                                    "paint": {
+                                        // "line-color": "#F67280",
+                                        "line-color": "#E2AF32",
+                                        "line-opacity": 1,
+                                        "line-width": 2
+                                    },
+                                    filter:["all", [">","FREQUENCY",2], ["<=","FREQUENCY",5]]
+
+                                });
+                                map.addLayer({
+                                    'id': 'roadFrequencyLayer4',
+                                    'type': 'line',
+                                    'source': 'roadFrequencySource',
+                                    "layout": {
+                                        "line-join": "round",
+                                        "line-cap": "round"
+                                    },
+                                    "paint": {
+                                        // "line-color": "#F8B195",
+                                        "line-color": "#E25365",
+                                        "line-opacity": 1,
+                                        "line-width": 2
+                                    },
+                                    filter:[">","FREQUENCY",5]
+
+                                });
                             });
                         }
                     }
@@ -524,10 +610,12 @@ function bufferGPTool() {
                             gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                 let bufferResult = value.value.features;
                                 // 输出格式转换，坐标尚未进行转换
-                                bufferJson = transtoJson(bufferResult);
+                                let bufferJson = transPolyJson(bufferResult);
+                                let gcjData = wgsToGcj(bufferJson);
+
                                 if (bufferJson) {
                                     // 切换数据源
-                                    map.getSource('coverCenterSource').setData(bufferJson);
+                                    map.getSource('coverCenterSource').setData(gcjData);
                                 } else {
                                     console.log("buffer结果加载出错了");
                                 }
@@ -548,9 +636,8 @@ function bufferGPTool() {
 
 
 //_____________________________________________________
-
 // MultiPolygon的格式转换
-function transtoJson(data) {
+function transPolyJson(data) {
     let multiPoly = [];
     data.map(function (value) {
         const geoCoordinate = value.geometry['rings'];
@@ -568,8 +655,40 @@ function transtoJson(data) {
             }
         ]
     };
-    transPolyJson = wgsToGcj(polygonJson);
-    return transPolyJson;
+    return polygonJson;
+}
+
+// Line的格式转换
+function transLineJson(data) {
+    let lineJson = {
+        "type": "FeatureCollection",
+        "features": []
+    };
+    data.map(function (value) {
+        let lineCoordinate = (value.geometry.paths)[0];
+        let lineAttribute = setFrequency(value.attributes);
+        let lineFeature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": lineCoordinate,
+            },
+            "properties": lineAttribute
+        };
+        lineJson.features.push(lineFeature)
+    });
+    return lineJson;
+}
+
+//_____________________________________________________
+
+function setFrequency(data) {
+    if(data.FREQUENCY) {
+        return data
+    } else {
+        data.FREQUENCY = 0;
+        return data
+    }
 }
 
 //_____________________________________________________
