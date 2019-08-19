@@ -94,7 +94,7 @@ $('.menuWrapper-info-li').click(function (e) {
     let showLayer = null;
     switch (liId) {
         case 'info-station':
-            showLayer = 'stopHeatLayer';
+            showLayer = 'stationHeatLayer';
             break;
         case 'info-cover':
             showLayer = 'coverCenterLayer';

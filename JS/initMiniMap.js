@@ -1,6 +1,5 @@
 var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
-var layerList = ['stationLayer', 'stationLayerL', 'stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'stopHeatLayer', 'centerLayer', 'busLaneLayer', 'busRouteLayer', 'oldCityLayer', 'busRoutesLayer', 'busSingleRouteLayer', 'busSingleStationLayer', 'coverCenterLayer', 'uncoverCenterLayer', 'roadFrequencyLayer0', 'roadFrequencyLayer1' ,'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4'];
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
 var busLaneLength; //公交专用道长度
@@ -62,26 +61,13 @@ $(document).ready(function () {
                     $('.legendWrapper').show();
                     map.resize();
                     mapFly();
-
-                    setTimeout(function () {
-                        addCoverCenter();
-                        addunCoverCenter();
-                        addSuzhoucity();
-
-                        addBuslane();
-                        addBusroute();
-                        addBusroutes();
-                        addCenter();
-                        addOldcity();
-
-                    }, 5000);
-
                 }
             } else {
                 clearInterval(t);
             }
         }, 1000);
-        addStation();
+        addMapIcon();
+        addMapSource();
     });
 
     setTimeout(function () {
@@ -101,59 +87,6 @@ $(document).ready(function () {
     changeStationLayer('true');
     mapPopup();
 });
-
-function mapPopup() {
-    map.on('click', function (e) {
-        // 点击地图，同步清除marker
-        if (marker) {
-            map.removeMarkers();
-        }
-
-        // let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
-        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
-        if (!features.length) {
-            popup.remove();
-            return;
-        }
-        /**
-         * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
-         */
-        let feature = features[0];
-        let popupLatLng = [Number(feature.geometry.coordinates[0]),Number(feature.geometry.coordinates[1])];
-        let stationPopup = stationInfoHtml(feature);
-
-        getDynamicIcon(feature, pointApertureColors[1]);
-        popup.setLngLat(popupLatLng)
-            .setHTML(stationPopup)
-            .addTo(map);
-        pointCenterFly(feature.geometry.coordinates);
-        listenStationInfo();
-    });
-}
-
-// 监听popup弹出框的click事件
-function listenStationInfo() {
-    $('.popup-station-list').on('click', function (e) {
-        // 关闭其他图层
-        closeLayer();
-        changeStationLayer('false');
-
-        // 关闭图例
-        $('.legendWrapper').hide();
-
-        let inputTarget = e.target;
-        let busLineName = inputTarget.innerText;
-        console.log(busLineName);
-        addSingleRoute(busLineName);
-    });
-    $('.minemap-popup-close-button').on('click',function () {
-        if (marker) {
-            map.removeMarkers();
-        }
-    });
-}
-
-//_____________________________________________________
 
 // 地图飞入动画
 function mapFly() {
@@ -181,7 +114,162 @@ function pointCenterFly(coordinates) {
     }
 }
 
+
 //_____________________________________________________
+// 加载数据
+function addMapIcon() {
+    icon_config.forEach(function (value) {
+        map.loadImage(value.icon_path, function (error, image) {
+            if (error) throw error;
+            map.addImage(value.icon_id, image);
+        });
+    });
+}
+
+function addMapSource() {
+    source_layer_config.forEach(function (value) {
+        $.when(getJson(value.source_path)).then(function (data) {
+            let gcjData = wgsToGcj(data);
+            map.addSource(value.source_id, {
+                'type': value.source_type,
+                'data': gcjData
+            });
+            addMapLayer(value.source_id);
+        });
+    });
+}
+
+function addMapLayer(sourceId) {
+    map_layer_config.forEach(function (value) {
+        if (value.source_id === sourceId) {
+            if (map.getLayer(value.layer_id)) {
+            } else {
+                if (value.layer_filter) {
+                    map.addLayer({
+                        'id': value.layer_id,
+                        'type': value.layer_type,
+                        'source': value.source_id,
+                        "layout": value.layer_layout,
+                        "paint": value.layer_paint,
+                        filter: value.layer_filter
+                    });
+                } else {
+                    map.addLayer({
+                        'id': value.layer_id,
+                        'type': value.layer_type,
+                        'source': value.source_id,
+                        "layout": value.layer_layout,
+                        "paint": value.layer_paint
+                    });
+                }
+            }
+        } else {
+            return false;
+        }
+    })
+}
+
+// 请求公交线路数据，站点数据
+function addSingleRoute(busLineName) {
+    let routeUrl;
+    let stationUrl;
+
+    if (busLineName === "40") {
+        routeUrl = './geojsonData/routeSample/40.json';
+        stationUrl = './geojsonData/routeSample/40Station.json'
+    } else {
+        routeUrl = './geojsonData/routeSample/1.json';
+        stationUrl = './geojsonData/routeSample/1Station.json'
+    }
+
+    // 测试用公交线路图层（自行处理的样例数据）
+    $.when(getJson(routeUrl)).then(function (data) {
+        routeInfoHtml(data);
+        let gcjData = wgsToGcj(data);
+        setBoundry(gcjData);
+
+        if (map.getLayer("busSingleRouteLayer")) {
+            map.getSource("busSingleRouteSource").setData(gcjData);
+            layerVisibilityToggle('busSingleRouteLayer', 'visible');
+        } else {
+            map.addSource('busSingleRouteSource', {
+                'type': 'geojson',
+                'data': gcjData
+            });
+            addMapLayer("busSingleRouteSource");
+        }
+    });
+
+    $.when(getJson(stationUrl)).then(function (data) {
+        let gcjData = wgsToGcj(data);
+        if (map.getLayer("busSingleStationLayer")) {
+            map.getSource("busSingleStationSource").setData(gcjData);
+            layerVisibilityToggle('busSingleStationLayer', 'visible');
+        } else {
+            map.addSource('busSingleStationSource', {
+                'type': 'geojson',
+                'data': gcjData
+            });
+            addMapLayer('busSingleStationSource');
+        }
+    });
+}
+
+//_____________________________________________________
+// 弹出框
+function mapPopup() {
+    map.on('click', function (e) {
+        // 点击地图，同步清除marker
+        if (marker) {
+            map.removeMarkers();
+        }
+
+        // let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
+        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
+        if (!features.length) {
+            popup.remove();
+            return;
+        }
+        /**
+         * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
+         */
+        let feature = features[0];
+        let popupLatLng = [Number(feature.geometry.coordinates[0]), Number(feature.geometry.coordinates[1])];
+        let stationPopup = stationInfoHtml(feature);
+
+        getDynamicIcon(feature, pointApertureColors[1]);
+        popup.setLngLat(popupLatLng)
+            .setHTML(stationPopup)
+            .addTo(map);
+        pointCenterFly(feature.geometry.coordinates);
+        listenStationInfo();
+    });
+}
+
+// 监听popup弹出框的click事件
+function listenStationInfo() {
+    $('.popup-station-list').on('click', function (e) {
+        // 关闭其他图层
+        closeLayer();
+        changeStationLayer('false');
+
+        // 关闭图例
+        $('.legendWrapper').hide();
+
+        let inputTarget = e.target;
+        let busLineName = inputTarget.innerText;
+        console.log(busLineName);
+        addSingleRoute(busLineName);
+    });
+    $('.minemap-popup-close-button').on('click', function () {
+        if (marker) {
+            map.removeMarkers();
+        }
+    });
+}
+
+//_____________________________________________________
+
 
 // 切换点坐标图层
 function changeZoom() {
@@ -414,95 +502,21 @@ function roadFrequencyGPTool() {
                                 let frequencyResult = value.value.features;
                                 let frequencyJson = transLineJson(frequencyResult);
                                 let gcjData = wgsToGcj(frequencyJson);
-                                map.addSource('roadFrequencySource', {
-                                    'type': 'geojson',
-                                    'data': gcjData
-                                });
-                                map.addLayer({
-                                    'id': 'roadFrequencyLayer0',
-                                    'type': 'line',
-                                    'source': 'roadFrequencySource',
-                                    "layout": {
-                                        "line-join": "round",
-                                        "line-cap": "round"
-                                    },
-                                    "paint": {
-                                        "line-color": "#474747",
-                                        // "line-color": "#7E5887",
-                                        "line-opacity": 1,
-                                        "line-width": 2.5
-                                    },
-                                    filter:["==","FREQUENCY",0]
+                                if (gcjData) {
+                                    if (map.getSource('roadFrequencySource')) {
+                                        map.getSource('roadFrequencySource').setData(gcjData);
+                                        addMapLayer('roadFrequencySource');
+                                    } else {
+                                        map.addSource('roadFrequencySource', {
+                                            'type': 'geojson',
+                                            'data': gcjData
+                                        });
+                                        addMapLayer('roadFrequencySource');
+                                    }
 
-                                });
-                                map.addLayer({
-                                    'id': 'roadFrequencyLayer1',
-                                    'type': 'line',
-                                    'source': 'roadFrequencySource',
-                                    "layout": {
-                                        "line-join": "round",
-                                        "line-cap": "round"
-                                    },
-                                    "paint": {
-                                        // "line-color": "#6C5B7B",
-                                        "line-color": "#1575A8",
-                                        "line-opacity": 1,
-                                        "line-width": 2
-                                    },
-                                    filter:["all", [">","FREQUENCY",0], ["<=","FREQUENCY",1]]
-
-                                });
-                                map.addLayer({
-                                    'id': 'roadFrequencyLayer2',
-                                    'type': 'line',
-                                    'source': 'roadFrequencySource',
-                                    "layout": {
-                                        "line-join": "round",
-                                        "line-cap": "round"
-                                    },
-                                    "paint": {
-                                        // "line-color": "#C06C84",
-                                        "line-color": "#25A982",
-                                        "line-opacity": 1,
-                                        "line-width": 2
-                                    },
-                                    filter:["all", [">","FREQUENCY",1], ["<=","FREQUENCY",2]]
-
-                                });
-                                map.addLayer({
-                                    'id': 'roadFrequencyLayer3',
-                                    'type': 'line',
-                                    'source': 'roadFrequencySource',
-                                    "layout": {
-                                        "line-join": "round",
-                                        "line-cap": "round"
-                                    },
-                                    "paint": {
-                                        // "line-color": "#F67280",
-                                        "line-color": "#E2AF32",
-                                        "line-opacity": 1,
-                                        "line-width": 2
-                                    },
-                                    filter:["all", [">","FREQUENCY",2], ["<=","FREQUENCY",5]]
-
-                                });
-                                map.addLayer({
-                                    'id': 'roadFrequencyLayer4',
-                                    'type': 'line',
-                                    'source': 'roadFrequencySource',
-                                    "layout": {
-                                        "line-join": "round",
-                                        "line-cap": "round"
-                                    },
-                                    "paint": {
-                                        // "line-color": "#F8B195",
-                                        "line-color": "#E25365",
-                                        "line-opacity": 1,
-                                        "line-width": 2
-                                    },
-                                    filter:[">","FREQUENCY",5]
-
-                                });
+                                } else {
+                                    console.log("结果加载出错了")
+                                }
                             });
                         }
                     }
@@ -612,10 +626,10 @@ function bufferGPTool() {
                                 // 输出格式转换，坐标尚未进行转换
                                 let bufferJson = transPolyJson(bufferResult);
                                 let gcjData = wgsToGcj(bufferJson);
-
-                                if (bufferJson) {
+                                if (gcjData) {
                                     // 切换数据源
                                     map.getSource('coverCenterSource').setData(gcjData);
+                                    layerVisibilityToggle('coverCenterLayer', 'visible');
                                 } else {
                                     console.log("buffer结果加载出错了");
                                 }
@@ -671,7 +685,7 @@ function transLineJson(data) {
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": lineCoordinate,
+                "coordinates": lineCoordinate
             },
             "properties": lineAttribute
         };
@@ -683,7 +697,7 @@ function transLineJson(data) {
 //_____________________________________________________
 
 function setFrequency(data) {
-    if(data.FREQUENCY) {
+    if (data.FREQUENCY) {
         return data
     } else {
         data.FREQUENCY = 0;
@@ -692,471 +706,6 @@ function setFrequency(data) {
 }
 
 //_____________________________________________________
-// 加载数据
-// 站点数据
-function addStation() {
-    $.when(getJson(conf_station_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('stopsSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-
-        map.addLayer({
-            'id': 'stationLayer',
-            'type': 'circle',
-            'source': 'stopsSource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'circle-radius': {
-                    'base': 1.5,
-                    'stops': [[5, 2], [18, 4]]
-                },
-                'circle-color': "#00A2D9",      //填充圆形的颜色
-                'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 0.6           //透明度，默认为1
-            },
-            filter: ["in", "stopType", "一般停靠站"]
-        });
-        map.addLayer({
-            'id': 'stationLayerA',
-            'type': 'circle',
-            'source': 'stopsSource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'circle-radius': {
-                    'base': 1.5,
-                    'stops': [[5, 2], [18, 4]]
-                },
-                'circle-color': "rgb(226, 83, 101)",      //填充圆形的颜色 红色
-                'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 0.6           //透明度，默认为1
-            },
-            filter: ["in", "stopType", "首末站"]
-
-        });
-        map.addLayer({
-            'id': 'stationLayerB',
-            'type': 'circle',
-            'source': 'stopsSource',
-            'layout': {
-                "visibility": "visible"
-            },
-            'paint': {
-                'circle-radius': {
-                    'base': 1.5,
-                    'stops': [[5, 2], [18, 4]]
-                },
-                'circle-color': "#00A2D9",      //填充圆形的颜色
-                'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 0.6           //透明度，默认为1
-            },
-            filter: ["in", "stopType", "一般停靠站"]
-        });
-        map.addLayer({
-            'id': 'stationLayerC',
-            'type': 'circle',
-            'source': 'stopsSource',
-            'layout': {
-                "visibility": "visible"
-            },
-            'paint': {
-                'circle-radius': {
-                    'base': 1.5,
-                    'stops': [[5, 2], [18, 4]]
-                },
-                'circle-color': "#E2AF32",      //填充圆形的颜色 黄色
-                'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 0.6           //透明度，默认为1
-            },
-            filter: ["in", "stopType", "换乘站"]
-
-        });
-        map.addLayer({
-            'id': 'stationLayerD',
-            'type': 'circle',
-            'source': 'stopsSource',
-            'layout': {
-                "visibility": "visible"
-            },
-            'paint': {
-                'circle-radius': {
-                    'base': 1.5,
-                    'stops': [[5, 2], [18, 4]]
-                },
-                // 'circle-color': "#7E5887",      //填充圆形的颜色 紫色
-                'circle-color': "#25a982",      //填充圆形的颜色 绿色
-                'circle-blur': 0.1,              //模糊程度，默认0
-                'circle-opacity': 0.6           //透明度，默认为1
-            },
-            filter: ["in", "stopType", "枢纽站", "集散站"]
-
-        });
-
-        map.loadImage('./CSS/svg/bus-stationA.png', function (error, image) {
-            if (error) throw error;
-            map.addImage('terminal-icon', image);
-            map.addLayer({
-                "id": "terminalLayer",
-                "type": "symbol",
-                "source": 'stopsSource',
-                "layout": {
-                    "icon-image": "terminal-icon",
-                    "icon-size": 0.5
-                },
-                filter: ["in", "stopType", "首末站"]
-            });
-        });
-
-        map.loadImage('./CSS/svg/bus-stationB.png', function (error, image) {
-            if (error) throw error;
-            map.addImage('staion-iconB', image);
-            map.addLayer({
-                "id": "stationLayerBL",
-                "type": "symbol",
-                "source": 'stopsSource',
-                "layout": {
-                    "icon-image": "staion-iconB",
-                    "icon-size": 0.5,
-                    "visibility": "none"
-                },
-                // filter: ["in", "stopType", "一般停靠站", "换乘站", "枢纽站","集散站"]
-                filter: ["in", "stopType", "一般停靠站"]
-            });
-        });
-
-        map.loadImage('./CSS/svg/bus-stationC.png', function (error, image) {
-            if (error) throw error;
-            map.addImage('staion-iconC', image);
-            map.addLayer({
-                "id": "stationLayerCL",
-                "type": "symbol",
-                "source": 'stopsSource',
-                "layout": {
-                    "icon-image": "staion-iconC",
-                    "icon-size": 0.5,
-                    "visibility": "none"
-                },
-                filter: ["in", "stopType", "换乘站"]
-            });
-        });
-
-        map.loadImage('./CSS/svg/bus-stationF.png', function (error, image) {
-            if (error) throw error;
-            map.addImage('staion-iconD', image);
-            map.addLayer({
-                // "id": "stationLayerL",
-                "id": "stationLayerDL",
-                "type": "symbol",
-                "source": 'stopsSource',
-                "layout": {
-                    "icon-image": "staion-iconD",
-                    "icon-size": 0.5,
-                    "visibility": "none"
-                },
-                filter: ["in", "stopType", "枢纽站", "集散站"]
-            });
-        });
-
-        // 热力图
-        map.addLayer({
-            "id": "stopHeatLayer",
-            "type": "heatmap",
-            "source": "stopsSource",
-            "layout": {
-                "visibility": "none"
-            },
-            "paint": {
-                "heatmap-radius": 30,
-                "heatmap-weight": {
-                    "property": "mag",
-                    "stops": [[0, 0], [10, 1]]
-                },
-                "heatmap-intensity": 0.2,
-                "heatmap-color": [
-                    "interpolate",
-                    ["linear"],
-                    ["heatmap-density"],
-                    0, "rgba(0, 0, 255, 0)", 0.1, "#6184ec", 0.3, "#1ee2e2", 0.5, "#55f155", 0.7, "#f7f71a", 1, "#f93a3a"
-                ],
-                "heatmap-opacity": 0.7
-            }
-        });
-    })
-}
-
-// 中心城区面
-function addCenter() {
-    $.when(getJson(conf_center_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('centerSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'centerLayer',
-            'type': 'fill',
-            'source': 'centerSource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'fill-color': '#79ada9',
-                'fill-opacity': 0.2
-            }
-        });
-    })
-}
-
-// 公交专用道
-function addBuslane() {
-    $.when(getJson(conf_buslane_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('busLaneSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'busLaneLayer',
-            'type': 'line',
-            'source': 'busLaneSource',
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round",
-                "visibility": "none"
-            },
-            "paint": {
-                "line-color": "#F9F871",
-                "line-opacity": 1,
-                "line-width": 2
-            }
-        });
-    });
-}
-
-// 古城区公交线路
-function addBusroute() {
-    $.when(getJson(conf_busroute_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('busRouteSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'busRouteLayer',
-            'type': 'line',
-            'source': 'busRouteSource',
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round",
-                "visibility": "none"
-            },
-            "paint": {
-                "line-color": "#7BE99E",
-                "line-opacity": 1,
-                "line-width": 2
-            }
-        });
-    });
-}
-
-// 苏州市城区面
-function addSuzhoucity() {
-    $.when(getJson(conf_district_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('citySource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'cityLayer',
-            'type': 'fill',
-            'source': 'citySource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'fill-color': '#8cb58c',
-                'fill-opacity': 0.4
-            }
-        });
-    })
-}
-
-// 古城区面
-function addOldcity() {
-    $.when(getJson(conf_oldcity_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('oldCitySource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'oldCityLayer',
-            'type': 'fill',
-            'source': 'oldCitySource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'fill-color': '#79ada9',
-                'fill-opacity': 0.4
-            }
-        });
-    })
-}
-
-// 中心城区面，站点覆盖
-function addCoverCenter() {
-    $.when(getJson(conf_cover_center_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('coverCenterSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'coverCenterLayer',
-            'type': 'fill',
-            'source': 'coverCenterSource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'fill-color': '#79ada9',
-                'fill-opacity': 0.4
-            }
-        });
-    })
-}
-
-// 中心城区面，站点未覆盖情况
-function addunCoverCenter() {
-    $.when(getJson(conf_uncover_center_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('uncoverCenterSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'uncoverCenterLayer',
-            'type': 'fill',
-            'source': 'uncoverCenterSource',
-            'layout': {
-                "visibility": "none"
-            },
-            'paint': {
-                'fill-color': '#79ada9',
-                'fill-opacity': 0.4
-            }
-        });
-    })
-}
-
-// 展示用公交线网图层
-function addBusroutes() {
-    $.when(getJson(conf_busroutes_query)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        map.addSource('busRoutesSource', {
-            'type': 'geojson',
-            'data': gcjData
-        });
-        map.addLayer({
-            'id': 'busRoutesLayer',
-            'type': 'line',
-            'source': 'busRoutesSource',
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round",
-                "visibility": "none"
-            },
-            "paint": {
-                "line-color": "#00A2D9",
-                // "line-color": "#00B6D0",
-                "line-opacity": 1,
-                "line-width": 2
-            }
-        });
-    });
-}
-
-// 请求公交线路数据，站点数据
-function addSingleRoute(busLineName) {
-    let routeUrl;
-    let stationUrl;
-
-    if (busLineName === "40") {
-        routeUrl = './geojsonData/routeSample/40.json';
-        stationUrl = './geojsonData/routeSample/40Station.json'
-    } else {
-        routeUrl = './geojsonData/routeSample/1.json';
-        stationUrl = './geojsonData/routeSample/1Station.json'
-    }
-
-    // 测试用公交线路图层（自行处理的样例数据）
-    $.when(getJson(routeUrl)).then(function (data) {
-        routeInfoHtml(data);
-        let gcjData = wgsToGcj(data);
-        setBoundry(gcjData);
-
-        if (map.getLayer("busSingleRouteLayer")) {
-            map.getSource("busSingleRouteSource").setData(gcjData);
-            layerVisibilityToggle('busSingleRouteLayer', 'visible');
-        } else {
-            map.addSource('busSingleRouteSource', {
-                'type': 'geojson',
-                'data': gcjData
-            });
-            map.addLayer({
-                'id': 'busSingleRouteLayer',
-                'type': 'line',
-                'source': 'busSingleRouteSource',
-                "layout": {
-                    "line-join": "round",
-                    "line-cap": "round"
-                },
-                "paint": {
-                    "line-color": "#00A2D9",
-                    "line-opacity": 1,
-                    "line-width": 2
-                }
-            });
-        }
-
-    });
-
-    $.when(getJson(stationUrl)).then(function (data) {
-        let gcjData = wgsToGcj(data);
-        if (map.getLayer("busSingleStationLayer")) {
-            map.getSource("busSingleStationSource").setData(gcjData);
-            layerVisibilityToggle('busSingleStationLayer', 'visible');
-        } else {
-            map.addSource('busSingleStationSource', {
-                'type': 'geojson',
-                'data': gcjData
-            });
-            map.loadImage('./CSS/svg/bus-stationE.png', function (error, image) {
-                if (error) throw error;
-                map.addImage('route-station', image);
-                map.addLayer({
-                    "id": "busSingleStationLayer",
-                    "type": "symbol",
-                    "source": 'busSingleStationSource',
-                    "layout": {
-                        "icon-image": "route-station",
-                        "icon-size": 0.5,
-                        "visibility": "visible"
-                    }
-                });
-            });
-        }
-    });
-}
-
-/*------------------------------*/
 
 // 图层显示切换
 function layerVisibilityToggle(layerName, checkValue) {
@@ -1181,9 +730,9 @@ function getJson(url) {
 
 // 关闭图层
 function closeLayer() {
-    layerList.forEach(function (value) {
-        if (map.getLayer(value)) {
-            layerVisibilityToggle(value, 'none');
+    map_layer_config.forEach(function (value) {
+        if (map.getLayer(value.layer_id)) {
+            layerVisibilityToggle(value.layer_id, 'none');
         }
     });
     if (popup) {
