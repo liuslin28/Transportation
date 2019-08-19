@@ -63,6 +63,7 @@ $('.mapWrapper').click(function () {
 
 // 交通信息页面 与 infoWrapper联动
 $('.menuWrapper-info-li').click(function (e) {
+    // 隐藏菜单栏
     $('.menuWrapper').hide();
     // 隐藏线路信息展示栏
     $('.routeInfoWrapper').hide();
@@ -76,40 +77,31 @@ $('.menuWrapper-info-li').click(function (e) {
     $('.infoWrapper-div').hide();
     $('.' + liId).show();
 
-    // 服务操作
-    switch (liId) {
-        case 'info-connectivity':
-            // bufferGPTool();
-            break;
-        default:
-            break;
-    }
-
     // 关闭其他图层
     closeLayer();
+    changeStationLayer('false');
+
     // 关闭图例
     $('.legendWrapper').hide();
-    // 图层显示
 
-    let showLayer = null;
+    // 页面切换的操作
     switch (liId) {
+        case 'info-connectivity':
+            roadFrequencyGPTool();
+            break;
         case 'info-station':
-            showLayer = 'stationHeatLayer';
+            layerVisibilityToggle('stationHeatLayer', 'visible');
             break;
         case 'info-cover':
-            showLayer = 'coverCenterLayer';
+            layerVisibilityToggle('coverCenterLayer', 'visible');
             break;
         case 'info-route':
-            showLayer = 'busRoutesLayer';
+            layerVisibilityToggle('busRoutesLayer', 'visible');
             break;
         case 'info-buslane':
-            showLayer = 'busLaneLayer';
+            layerVisibilityToggle('busLaneLayer', 'visible');
             break;
         default:
             break;
     }
-    if(showLayer) {
-        layerVisibilityToggle(showLayer, 'visible');
-    }
-    changeStationLayer('false');
 });
