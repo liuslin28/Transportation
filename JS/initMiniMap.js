@@ -182,9 +182,9 @@ function addSingleRoute(busLineName) {
         stationUrl = './geojsonData/routeSample/1Station.json'
     }
 
+    routeInfoHtml(routeUrl);
     // 测试用公交线路图层（自行处理的样例数据）
     $.when(getJson(routeUrl)).then(function (data) {
-        routeInfoHtml(data);
         let gcjData = wgsToGcj(data);
         setBoundry(gcjData);
 
@@ -346,16 +346,11 @@ function buslaneGPTool() {
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
-                        // 运行状态显示
-                        function statusCallback(jobInfo) {
-                            console.log(jobInfo.jobStatus);
-                        }
-
                         // 结果图加载
                         function completeCallback(jobInfo) {
                             // 长度求算
                             gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
-                                let lineLength = (value.value.features)[0].attributes.SUM_leg;
+                                let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
                                 // 米=>千米
                                 busLaneLength = (lineLength / 1000).toFixed(2);
                                 busLaneRatio = busLaneLength / networkLength;
@@ -392,16 +387,11 @@ function busrouteGPTool() {
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
-                        // 运行状态显示
-                        function statusCallback(jobInfo) {
-                            console.log(jobInfo.jobStatus);
-                        }
-
                         // 结果图加载
                         function completeCallback(jobInfo) {
                             // 长度求算
                             gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
-                                let lineLength = (value.value.features)[0].attributes.SUM_leg;
+                                let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
                                 // 米=>千米
                                 busLineLength = (lineLength / 1000).toFixed(2);
                                 console.log(busLineLength);
@@ -422,46 +412,67 @@ function busrouteGPTool() {
 }
 
 // 公交线路通过公交专用道的长度
-function routeGPTool() {
+function routeGPTool(data) {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+        let linePath = (data.features)[0].geometry.coordinates;
+        let lineFeature = {
+            "displayFieldName": "",
+            "fieldAliases": {
+                "FID": "FID"
+            },
+            "geometryType": "esriGeometryPolyline",
+            "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+            },
+            "fields": [
+                {
+                    "name": "FID",
+                    "type": "esriFieldTypeOID",
+                    "alias": "FID"
+                }
+            ],
+            "features": [
+                {
+                    "attributes": {
+                        "FID": 0
+                    },
+                    "geometry": {
+                        "paths": [
+                            linePath
+                        ]
+                    }
+                }
+            ]
+        };
+        let buslineFeatureSet = new esri.tasks.FeatureSet(lineFeature);
+        buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
         $.ajax({
-            url: "./esrijsonData/esrirouteSample.json",
+            url: "./esrijsonData/esribusLaneSUnp.json",
             type: "GET",
             success: function (data) {
-                let buslineFeatureSet = new esri.tasks.FeatureSet(data);
-                buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-                $.ajax({
-                    url: "./esrijsonData/esribusLane.json",
-                    type: "GET",
-                    success: function (data) {
-                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
-                        roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+                let roadFeatureSet = new esri.tasks.FeatureSet(data);
+                roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
-                        let gpParams = {
-                            "road": roadFeatureSet,
-                            "line": buslineFeatureSet
-                        };
-                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+                let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
+                let gpParams = {
+                    "road": roadFeatureSet,
+                    "line": buslineFeatureSet
+                };
+                gptask.submitJob(gpParams, completeCallback, statusCallback);
 
-                        // 运行状态显示
-                        function statusCallback(jobInfo) {
-                            console.log(jobInfo.jobStatus);
-                        }
+                // 结果图加载
+                function completeCallback(jobInfo) {
+                    // 长度求算
+                    gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
+                        let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
+                        // 米=>千米,保留2位小数
+                        lineLength = (lineLength / 1000).toFixed(2);
 
-                        // 结果图加载
-                        function completeCallback(jobInfo) {
-                            // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
-                                let lineLength = (value.value.features)[0].attributes.SUM_leg;
-                                // 米=>千米,保留2位小数
-                                lineLength = (lineLength / 1000).toFixed(2);
-                                console.log(lineLength);
-
-                            });
-                        }
-                    }
-                })
+                        $('#index-laneLength').text(lineLength);
+                        $('.routeInfoWrapper').show();
+                    });
+                }
             }
         })
     });
@@ -490,11 +501,6 @@ function roadFrequencyGPTool() {
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
 
-                        // 运行状态显示
-                        function statusCallback(jobInfo) {
-                            console.log(jobInfo.jobStatus);
-                        }
-
                         // 结果图加载
                         function completeCallback(jobInfo) {
                             // 长度求算
@@ -513,7 +519,6 @@ function roadFrequencyGPTool() {
                                         });
                                         addMapLayer('roadFrequencySource');
                                     }
-
                                 } else {
                                     console.log("结果加载出错了")
                                 }
@@ -568,7 +573,7 @@ function bufferGPTool() {
                 let i = 0;
                 pointData.forEach(function (pointValue) {
                     i += 1;
-                    let coordinateValue = (pointValue['geometry'])['coordinates']
+                    let coordinateValue = (pointValue['geometry'])['coordinates'];
                     let point = new esri.geometry.Point([coordinateValue[0], coordinateValue[1]], new SpatialReference({wkid: 4326}));
                     let graphic = new Graphic({
                         geometry: point,
@@ -602,11 +607,6 @@ function bufferGPTool() {
                             "city1": polygonFeatureSet
                         };
                         gptask.submitJob(gpParams, completeCallback, statusCallback);
-
-                        // 运行状态显示
-                        function statusCallback(jobInfo) {
-                            console.log(jobInfo.jobStatus);
-                        }
 
                         // 结果图加载
                         function completeCallback(jobInfo) {
@@ -648,6 +648,10 @@ function bufferGPTool() {
     });
 }
 
+// 运行状态显示
+function statusCallback(jobInfo) {
+    console.log(jobInfo.jobStatus);
+}
 
 //_____________________________________________________
 // MultiPolygon的格式转换
