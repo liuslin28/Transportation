@@ -41,7 +41,7 @@ function networkDistance() {
     })
 }
 
-// 非直线系数,引用turf计算, 数据conf_busline_ex_query
+// 非直线系数,引用turf计算, 数据routeSample文件夹下的线数据
 function nonLinear(data) {
     let busData = data['features'];
     let busRouteLength = busData[0].geometry.properties.lineLength;
@@ -55,7 +55,7 @@ function nonLinear(data) {
     return(nonlinear);
 }
 
-// 站间距,引用turf计算,数据conf_busline_ex_query
+// 站间距,引用turf计算,数据routeSample文件夹下的线数据
 function stationDistance(data,max,min) {
     let busData = data['features'];
     let busStationList = busData[0].geometry.properties.station;
