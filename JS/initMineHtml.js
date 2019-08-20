@@ -86,9 +86,6 @@ $('.menuWrapper-info-li').click(function (e) {
 
     // 页面切换的操作
     switch (liId) {
-        case 'info-connectivity':
-            roadFrequencyGPTool();
-            break;
         case 'info-station':
             layerVisibilityToggle('stationHeatLayer', 'visible');
             break;
@@ -100,6 +97,12 @@ $('.menuWrapper-info-li').click(function (e) {
             break;
         case 'info-buslane':
             layerVisibilityToggle('busLaneLayer', 'visible');
+            break;
+        case 'info-connectivity':
+            roadFrequencyGPTool();
+            break;
+        case 'info-metro':
+            bufferGPTool();
             break;
         default:
             break;
