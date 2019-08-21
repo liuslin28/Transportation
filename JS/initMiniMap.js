@@ -514,6 +514,7 @@ function roadFrequencyGPTool() {
                             gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
                                 let frequencyResult = value.value.features;
                                 let frequencyJson = transLineJson(frequencyResult);
+                                connectivityChart(frequencyJson);
                                 let gcjData = wgsToGcj(frequencyJson);
                                 if (gcjData) {
                                     if (map.getSource('roadFrequencySource')) {
@@ -525,6 +526,11 @@ function roadFrequencyGPTool() {
                                             'data': gcjData
                                         });
                                         addMapLayer('roadFrequencySource');
+
+                                        // 图层加载完成后加载图例
+                                        $('#legendWrapper-station').hide();
+                                        $('#legendWrapper-connectivity').show();
+                                        $('.legendWrapper').show();
                                     }
                                 } else {
                                     console.log("结果加载出错了")
