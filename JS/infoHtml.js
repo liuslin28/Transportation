@@ -36,8 +36,14 @@ function routeInfoHtml(routeUrl) {
         routeGPTool(data);
         // 平均站间距
         let distanceIndex = (dataProperty.lineLength / dataProperty.stationNum).toFixed(2);
-        // 非直线系数
-        let nonLinearIndex = nonLinear(data);
+        // 非直线系数,环线不计算
+        let nonLinearIndex;
+        if(dataProperty.isLoop) {
+            nonLinearIndex = '/';
+        } else {
+            nonLinearIndex = nonLinear(data);
+        }
+
         // 站间距最大最小阈值
         let stationDistanceIndex = stationDistance(data, maxIndex, minIndex);
 
