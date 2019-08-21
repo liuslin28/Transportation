@@ -58,7 +58,12 @@ $(document).ready(function () {
                     //加载成功后 loading 隐藏 , 加载其它数据
                     clearInterval(t);
                     $('.loading').hide();
+
+                    // 图例
+                    $('#legendWrapper-station').show();
+                    $('#legendWrapper-connectivity').hide();
                     $('.legendWrapper').show();
+
                     map.resize();
                     mapFly();
                 }
@@ -672,7 +677,6 @@ function statusModel(status) {
         case 'esriJobFailed':
             maskLayer('none');
             $('.gpWaitWrapper').hide();
-
             break;
         default:
             break;

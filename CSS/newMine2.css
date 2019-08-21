@@ -230,7 +230,6 @@ label {
 /*-------------图例页面-----------------*/
 .legendWrapper {
     width: 220px;
-    height: 180px;
     left: 20px;
     bottom: 20px;
     position: absolute;
@@ -311,6 +310,42 @@ label {
     margin: auto 16px;
 }
 
+.legend-lineA {
+    width: 60px;
+    height: 15px;
+    margin: auto 32px 16px;
+    color: #474747;
+    display: inline-block;
+}
+
+.legend-lineB {
+    width: 60px;
+    height: 15px;
+    margin: auto 32px 16px;
+    color: #1575A8;
+    display: inline-block;
+}
+.legend-lineC {
+    width: 60px;
+    height: 15px;
+    margin: auto 32px 16px;
+    color: #25A982;
+    display: inline-block;
+}
+.legend-lineD {
+    width: 60px;
+    height: 15px;
+    margin: auto 32px 16px;
+    color: #E2AF32;
+    display: inline-block;
+}
+.legend-lineE {
+    width: 60px;
+    height: 15px;
+    margin: auto 32px 16px;
+    color: #E25365;
+    display: inline-block;
+}
 /*------------地图页面------------------*/
 .mapWrapper {
     width: 100%;

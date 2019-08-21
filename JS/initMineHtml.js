@@ -100,6 +100,9 @@ $('.menuWrapper-info-li').click(function (e) {
             break;
         case 'info-connectivity':
             roadFrequencyGPTool();
+            $('#legendWrapper-station').hide();
+            $('#legendWrapper-connectivity').show();
+            $('.legendWrapper').show();
             break;
         case 'info-metro':
             bufferGPTool();
