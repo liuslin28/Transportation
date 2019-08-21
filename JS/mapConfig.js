@@ -508,6 +508,20 @@ let map_layer_config = [
             "line-width": 2
         },
         "layer_filter": [">", "FREQUENCY", 5]
+    },
+    {
+        "layer_title": "遮罩层",
+        "layer_id": "maskLayer",
+        "source_id": "",
+        "layer_type": "background",
+        "layer_layout": {
+            "visibility": "none"
+        },
+        "layer_paint": {
+            'background-color': '#000000',
+            'background-opacity': 0.5
+        },
+        "layer_filter": null
     }
 ];
 

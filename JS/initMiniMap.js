@@ -459,7 +459,9 @@ function routeGPTool(data) {
                     "road": roadFeatureSet,
                     "line": buslineFeatureSet
                 };
+
                 gptask.submitJob(gpParams, completeCallback, statusCallback);
+                gptask.on("get-result-data-complete", displayResults);
 
                 // 结果图加载
                 function completeCallback(jobInfo) {
@@ -647,10 +649,49 @@ function bufferGPTool() {
         })
     });
 }
+function displayResults() {
+    console.log(1)
+}
 
 // 运行状态显示
 function statusCallback(jobInfo) {
     console.log(jobInfo.jobStatus);
+    statusModel(jobInfo.jobStatus);
+}
+
+function statusModel(status) {
+    switch (status) {
+        case 'esriJobSubmitted':
+            maskLayer('visible');
+            $('.gpWaitWrapper').show();
+            break;
+        case 'esriJobSucceeded':
+            maskLayer('none');
+            $('.gpWaitWrapper').hide();
+            break;
+        case 'esriJobFailed':
+            maskLayer('none');
+            $('.gpWaitWrapper').hide();
+
+            break;
+        default:
+            break;
+    }
+}
+// 地图遮罩图层
+function maskLayer(checkValue) {
+    if(map.getLayer('maskLayer')) {
+        layerVisibilityToggle('maskLayer', checkValue);
+    } else {
+        map.addLayer({
+            type: 'background',
+            id: 'maskLayer',
+            paint: {
+                'background-color': '#000000',
+                'background-opacity': 0.5
+            }
+        });
+    }
 }
 
 //_____________________________________________________
