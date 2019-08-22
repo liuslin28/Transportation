@@ -185,10 +185,10 @@ label {
     left: 20px;
     width: 220px;
     background-color: rgba(25, 38, 52, 0.8);
-    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
-    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
-    z-index: 199;
+    -moz-box-shadow: 2px 2px 5px #000000;
+    -webkit-box-shadow: 2px 2px 5px #000000;
+    box-shadow: 2px 2px 5px #000000;
+    z-index: 299;
     display: none;
 }
 
@@ -619,4 +619,24 @@ label {
         top: 19px;
         height: 26px;
     }
+}
+
+/*------------图表框------------*/
+.echartsWrapper {
+    width: 300px;
+    height:300px;
+    position: absolute;
+    top: 180px;
+    left: 20px;
+    z-index: 199;
+    background-color: rgba(25, 38, 52, 0.8);
+    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 1px 3px;
+    display: none;
+}
+
+.echartsWrapper-content {
+    width: 300px;
+    height:300px;
 }

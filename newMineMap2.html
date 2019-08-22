@@ -112,7 +112,6 @@
                 <span class="infoWrapper-list-unit"></span>
             </div>
             <div class="infoWrapper-list col">
-
                 <span class="infoWrapper-list-header">网络复杂度</span>
                 <span class="infoWrapper-list-num">0.99987</span>
                 <span class="infoWrapper-list-unit"></span>
@@ -260,15 +259,15 @@
                 </li>
                 <li class="legendWrapper-list">
                     <div class="legend-lineB">————</div>
-                    <span>1条</span>
+                    <span>0-1条</span>
                 </li>
                 <li class="legendWrapper-list">
                     <div class="legend-lineC">————</div>
-                    <span>2条</span>
+                    <span>1-3条</span>
                 </li>
                 <li class="legendWrapper-list">
                     <div class="legend-lineD">————</div>
-                    <span>2-5条</span>
+                    <span>3-5条</span>
                 </li>
                 <li class="legendWrapper-list">
                     <div class="legend-lineE">————</div>
@@ -330,12 +329,17 @@
         </div>
     </div>
 
+    <div class="echartsWrapper">
+        <div class="echartsWrapper-content" id="echart-connectivity"></div>
+    </div>
+
 </div>
 </body>
 
 <script src="//minedata.cn/minemapapi/v2.0.0/minemap.js"></script>
 
 <script src="JS/turf.min.js"></script>
+<script src="JS/echarts.min.js"></script>
 <script src="JS/wgs2mars.min.js"></script>
 
 <script type="text/javascript" src="JS/config.js"></script>
@@ -345,6 +349,7 @@
 <script type="text/javascript" src="JS/infoHtml.js"></script>
 <script type="text/javascript" src="JS/initMiniMap.js"></script>
 <script type="text/javascript" src="JS/initMineHtml.js"></script>
+<script type="text/javascript" src="JS/initEcharts.js"></script>
 
 <script src="JS/bootstrap.js"></script>
 <script src="//minedata.cn/minemapapi/v2.0.0/plugins/edit/minemap-edit.js"></script>

@@ -473,7 +473,7 @@ let map_layer_config = [
             "line-opacity": 1,
             "line-width": 2
         },
-        "layer_filter": ["all", [">", "FREQUENCY", 1], ["<=", "FREQUENCY", 2]]
+        "layer_filter": ["all", [">", "FREQUENCY", 1], ["<=", "FREQUENCY", 3]]
     },
     {
         "layer_title": "线网连通性图层",
@@ -490,7 +490,7 @@ let map_layer_config = [
             "line-opacity": 1,
             "line-width": 2
         },
-        "layer_filter": ["all", [">", "FREQUENCY", 2], ["<=", "FREQUENCY", 5]]
+        "layer_filter": ["all", [">", "FREQUENCY", 3], ["<=", "FREQUENCY", 5]]
     },
     {
         "layer_title": "线网连通性图层",

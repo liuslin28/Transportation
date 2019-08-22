@@ -31,9 +31,13 @@ $('#home-click').click(function () {
     $('#info-menuWrapper').hide();
     $('.infoWrapper').hide();
     // 展示图例展示栏
+    $('#legendWrapper-station').show();
+    $('#legendWrapper-connectivity').hide();
     $('.legendWrapper').show();
     // 隐藏线路信息展示栏
     $('.routeInfoWrapper').hide();
+    // 隐藏图表
+    $('.echartsWrapper').hide();
     closeLayer();
     layerVisibilityToggle("stationLayerB", 'visible');
     layerVisibilityToggle("stationLayerC", 'visible');
@@ -67,6 +71,9 @@ $('.menuWrapper-info-li').click(function (e) {
     $('.menuWrapper').hide();
     // 隐藏线路信息展示栏
     $('.routeInfoWrapper').hide();
+    // 隐藏图表
+    $('.echartsWrapper').hide();
+
     let liTarget = e.target;
     let liId = liTarget.id;
     console.log(liId);
