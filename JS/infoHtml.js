@@ -70,3 +70,9 @@ $('.routeInfoWrapper-button').click(function () {
     // 显示图例
     $('.legendWrapper').show();
 });
+
+// 路段重复系数
+function frequencyHtml(data) {
+    let  frequencyInfoHtml = "<span class='popup-station-header'>" + data.properties.NAME_CHN + "</span>" +"<span class='popup-station-count'>" + "途径路段线路" +  data.properties.FREQUENCY + "条" + "</span>";
+    return frequencyInfoHtml;
+}

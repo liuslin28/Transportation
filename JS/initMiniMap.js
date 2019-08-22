@@ -1,4 +1,4 @@
-var map, popup, marker;//地图Map，地图POPUP框，地图中marker点
+var map, popup, frepopup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
@@ -12,6 +12,7 @@ var oldcityArea = 16.373766; //古城区面积
 var coverArea;  //中央建成区站点覆盖面积
 var coverAreaRatio;  //中央建成区站点覆盖比率
 var pointApertureColors = ['red', 'blue', 'orange', 'green']; //目前只提供地图上点击点（ICON）展示的四色光晕
+let popupLayer = ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'roadFrequencyLayer1', 'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4'];
 
 /**
  * 基本地图加载
@@ -38,6 +39,11 @@ $(document).ready(function () {
     });
 
     popup = new minemap.Popup({
+        closeButton: true,
+        closeOnClick: false,
+        offset: [0, 0]
+    });
+    frepopup = new minemap.Popup({
         closeButton: true,
         closeOnClick: false,
         offset: [0, 0]
@@ -90,7 +96,7 @@ $(document).ready(function () {
     map.on("edit.redo", onEditRedo);
 
     changeStationLayer('true');
-    mapPopup();
+    mapStationPop();
 });
 
 // 地图飞入动画
@@ -222,7 +228,7 @@ function addSingleRoute(busLineName) {
 
 //_____________________________________________________
 // 弹出框
-function mapPopup() {
+function mapStationPop() {
     map.on('click', function (e) {
         // 点击地图，同步清除marker
         if (marker) {
@@ -271,6 +277,25 @@ function listenStationInfo() {
             map.removeMarkers();
         }
     });
+}
+
+function mapFrePop() {
+    map.on('click', function (e) {
+        let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['roadFrequencyLayer1', 'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4']});
+
+        if(!features.length){
+            frepopup.remove();
+            return;
+        }
+
+        let feature = features[0];
+        let popupLatLng = feature.geometry.coordinates[0];
+        let frequencyPopup = frequencyHtml(feature);
+        popup.setLngLat(popupLatLng)
+            .setHTML(frequencyPopup)
+            .addTo(map);
+        pointCenterFly(feature.geometry.coordinates[0]);
+    })
 }
 
 //_____________________________________________________
@@ -517,21 +542,25 @@ function roadFrequencyGPTool() {
                                 connectivityChart(frequencyJson);
                                 let gcjData = wgsToGcj(frequencyJson);
                                 if (gcjData) {
-                                    if (map.getSource('roadFrequencySource')) {
+                                    if (map.getLayer('roadFrequencyLayer1')) {
                                         map.getSource('roadFrequencySource').setData(gcjData);
-                                        addMapLayer('roadFrequencySource');
+                                        layerVisibilityToggle("roadFrequencyLayer0", "visible");
+                                        layerVisibilityToggle("roadFrequencyLayer1", "visible");
+                                        layerVisibilityToggle("roadFrequencyLayer2", "visible");
+                                        layerVisibilityToggle("roadFrequencyLayer3", "visible");
+                                        layerVisibilityToggle("roadFrequencyLayer4", "visible");
                                     } else {
                                         map.addSource('roadFrequencySource', {
                                             'type': 'geojson',
                                             'data': gcjData
                                         });
                                         addMapLayer('roadFrequencySource');
-
-                                        // 图层加载完成后加载图例
-                                        $('#legendWrapper-station').hide();
-                                        $('#legendWrapper-connectivity').show();
-                                        $('.legendWrapper').show();
                                     }
+                                    mapFrePop();
+                                    // 图层加载完成后加载图例
+                                    $('#legendWrapper-station').hide();
+                                    $('#legendWrapper-connectivity').show();
+                                    $('.legendWrapper').show();
                                 } else {
                                     console.log("结果加载出错了")
                                 }
@@ -660,6 +689,7 @@ function bufferGPTool() {
         })
     });
 }
+
 function displayResults() {
     console.log(1)
 }
@@ -688,9 +718,10 @@ function statusModel(status) {
             break;
     }
 }
+
 // 地图遮罩图层
 function maskLayer(checkValue) {
-    if(map.getLayer('maskLayer')) {
+    if (map.getLayer('maskLayer')) {
         layerVisibilityToggle('maskLayer', checkValue);
     } else {
         map.addLayer({
