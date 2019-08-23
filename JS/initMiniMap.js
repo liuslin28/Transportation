@@ -1,4 +1,4 @@
-var map, stationInfoPopup,stationPopup, frePopup, marker;//地图Map，地图POPUP框，地图中marker点
+var map, stationInfoPopup, stationPopup, frePopup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
@@ -12,7 +12,7 @@ var oldcityArea = 16.373766; //古城区面积
 var coverArea;  //中央建成区站点覆盖面积
 var coverAreaRatio;  //中央建成区站点覆盖比率
 var pointApertureColors = ['red', 'blue', 'orange', 'green']; //目前只提供地图上点击点（ICON）展示的四色光晕
-let popupLayer = ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer', 'roadFrequencyLayer1', 'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4'];
+let mousemoveIs = true; //地图鼠标移动实现是否开启
 
 /**
  * 基本地图加载
@@ -235,7 +235,7 @@ function addSingleRoute(busLineName) {
 //_____________________________________________________
 // 站点图层hover事件，弹出框
 function mapStationHover(e) {
-    if(e) {
+    if (e) {
 
         let features = map.queryRenderedFeatures([[e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
         if (features.length === 0) {
@@ -254,7 +254,7 @@ function mapStationHover(e) {
 
 // 站点图层点击事件，弹出框
 function mapStationPop(e) {
-    if(e) {
+    if (e) {
         // 点击地图，同步清除marker
         if (marker) {
             map.removeMarkers();
@@ -264,10 +264,14 @@ function mapStationPop(e) {
         let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
         if (features.length === 0) {
             stationInfoPopup.remove();
-            map.on("mousemove", mapStationHover);
+            if (!mousemoveIs) {
+                map.on("mousemove", mapStationHover);
+                mousemoveIs = true;
+            }
 
         } else {
             map.off("mousemove", mapStationHover);
+            mousemoveIs = false;
 
             /**
              * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
@@ -305,16 +309,19 @@ function listenStationInfo() {
         if (marker) {
             map.removeMarkers();
         }
-        map.on("mousemove", mapStationHover);
+        if (!mousemoveIs) {
+            map.on("mousemove", mapStationHover);
+            mousemoveIs = true;
+        }
     });
 }
 
 // 线网连通性图层点击事件，弹出框
 function mapFrePop(e) {
-    if(e) {
+    if (e) {
         let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['roadFrequencyLayer1', 'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4']});
 
-        if(!features.length){
+        if (!features.length) {
             frePopup.remove();
             return;
         }
@@ -358,13 +365,15 @@ function changeEvent(layerChange) {
         map.on("zoomend", changeZoom);
         map.on("click", mapStationPop);
         map.on("mousemove", mapStationHover)
+        mousemoveIs = true;
+
     } else {
         // 关闭所有地图绑定事件
         map.off("zoomend", changeZoom);
         map.off("click", mapStationPop);
         map.off("click", mapFrePop);
-        map.off("mousemove", mapStationHover)
-
+        map.off("mousemove", mapStationHover);
+        mousemoveIs = false;
     }
 }
 
@@ -848,7 +857,7 @@ function getJson(url) {
     });
 }
 
-// 关闭图层
+// 关闭图层,移除popup/marker
 function closeLayer() {
     map_layer_config.forEach(function (value) {
         if (map.getLayer(value.layer_id)) {
