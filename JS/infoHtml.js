@@ -47,9 +47,12 @@ function routeInfoHtml(routeUrl) {
         // 非直线系数,环线不计算
         let nonLinearIndex;
         if(dataProperty.isLoop) {
-            nonLinearIndex = '/';
+            $('#index-nonLinear').hide();
+            $('#index-nonLinear2').show();
         } else {
+            $('#index-nonLinear2').hide();
             nonLinearIndex = nonLinear(data);
+            $('#index-nonLinear').text(nonLinearIndex).show();
         }
 
         // 站间距最大最小阈值
@@ -60,7 +63,7 @@ function routeInfoHtml(routeUrl) {
         $('.routeInfoWrapper-basic').empty().append(basicHtml);
 
         $('#index-distance').text(distanceIndex);
-        $('#index-nonLinear').text(nonLinearIndex);
+        // $('#index-nonLinear').text(nonLinearIndex);
         $('#index-maxDis').text(stationDistanceIndex.maxRatio);
         $('#index-minDis').text(stationDistanceIndex.minRatio);
     });
