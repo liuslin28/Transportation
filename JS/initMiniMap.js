@@ -1,4 +1,4 @@
-var map, popup, frepopup, marker;//地图Map，地图POPUP框，地图中marker点
+var map, stationInfoPopup,stationPopup, frePopup, marker;//地图Map，地图POPUP框，地图中marker点
 var edit;
 var networkLength; //各线路长度之和
 var networkLengthTemp = 201537.800148 / 1000; //各线路长度之和(古城区)
@@ -38,16 +38,22 @@ $(document).ready(function () {
         logoControl: false  /*logo控件是否显示，不加该参数时默认显示*/
     });
 
-    popup = new minemap.Popup({
+    stationInfoPopup = new minemap.Popup({
         closeButton: true,
         closeOnClick: false,
         offset: [0, 0]
     });
-    frepopup = new minemap.Popup({
+    frePopup = new minemap.Popup({
         closeButton: true,
         closeOnClick: false,
         offset: [0, 0]
     });
+    stationPopup = new minemap.Popup({
+        closeButton: true,
+        closeOnClick: false,
+        offset: [0, 0]
+    });
+
 
     edit = new minemap.edit.init(map, {
         boxSelect: true,
@@ -227,6 +233,25 @@ function addSingleRoute(busLineName) {
 }
 
 //_____________________________________________________
+// 站点图层hover事件，弹出框
+function mapStationHover(e) {
+    if(e) {
+
+        let features = map.queryRenderedFeatures([[e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
+        if (features.length === 0) {
+            stationPopup.remove();
+        } else {
+            let feature = features[0];
+            let popupLatLng = [Number(feature.geometry.coordinates[0]), Number(feature.geometry.coordinates[1])];
+            let infoHtml = stationHtml(feature);
+
+            stationPopup.setLngLat(popupLatLng)
+                .setHTML(infoHtml)
+                .addTo(map);
+        }
+    }
+}
+
 // 站点图层点击事件，弹出框
 function mapStationPop(e) {
     if(e) {
@@ -234,25 +259,30 @@ function mapStationPop(e) {
         if (marker) {
             map.removeMarkers();
         }
+        stationPopup.remove();
 
         let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
-        if (!features.length) {
-            popup.remove();
-            return;
-        }
-        /**
-         * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
-         */
-        let feature = features[0];
-        let popupLatLng = [Number(feature.geometry.coordinates[0]), Number(feature.geometry.coordinates[1])];
-        let stationPopup = stationInfoHtml(feature);
+        if (features.length === 0) {
+            stationInfoPopup.remove();
+            map.on("mousemove", mapStationHover);
 
-        getDynamicIcon(feature, pointApertureColors[1]);
-        popup.setLngLat(popupLatLng)
-            .setHTML(stationPopup)
-            .addTo(map);
-        pointCenterFly(feature.geometry.coordinates);
-        listenStationInfo();
+        } else {
+            map.off("mousemove", mapStationHover);
+
+            /**
+             * 如果在点击的位置有多个响应类型的点或者线，会获取一个feature的数组,取第一个要素显示
+             */
+            let feature = features[0];
+            let popupLatLng = [Number(feature.geometry.coordinates[0]), Number(feature.geometry.coordinates[1])];
+            let infoHtml = stationInfoHtml(feature);
+
+            getDynamicIcon(feature, pointApertureColors[1]);
+            stationInfoPopup.setLngLat(popupLatLng)
+                .setHTML(infoHtml)
+                .addTo(map);
+            pointCenterFly(feature.geometry.coordinates);
+            listenStationInfo();
+        }
     }
 }
 
@@ -275,6 +305,7 @@ function listenStationInfo() {
         if (marker) {
             map.removeMarkers();
         }
+        map.on("mousemove", mapStationHover);
     });
 }
 
@@ -284,15 +315,15 @@ function mapFrePop(e) {
         let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['roadFrequencyLayer1', 'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4']});
 
         if(!features.length){
-            frepopup.remove();
+            frePopup.remove();
             return;
         }
 
         let feature = features[0];
         let popupLatLng = feature.geometry.coordinates[0];
-        let frequencyPopup = frequencyHtml(feature);
-        popup.setLngLat(popupLatLng)
-            .setHTML(frequencyPopup)
+        let infoHtml = frequencyHtml(feature);
+        frePopup.setLngLat(popupLatLng)
+            .setHTML(infoHtml)
             .addTo(map);
         pointCenterFly(feature.geometry.coordinates[0]);
     }
@@ -326,11 +357,14 @@ function changeEvent(layerChange) {
         // 开启首页地图事件
         map.on("zoomend", changeZoom);
         map.on("click", mapStationPop);
+        map.on("mousemove", mapStationHover)
     } else {
         // 关闭所有地图绑定事件
         map.off("zoomend", changeZoom);
         map.off("click", mapStationPop);
         map.off("click", mapFrePop);
+        map.off("mousemove", mapStationHover)
+
     }
 }
 
@@ -821,8 +855,14 @@ function closeLayer() {
             layerVisibilityToggle(value.layer_id, 'none');
         }
     });
-    if (popup) {
-        popup.remove();
+    if (stationPopup) {
+        stationPopup.remove();
+    }
+    if (frePopup) {
+        frePopup.remove();
+    }
+    if (stationInfoPopup) {
+        stationInfoPopup.remove();
     }
     if (marker) {
         map.removeMarkers();

@@ -1,4 +1,12 @@
 // 站点信息
+function stationHtml(data) {
+    let layerId = data.layer.id;
+    let stationHtml = "<span class='popup-station-type'>" + data.properties.stopType + "</span>" + "<span class='popup-station-header'>" + data.properties.stopName + "</span>";
+
+    return stationHtml;
+}
+
+// 站点信息
 function stationInfoHtml(data) {
     let layerId = data.layer.id;
     let stationLine = data.properties.stopLine;
