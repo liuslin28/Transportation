@@ -39,13 +39,13 @@ $('#home-click').click(function () {
     // 隐藏图表
     $('.echartsWrapper').hide();
     closeLayer();
-    changeStationLayer('false');
+    changeEvent('false');
 
     layerVisibilityToggle("stationLayerB", 'visible');
     layerVisibilityToggle("stationLayerC", 'visible');
     layerVisibilityToggle("stationLayerD", 'visible');
     layerVisibilityToggle("terminalLayer", 'visible');
-    changeStationLayer('true');
+    changeEvent('true');
 });
 
 // 交通信息列表显示切换
@@ -88,7 +88,7 @@ $('.menuWrapper-info-li').click(function (e) {
 
     // 关闭其他图层
     closeLayer();
-    changeStationLayer('false');
+    changeEvent('false');
 
     // 关闭图例
     $('.legendWrapper').hide();

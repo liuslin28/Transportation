@@ -95,7 +95,7 @@ $(document).ready(function () {
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
 
-    changeStationLayer('true');
+    changeEvent('true');
     mapStationPop();
 });
 
@@ -227,15 +227,14 @@ function addSingleRoute(busLineName) {
 }
 
 //_____________________________________________________
-// 弹出框
-function mapStationPop() {
-    map.on('click', function (e) {
+// 站点图层点击事件，弹出框
+function mapStationPop(e) {
+    if(e) {
         // 点击地图，同步清除marker
         if (marker) {
             map.removeMarkers();
         }
 
-        // let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayer', 'stationLayerL','terminalLayer']});
         let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['stationLayerB', 'stationLayerC', 'stationLayerD', 'stationLayerBL', 'stationLayerCL', 'stationLayerDL', 'terminalLayer']});
         if (!features.length) {
             popup.remove();
@@ -254,7 +253,7 @@ function mapStationPop() {
             .addTo(map);
         pointCenterFly(feature.geometry.coordinates);
         listenStationInfo();
-    });
+    }
 }
 
 // 监听popup弹出框的click事件
@@ -262,7 +261,7 @@ function listenStationInfo() {
     $('.popup-station-list').on('click', function (e) {
         // 关闭其他图层
         closeLayer();
-        changeStationLayer('false');
+        changeEvent('false');
 
         // 关闭图例
         $('.legendWrapper').hide();
@@ -279,8 +278,9 @@ function listenStationInfo() {
     });
 }
 
-function mapFrePop() {
-    map.on('click', function (e) {
+// 线网连通性图层点击事件，弹出框
+function mapFrePop(e) {
+    if(e) {
         let features = map.queryRenderedFeatures([[e.point.x - 10, e.point.y - 10], [e.point.x + 10, e.point.y + 10]], {layers: ['roadFrequencyLayer1', 'roadFrequencyLayer2', 'roadFrequencyLayer3', 'roadFrequencyLayer4']});
 
         if(!features.length){
@@ -295,42 +295,42 @@ function mapFrePop() {
             .setHTML(frequencyPopup)
             .addTo(map);
         pointCenterFly(feature.geometry.coordinates[0]);
-    })
+    }
 }
 
 //_____________________________________________________
 
-
-// 切换点坐标图层
+// 根据缩放级别显示站点图层
 function changeZoom() {
     let mapZoom = map.getZoom();
     if (mapZoom > 13) {
-        // layerVisibilityToggle("stationLayer", "none");
         layerVisibilityToggle("stationLayerB", "none");
         layerVisibilityToggle("stationLayerC", "none");
         layerVisibilityToggle("stationLayerD", "none");
-        // layerVisibilityToggle("stationLayerL", "visible");
         layerVisibilityToggle("stationLayerBL", "visible");
         layerVisibilityToggle("stationLayerCL", "visible");
         layerVisibilityToggle("stationLayerDL", "visible");
     } else {
-        // layerVisibilityToggle("stationLayer", "visible");
         layerVisibilityToggle("stationLayerB", "visible");
         layerVisibilityToggle("stationLayerC", "visible");
         layerVisibilityToggle("stationLayerD", "visible");
-        // layerVisibilityToggle("stationLayerL", "none");
         layerVisibilityToggle("stationLayerBL", "none");
         layerVisibilityToggle("stationLayerCL", "none");
         layerVisibilityToggle("stationLayerDL", "none");
     }
 }
 
-function changeStationLayer(layerChange) {
+// 图层事件
+function changeEvent(layerChange) {
     if (layerChange === 'true') {
-        // 地图缩放,改变站点图层显示
+        // 开启首页地图事件
         map.on("zoomend", changeZoom);
+        map.on("click", mapStationPop);
     } else {
+        // 关闭所有地图绑定事件
         map.off("zoomend", changeZoom);
+        map.off("click", mapStationPop);
+        map.off("click", mapFrePop);
     }
 }
 
@@ -556,7 +556,7 @@ function roadFrequencyGPTool() {
                                         });
                                         addMapLayer('roadFrequencySource');
                                     }
-                                    mapFrePop();
+                                    map.on("click", mapFrePop);
                                     // 图层加载完成后加载图例
                                     $('#legendWrapper-station').hide();
                                     $('#legendWrapper-connectivity').show();

@@ -66,7 +66,7 @@ $('.routeInfoWrapper-button').click(function () {
     layerVisibilityToggle("stationLayerC", 'visible');
     layerVisibilityToggle("stationLayerD", 'visible');
     layerVisibilityToggle("terminalLayer", 'visible');
-    changeStationLayer('true');
+    changeEvent('true');
     // 显示图例
     $('.legendWrapper').show();
 });
