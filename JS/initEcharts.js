@@ -47,6 +47,7 @@ function connectivityChart(data) {
         calculable: true,
         series: [
             {
+                name: '路段重复系数比例',
                 type: 'pie',
                 radius: [30, 110],
                 center: ['50%', '50%'],
@@ -59,7 +60,6 @@ function connectivityChart(data) {
                     {value: dataChart.d, name: '3-5'},
                     {value: dataChart.c, name: '1-3'},
                     {value: dataChart.b, name: '1'},
-                    // {value: dataChart.a, name: '0'}
                 ]
             }
         ]
