@@ -39,6 +39,8 @@ $('#home-click').click(function () {
     // 隐藏图表
     $('.echartsWrapper').hide();
     closeLayer();
+    changeStationLayer('false');
+
     layerVisibilityToggle("stationLayerB", 'visible');
     layerVisibilityToggle("stationLayerC", 'visible');
     layerVisibilityToggle("stationLayerD", 'visible');
