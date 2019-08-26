@@ -7,11 +7,11 @@
     <script src="https://unpkg.com/shapefile@0.6"></script>
 
     <link rel="stylesheet" href="CSS/bootstrap.css">
-    <script src="JS/jquery.js"></script>
+    <script src="JS/library/jquery.js"></script>
     <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
             integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
             crossorigin="anonymous"></script>
-    <script src="JS/bootstrap.js"></script>
+    <script src="JS/library/bootstrap.js"></script>
 
     <link href="http://58.210.10.26:8011/arcgis_js_api/library/3.16/3.16compact/dijit/themes/claro/claro.css"
           rel="stylesheet"/>
@@ -486,7 +486,7 @@
         $("#result1").text("appendText");
         console.log($("#result1").text())
     }
-    
+
     function testShp() {
         shapefile.open("https://raw.githubusercontent.com/matplotlib/basemap/v1.1.0/lib/mpl_toolkits/basemap/data/UScounties.shp")
             .then(source => source.read()
