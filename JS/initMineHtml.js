@@ -17,6 +17,20 @@ $('.layerWrapper-check-input').click(function (e) {
 $('#layer-click').click(function () {
     $('.layerWrapper').slideToggle();
     $('#layer-click').toggleClass("navWrapper-nav-li-active");
+
+    $('.layerWrapper-check-input').each(function (index, element) {
+        let layerName = element.name;
+        if (map.getLayer(layerName)) {
+            if(map.getLayoutProperty(layerName, 'visibility') === 'visible') {
+                element.checked = true;
+            } else {
+                element.checked = false;
+            }
+        } else {
+            element.checked = false;
+
+        }
+    })
 });
 
 $('.layerWrapper-angle').click(function () {
