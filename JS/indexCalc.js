@@ -65,7 +65,7 @@ function stationDistance(data, max, min) {
     let maxCount = 0;  //大于最大阈值个数
     let minCount = 0;  //小于最小阈值个数
 
-    for (let i = 0; i < busStationList.length - 1; i++) {
+    for (let i = 0; i < busStationList.length - 2; i++) {
         let startCoordinate = busStationList[i];
         let endCoordinate = busStationList[i + 1];
         let start = turf.point(startCoordinate);
@@ -144,9 +144,9 @@ function directTransferRate() {
                 // console.log(tempStationArr);
                 stationListArr.push(tempStationArr);
             });
-            console.log(stationListArr);
-            console.log(stationListArr.length);
-            console.log("-----------------------------");
+            // console.log(stationListArr);
+            // console.log(stationListArr.length);
+            // console.log("-----------------------------");
 
 
             let newRouteArr = [];
@@ -165,18 +165,18 @@ function directTransferRate() {
                 directTransferCon2(stationListArr, newStationArr, newRouteArr, firstStationData);
                 connectList.push(newRouteArr);
                 firstStationData = stationListArr.pop();
-                console.log("--------------------");
+                // console.log("--------------------");
                 // console.log(newStationArr);
-                console.log("newRouteArr");
-                console.log(newRouteArr);
+                // console.log("newRouteArr");
+                // console.log(newRouteArr);
                 stationListArr = removeDuplicate(stationListArr, newStationArr);
                 // console.log(stationListArr);
                 // console.log("--------------------");
 
             }
-            console.log("connectList");
-            console.log(connectList);
-            console.log("--------------------");
+            // console.log("connectList");
+            // console.log(connectList);
+            // console.log("--------------------");
 
             let endPointList;
             let endPointNum;
@@ -188,9 +188,9 @@ function directTransferRate() {
             let tempTransferCount = 0;  //换乘线路数计算使用
 
             for (let i = 0; i < connectList.length; i++) {
-                console.log("connectList[i]");
-                console.log(connectList[i]);
-                console.log("--------------------");
+                // console.log("connectList[i]");
+                // console.log(connectList[i]);
+                // console.log("--------------------");
 
                 endPointList = [];
                 endPointNum = 0;
@@ -213,9 +213,9 @@ function directTransferRate() {
 
                 tempTransferCount = endPointNum * endPointNum - tempDirectCount - endPointNum;
                 transferCount += tempTransferCount;
-                console.log("********************");
-                console.log(endPointList);
-                console.log(connectNameList);
+                // console.log("********************");
+                // console.log(endPointList);
+                // console.log(connectNameList);
             }
 
             let totalNum = directCount + transferCount;
