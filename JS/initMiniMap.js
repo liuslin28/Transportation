@@ -88,6 +88,7 @@ $(document).ready(function () {
     });
 
     setTimeout(function () {
+        // directTransferRate();
         // stopDensity();
         // networkComplex();
         // networkDistance();
@@ -96,7 +97,8 @@ $(document).ready(function () {
         // bufferGPTool();
         // busrouteGPTool();
         // stationDistance();
-    }, 5000);
+        // stationCheck();
+    }, 10000);
 
     map.on("edit.undo", onEditUndo);
     map.on("edit.redo", onEditRedo);
@@ -640,14 +642,16 @@ function bufferGPTool() {
         "features": []
     };
 
-    let Dis = {
-        "distance": 500,
-        "units": "esriMeters"
-    };
 
     // 设置输入参数(公交点
     // 数据格式要求：小数点6位，经纬度范围
-    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor" ,"esri/tasks/LinearUnit"], function (SpatialReference, Graphic, Geoprocessor, LinearUnit) {
+
+        // gp参数
+        let Dis = new LinearUnit();
+        Dis.distance = 500;
+        Dis.units = "esriMeters";
+
         $.ajax({
             url: "./geojsonData/stopsPoint.json",
             type: "GET",
@@ -918,5 +922,4 @@ function setBoundry(data) {
         center: [centerPoint[0] + 0.01, centerPoint[1]]
     })
 }
-
 
