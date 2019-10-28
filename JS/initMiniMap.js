@@ -488,9 +488,10 @@ function busrouteGPTool() {
 
 // 公交线路通过公交专用道的长度
 function routeGPTool(data) {
-    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
-        let linePath = (data.features)[0].geometry.coordinates;
-        let lineFeature = {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor" ,"esri/tasks/LinearUnit"], function (SpatialReference, Graphic, Geoprocessor, LinearUnit) {
+
+        let routePath = (data.features)[0].geometry.coordinates;
+        let routeFeature = {
             "displayFieldName": "",
             "fieldAliases": {
                 "FID": "FID"
@@ -514,44 +515,45 @@ function routeGPTool(data) {
                     },
                     "geometry": {
                         "paths": [
-                            linePath
+                            routePath
                         ]
                     }
                 }
             ]
         };
-        let buslineFeatureSet = new esri.tasks.FeatureSet(lineFeature);
-        buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-        $.ajax({
-            url: "./esrijsonData/esribusLaneSUnp.json",
-            type: "GET",
-            success: function (data) {
-                let roadFeatureSet = new esri.tasks.FeatureSet(data);
-                roadFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
-                let gpParams = {
-                    "road": roadFeatureSet,
-                    "line": buslineFeatureSet
-                };
+        let Dis1 = new LinearUnit();
+        Dis1.distance = 3;
+        Dis1.units = "esriMeters";
 
-                gptask.submitJob(gpParams, completeCallback, statusCallback);
-                gptask.on("get-result-data-complete", displayResults);
+        let Dis2 = new LinearUnit();
+        Dis2.distance = 5;
+        Dis2.units = "esriMeters";
 
-                // 结果图加载
-                function completeCallback(jobInfo) {
-                    // 长度求算
-                    gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
-                        let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
-                        // 米=>千米,保留2位小数
-                        lineLength = (lineLength / 1000).toFixed(2);
+        let busRouteFeatureSet = new esri.tasks.FeatureSet(routeFeature);
+        busRouteFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                        $('#index-laneLength').text(lineLength);
-                        $('.routeInfoWrapper').show();
-                    });
-                }
-            }
-        })
+        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/laneLength2/GPServer/laneLength2");
+        let gpParams = {
+            "Dis1": Dis1,
+            "Dis2": Dis2,
+            "line": busRouteFeatureSet
+        };
+
+        gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+        // 结果图加载
+        function completeCallback(jobInfo) {
+            // 长度求算
+            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
+                let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
+                // 米=>千米,保留2位小数
+                lineLength = (lineLength / 1000).toFixed(2);
+
+                $('#index-laneLength').text(lineLength);
+                $('.routeInfoWrapper').show();
+            });
+        }
     });
 }
 
