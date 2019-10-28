@@ -619,7 +619,7 @@ function roadFrequencyGPTool() {
 }
 
 // 站点覆盖率
-function bufferGPTool() {
+function stopBufferGP() {
     let pointFeatureSet;
     let polygonFeatureSet;
     let aPoint = {
@@ -678,57 +678,41 @@ function bufferGPTool() {
                 pointFeatureSet = new esri.tasks.FeatureSet(aPoint);
                 pointFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
 
-                // 设置输入参数(中心城区
-                $.ajax({
-                    url: './esrijsonData/esricenterPolygon.json',
-                    type: 'GET',
-                    success: function (data) {
-                        // 设置输入参数（多边形
-                        polygonFeatureSet = new esri.tasks.FeatureSet(data);
-                        polygonFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+                // GP服务调用
+                let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/coverArea/GPServer/coverArea");
+                let gpParams = {
+                    "stops": pointFeatureSet,
+                    "Dis1": Dis,
+                    "Dis2": Dis,
+                };
+                gptask.submitJob(gpParams, completeCallback, statusCallback);
 
-                        // GP服务调用
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/coverArea/GPServer/coverArea");
-                        let gpParams = {
-                            "stops": pointFeatureSet,
-                            "Dis1": Dis,
-                            "Dis2": Dis,
-                            "city1": polygonFeatureSet
-                        };
-                        gptask.submitJob(gpParams, completeCallback, statusCallback);
+                // 结果图加载
+                function completeCallback(jobInfo) {
+                    // 面积求算
+                    gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
+                        // 面积
+                        areaData = value.value.features[0].attributes['Shape_Area'];
+                        // 米=>千米
+                        coverArea = areaData / (1000 * 1000);
+                        console.log(coverArea);
+                        coverAreaRatio = coverArea / centerArea;
+                        console.log(coverAreaRatio);
+                    });
+                    // 地图展示
+                    gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
+                        let outputData = ArcgisToGeojsonUtils.arcgisToGeoJSON(value.value);
+                        let gcjData = wgsToGcj(outputData);
 
-                        // 结果图加载
-                        function completeCallback(jobInfo) {
-                            // 面积求算
-                            gptask.getResultData(jobInfo.jobId, "bufferOutput").then(function (value) {
-                                // 面积
-                                areaData = value.value.features[0].attributes['Shape_Area'];
-                                // 米=>千米
-                                coverArea = areaData / (1000 * 1000);
-                                console.log(coverArea);
-                                coverAreaRatio = coverArea / centerArea;
-                                console.log(coverAreaRatio);
-                            });
-                            // 地图展示
-                            gptask.getResultData(jobInfo.jobId, "output").then(function (value) {
-                                let bufferResult = value.value.features;
-                                // 输出格式转换，坐标尚未进行转换
-                                let bufferJson = transPolyJson(bufferResult);
-                                let gcjData = wgsToGcj(bufferJson);
-                                if (gcjData) {
-                                    // 切换数据源
-                                    map.getSource('coverCenterSource').setData(gcjData);
-                                    layerVisibilityToggle('coverCenterLayer', 'visible');
-                                } else {
-                                    console.log("buffer结果加载出错了");
-                                }
-                            });
+                        if (gcjData) {
+                            // 切换数据源
+                            map.getSource('coverCenterSource').setData(gcjData);
+                            layerVisibilityToggle('coverCenterLayer', 'visible');
+                        } else {
+                            console.log("buffer结果加载出错了");
                         }
-                    },
-                    error: function (error) {
-                        alert(error)
-                    }
-                })
+                    });
+                }
             },
             error: function (error) {
                 alert(error)
@@ -783,28 +767,6 @@ function maskLayer(checkValue) {
 }
 
 //_____________________________________________________
-// MultiPolygon的格式转换
-function transPolyJson(data) {
-    let multiPoly = [];
-    data.map(function (value) {
-        const geoCoordinate = value.geometry['rings'];
-        multiPoly.push(geoCoordinate);
-    });
-    let polygonJson = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "MultiPolygon",
-                    "coordinates": multiPoly
-                }
-            }
-        ]
-    };
-    return polygonJson;
-}
-
 // Line的格式转换
 function transLineJson(data) {
     let lineJson = {
