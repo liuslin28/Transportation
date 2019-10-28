@@ -31,7 +31,7 @@ function networkDistance() {
                 busRouteLength += Number(value['properties'].lineLength);
             }
             if (value['properties'].stationNum) {
-                busRouteStation += Number(value['properties'].stationNum);
+                busRouteStation += (Number(value['properties'].stationNum-1));
             }
         });
         networkLength = busRouteLength;

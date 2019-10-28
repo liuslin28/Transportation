@@ -43,10 +43,10 @@ function routeInfoHtml(routeUrl) {
         // let buslaneLength;
         routeGPTool(data);
         // 平均站间距
-        let distanceIndex = (dataProperty.lineLength / dataProperty.stationNum).toFixed(2);
+        let distanceIndex = (dataProperty.lineLength / (dataProperty.stationNum - 1)).toFixed(2);
         // 非直线系数,环线不计算
         let nonLinearIndex;
-        if(dataProperty.isLoop) {
+        if (dataProperty.isLoop) {
             $('#index-nonLinear').hide();
             $('#index-nonLinear2').show();
         } else {
@@ -84,6 +84,6 @@ $('.routeInfoWrapper-button').click(function () {
 
 // 路段重复系数
 function frequencyHtml(data) {
-    let  frequencyInfoHtml = "<span class='popup-station-header'>" + data.properties.NAME_CHN + "</span>" +"<span class='popup-station-count'>" + "途径路段线路" +  data.properties.FREQUENCY + "条" + "</span>";
+    let frequencyInfoHtml = "<span class='popup-station-header'>" + data.properties.NAME_CHN + "</span>" + "<span class='popup-station-count'>" + "途径路段线路" + data.properties.FREQUENCY + "条" + "</span>";
     return frequencyInfoHtml;
 }
