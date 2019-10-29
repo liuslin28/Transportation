@@ -88,13 +88,13 @@ $(document).ready(function () {
     });
 
     setTimeout(function () {
+        networkLenGPTool();
         // directTransferRate();
         // stopDensity();
         // networkComplex();
         // networkDistance();
         // nonLinear();
         // bufferGPTool();
-        // busrouteGPTool();
         // stationDistance();
         // stationCheck();
     }, 10000);
@@ -397,49 +397,71 @@ function onEditRedo(e) {
 //_____________________________________________________
 //GP服务
 // 线网长度
-function busrouteGPTool() {
-    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
-        $.ajax({
-            url: "./esrijsonData/esriroutesOldcityUnp.json",
-            type: "GET",
-            success: function (data) {
-                let buslineFeatureSet = new esri.tasks.FeatureSet(data);
-                buslineFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-                $.ajax({
-                    url: "./esrijsonData/esriroadOldcityUnp.json",
-                    type: "GET",
-                    success: function (data) {
-                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
-
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
-                        let gpParams = {
-                            "road": roadFeatureSet,
-                            "line": buslineFeatureSet
-                        };
-                        gptask.submitJob(gpParams, completeCallback, statusCallback);
-
-                        // 结果图加载
-                        function completeCallback(jobInfo) {
-                            // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
-                                let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
-                                // 米=>千米
-                                busLineLength = (lineLength / 1000).toFixed(2);
-                                console.log(busLineLength);
-                                // 全市为例的计算
-                                // networkRepeat = networkLength/busLineLength;
-                                // busLineDensity = busLineLength/centerArea;
-                                // 古城区为例的计算
-                                networkRepeat = networkLengthTemp / busLineLength;
-                                busLineDensity = busLineLength / oldcityArea;
-                                console.log(busLineDensity);
-                            });
-                        }
+function networkLenGPTool() {
+    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor" ,"esri/tasks/LinearUnit"], function (SpatialReference, Graphic, Geoprocessor, LinearUnit) {
+        $.when(getJson(conf_busroute_query)).then(function (data) {
+            let routePath = ArcgisToGeojsonUtils.geojsonToArcGIS(data);
+            let routeFeature = {
+                "displayFieldName": "",
+                "fieldAliases": {
+                    "FID": "FID"
+                },
+                "geometryType": "esriGeometryPolyline",
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                },
+                "fields": [
+                    {
+                        "name": "FID",
+                        "type": "esriFieldTypeOID",
+                        "alias": "FID"
                     }
-                })
+                ],
+                "features": routePath
+            };
+
+            let Dis1 = new LinearUnit();
+            Dis1.distance = 10;
+            Dis1.units = "esriMeters";
+
+            let Dis2 = new LinearUnit();
+            Dis2.distance = 15;
+            Dis2.units = "esriMeters";
+
+            let busRouteFeatureSet = new esri.tasks.FeatureSet(routeFeature);
+            busRouteFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
+
+            let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/networkLength/GPServer/networkLength");
+            let gpParams = {
+                "Dis1": Dis1,
+                "Dis2": Dis2,
+                "line": busRouteFeatureSet
+            };
+
+            gptask.submitJob(gpParams, completeCallback, statusCallback);
+
+            // 结果图加载
+            function completeCallback(jobInfo) {
+                // 长度求算
+                gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
+                    console.log(value);
+                    let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
+                    // 米=>千米
+                    busLineLength = (lineLength / 1000).toFixed(2);
+                    console.log(busLineLength);
+                    // 全市为例的计算
+                    // networkRepeat = networkLength/busLineLength;
+                    // busLineDensity = busLineLength/centerArea;
+                    // 古城区为例的计算
+                    networkRepeat = networkLengthTemp / busLineLength;
+                    busLineDensity = busLineLength / oldcityArea;
+                    console.log(busLineDensity);
+                });
             }
         })
-    });
+
+    })
 }
 
 // 公交线路通过公交专用道的长度
