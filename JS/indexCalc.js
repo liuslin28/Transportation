@@ -1,5 +1,20 @@
 /*指标计算 */
 
+
+// 公交专用道长度计算
+function buslaneLength() {
+    $.when(getJson(conf_buslane_query)).then(function (data) {
+        let buslaneLength = 0;
+        let buslaneCount = data.features.length;
+        data.features.forEach(function (item) {
+            buslaneLength += item.properties.Shape_Leng;
+        });
+        $('#buslaneNum').empty().text(buslaneCount);
+        $('#buslaneLength').empty().text(buslaneLength.toFixed(2));
+    })
+}
+
+
 // 站点密度
 function stopDensity() {
     $.when(getJson(conf_station_query)).then(function (data) {
@@ -24,14 +39,14 @@ function networkDistance() {
     let busRouteStation = 0;
     $.when(getJson(conf_busline_query)).then(function (data) {
         let busRoute = data['features'];
-        busRoute.forEach(function (value) {
-            if (value['properties'].lineLength === '') {
-                // console.log(value['properties'].lineName);
+        busRoute.forEach(function (item) {
+            if (item['properties'].lineLength === '') {
+                // console.log(item['properties'].lineName);
             } else {
-                busRouteLength += Number(value['properties'].lineLength);
+                busRouteLength += Number(item['properties'].lineLength);
             }
-            if (value['properties'].stationNum) {
-                busRouteStation += (Number(value['properties'].stationNum-1));
+            if (item['properties'].stationNum) {
+                busRouteStation += (Number(item['properties'].stationNum-1));
             }
         });
         networkLength = busRouteLength;
@@ -195,14 +210,14 @@ function directTransferRate() {
                 endPointList = [];
                 endPointNum = 0;
                 connectNameList = [];
-                connectList[i].forEach(function (value) {
-                    routeData.forEach(function (rvalue) {
-                        if (rvalue.routeId === value) {
-                            let tempIndex = connectNameList.indexOf(rvalue.routeName);
+                connectList[i].forEach(function (item) {
+                    routeData.forEach(function (ritem) {
+                        if (ritem.routeId === value) {
+                            let tempIndex = connectNameList.indexOf(ritem.routeName);
                             if (tempIndex < 0) {
-                                connectNameList.push(rvalue.routeName);
-                                endPointList = isInclude(endPointList, rvalue.stationList[0]);//首站
-                                endPointList = isInclude(endPointList, rvalue.stationList[rvalue.stationList.length - 1]);//末站
+                                connectNameList.push(ritem.routeName);
+                                endPointList = isInclude(endPointList, ritem.stationList[0]);//首站
+                                endPointList = isInclude(endPointList, ritem.stationList[ritem.stationList.length - 1]);//末站
                             }
                         }
                     })
@@ -243,29 +258,29 @@ function directTransferCon2(data, newStationArr, newRouteArr, stationData) {
     newStationArr = isInclude(newStationArr, stationData.stationId);
     let tempIsPush = 0;
 
-    stationData.routeList.forEach(function (value) {
-        newRouteArr = isInclude(newRouteArr, value);
+    stationData.routeList.forEach(function (item) {
+        newRouteArr = isInclude(newRouteArr, item);
 
     });
 
-    stationData.linkedStationList.forEach(function (value) {
+    stationData.linkedStationList.forEach(function (item) {
         for (let i = 0; i < data.length; i++) {
-            if (value === data[i].stationId) {
+            if (item === data[i].stationId) {
                 let stationData = (data.splice(i, 1))[0];
                 directTransferCon2(data, newStationArr, newRouteArr, stationData);
                 tempIsPush = 1;
             }
         }
         if (tempIsPush === 0) {
-            newStationArr = isInclude(newStationArr, value);
+            newStationArr = isInclude(newStationArr, item);
         }
     })
 }
 
 
 function removeDuplicate(stationListArr, newStationArr) {
-    newStationArr.forEach(function (value) {
-        stationListArr = isDelete(stationListArr, value)
+    newStationArr.forEach(function (item) {
+        stationListArr = isDelete(stationListArr, item)
     });
     return stationListArr;
 }
