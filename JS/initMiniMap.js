@@ -93,7 +93,6 @@ $(document).ready(function () {
         // networkComplex();
         // networkDistance();
         // nonLinear();
-        // buslaneGPTool();
         // bufferGPTool();
         // busrouteGPTool();
         // stationDistance();
@@ -397,49 +396,6 @@ function onEditRedo(e) {
 
 //_____________________________________________________
 //GP服务
-// 公交专用道
-function buslaneGPTool() {
-    require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
-        $.ajax({
-            url: "./esrijsonData/esribusLaneC.json",
-            type: "GET",
-            success: function (data) {
-                let buslaneFeatureSet = new esri.tasks.FeatureSet(data);
-                buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-
-                $.ajax({
-                    url: "./esrijsonData/esriroadOldcityUnp.json",
-                    type: "GET",
-                    success: function (data) {
-                        let roadFeatureSet = new esri.tasks.FeatureSet(data);
-                        buslaneFeatureSet.spatialReference = new SpatialReference({wkid: 4326});
-
-                        let gptask = new Geoprocessor("https://192.168.207.165:6443/arcgis/rest/services/GPTool/lineLength/GPServer/lineLength");
-                        let gpParams = {
-                            "road": roadFeatureSet,
-                            "line": buslaneFeatureSet
-                        };
-                        gptask.submitJob(gpParams, completeCallback, statusCallback);
-
-                        // 结果图加载
-                        function completeCallback(jobInfo) {
-                            // 长度求算
-                            gptask.getResultData(jobInfo.jobId, "output_length").then(function (value) {
-                                let lineLength = (value.value.features)[0].attributes.SUM_Shape_Length;
-                                // 米=>千米
-                                busLaneLength = (lineLength / 1000).toFixed(2);
-                                busLaneRatio = busLaneLength / networkLength;
-                                console.log(busLaneLength);
-                                // console.log(busLaneRatio);
-                            });
-                        }
-                    }
-                })
-            }
-        })
-    });
-}
-
 // 线网长度
 function busrouteGPTool() {
     require(["esri/SpatialReference", "esri/graphic", "esri/tasks/Geoprocessor"], function (SpatialReference, Graphic, Geoprocessor) {
