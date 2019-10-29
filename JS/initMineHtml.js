@@ -113,12 +113,13 @@ $('.menuWrapper-info-li').click(function (e) {
             layerVisibilityToggle('stationHeatLayer', 'visible');
             break;
         case 'info-cover':
-            layerVisibilityToggle('coverCenterLayer', 'visible');
+            stopBufferGP();
             break;
         case 'info-route':
             layerVisibilityToggle('busRoutesLayer', 'visible');
             break;
         case 'info-buslane':
+            buslaneLength();
             layerVisibilityToggle('busLaneLayer', 'visible');
             break;
         case 'info-connectivity':
@@ -126,7 +127,6 @@ $('.menuWrapper-info-li').click(function (e) {
             $('.infoWrapper').hide();
             break;
         case 'info-metro':
-            bufferGPTool();
             break;
         default:
             break;
